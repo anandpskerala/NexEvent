@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IRequest } from "../types/organizerRequest";
+import { IRequest } from "../shared/types/organizerRequest";
 
 const schema = new Schema<IRequest>({
     userId: {

@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { IForgotRequest } from "../types/forgotRequest";
+import { IForgotRequest } from "../shared/types/forgotRequest";
 import { IForgotRepository } from "./interfaces/IForgotRepository";
 import forgotModel from "../models/forgotModel";
 

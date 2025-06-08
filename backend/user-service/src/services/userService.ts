@@ -1,7 +1,7 @@
 import { CloudinaryService } from "../shared/utils/cloudinary";
 import { StatusCode } from "../shared/constants/statusCode";
 import { UserRepository } from "../repositories/UserRepository";
-import { UserPaginationType, UserReturnType } from "../types/returnTypes";
+import { UserPaginationType, UserReturnType } from "../shared/types/returnTypes";
 
 export class UserService {
     private cloudinary: CloudinaryService;

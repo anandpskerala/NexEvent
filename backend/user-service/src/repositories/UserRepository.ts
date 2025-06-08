@@ -1,5 +1,5 @@
 import { FilterQuery, Model } from "mongoose";
-import { AllUsers, IUser } from "../types/user";
+import { AllUsers, IUser } from "../shared/types/user";
 import { IUserRepository } from "./interfaces/IUserRepository";
 import userModel from "../models/userModel";
 

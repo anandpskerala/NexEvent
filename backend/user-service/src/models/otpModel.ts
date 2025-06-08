@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { IOtp } from "../types/otp";
+import { IOtp } from "../shared/types/otp";
 
 const schema = new Schema<IOtp>({
     userId: {

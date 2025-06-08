@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+.beautiful-toast {
+    animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s ease;
+}
+
+.beautiful-toast:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 32px 64px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.custom-toast {
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.9), rgba(219, 39, 119, 0.9)) !important;
+    border: 1px solid rgba(236, 72, 153, 0.3) !important;
+}
+
+@media (max-width: 768px) {
+    .beautiful-toast {
+        margin: 0 1rem !important;
+        width: calc(100vw - 2rem) !important;
+        max-width: calc(100vw - 2rem) !important;
+    }
+}

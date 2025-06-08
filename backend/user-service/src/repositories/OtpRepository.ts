@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { IOtp } from "../types/otp";
+import { IOtp } from "../shared/types/otp";
 import { IOtpRepository } from "./interfaces/IOtpRepository";
 import otpModel from "../models/otpModel";
 
