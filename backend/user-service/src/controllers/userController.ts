@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/userService";
-import { IUser } from "../types/user";
+import { IUser } from "../shared/types/user";
 import { StatusCode } from "../shared/constants/statusCode";
 import { TOPICS } from "../kafka/topics";
 import { UserProducer } from "../kafka/producer/userProducer";

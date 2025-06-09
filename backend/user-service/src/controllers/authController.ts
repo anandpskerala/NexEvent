@@ -3,7 +3,7 @@ import { AuthService } from "../services/authService";
 import { StatusCode } from "../shared/constants/statusCode";
 import { config } from "../config";
 import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../types/user";
+import { IUser } from "../shared/types/user";
 import { TOPICS } from "../kafka/topics";
 
 

@@ -1,5 +1,5 @@
 import { Server } from "socket.io";
-import { Message } from "../../../types/Message";
+import { Message } from "../../../shared/types/Message";
 
 export class ConsumerHandler {
     constructor(private io: Server) {

@@ -1,4 +1,4 @@
-import { StatusCode } from "../shared/constants/statusCode";
+import { StatusCode } from "../constants/statusCode";
 import { IRequest } from "./organizerRequest";
 import { IUser } from "./user";
 

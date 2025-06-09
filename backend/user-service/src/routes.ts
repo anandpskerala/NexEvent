@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { AuthController } from "./controllers/authController";
 import { UserProducer } from "./kafka/producer/userProducer";
-import { IUser } from "./types/user";
+import { IUser } from "./shared/types/user";
 import { AuthService } from "./services/authService";
 import { UserRepository } from "./repositories/UserRepository";
 import { OtpRepository } from "./repositories/OtpRepository";

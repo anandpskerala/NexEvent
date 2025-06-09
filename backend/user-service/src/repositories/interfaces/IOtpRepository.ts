@@ -1,4 +1,4 @@
-import { IOtp } from "../../types/otp";
+import { IOtp } from "../../shared/types/otp";
 
 export interface IOtpRepository {
     findOtp(userId: string, otp?: number): Promise<IOtp | undefined>;

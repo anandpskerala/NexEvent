@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
 import { AuthService } from "../services/authService";
-import { IUser } from "../types/user";
+import { IUser } from "../shared/types/user";
 import { StatusCode } from "../shared/constants/statusCode";
 import { config } from "../config";
 import { TOPICS } from "../kafka/topics";

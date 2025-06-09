@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import crypto from "crypto";
-import { IForgotRequest } from "../types/forgotRequest";
+import { IForgotRequest } from "../shared/types/forgotRequest";
 
 const schema = new Schema<IForgotRequest>({
     userId: {
