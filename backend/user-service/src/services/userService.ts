@@ -204,28 +204,28 @@ export class UserService {
         }
     }
 
-    // public async getUsersBulk(ids: string[]) {
-    //     try {
-    //         if (!Array.isArray(ids) || ids.length === 0) {
-    //             return {
-    //                 message: "ids must be a non-empty array",
-    //                 status: StatusCode.BAD_REQUEST
-    //             }
-    //         }
+    public async getUsersBulk(ids: string[]) {
+        try {
+            if (!Array.isArray(ids) || ids.length === 0) {
+                return {
+                    message: "ids must be a non-empty array",
+                    status: StatusCode.BAD_REQUEST
+                }
+            }
 
-    //         const users = await this.userRepo.getBulkUsers(ids);
-    //         return {
-    //             message: "Fetched users",
-    //             status: StatusCode.OK,
-    //             users
-    //         }
-    //     } catch (error) {
-    //         console.error(error)
-    //         return {
-    //             message: "Internal Server error",
-    //             status: StatusCode.INTERNAL_SERVER_ERROR
-    //         }
-    //     }
-    // }
+            const users = await this.userRepo.getBulkUsers(ids);
+            return {
+                message: "Fetched users",
+                status: StatusCode.OK,
+                users
+            }
+        } catch (error) {
+            console.error(error)
+            return {
+                message: "Internal Server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
 
 }

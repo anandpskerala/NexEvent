@@ -55,9 +55,9 @@ export class UserController {
         res.status(result.status).json({message: result.message});
     }
 
-    // public getBulkUsers = async (req: Request, res: Response): Promise<void> => {
-    //     const { ids } = req.body;
-    //     const result = await this.userService.getUsersBulk(ids);
-    //     res.status(result.status).json({message: result.message, users: result.users});
-    // }
+    public getBulkUsers = async (req: Request, res: Response): Promise<void> => {
+        const { ids } = req.body;
+        const result = await this.userService.getUsersBulk(ids);
+        res.status(result.status).json({message: result.message, users: result.users});
+    }
 }

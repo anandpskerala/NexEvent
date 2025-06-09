@@ -9,4 +9,5 @@ export interface IUserRepository {
     updateProfileImage(id: string, image: string): Promise<void>;
     updateUser(email: string, firstName: string, lastName: string, phoneNumber: number, roles?: string[], isBlocked?: boolean): Promise<void>;
     addRole(id: string, role: string): Promise<void>;
+    getBulkUsers(ids: string[]): Promise<IUser[]> 
 }

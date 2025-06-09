@@ -48,7 +48,7 @@ routes.patch("/otp", otpController.resendOtp);
 
 routes.post("/verify", userController.verifyUser);
 routes.get("/users", userController.getAllUsers);
-// routes.post("/bulk/users", userController.getBulkUsers);
+routes.post("/bulk/users", userController.getBulkUsers);
 routes.patch("/me/profile", protectedRoute, userController.updateProfile);
 routes.patch("/me/profile-image", protectedRoute, userController.updateProfileImage);
 
