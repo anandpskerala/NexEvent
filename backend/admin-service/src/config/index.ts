@@ -5,7 +5,7 @@ dotenv.config();
 export const config = {
     env: process.env.NODE_ENV || 'development',
     app: {
-        port: Number(process.env.PORT) || 5003,
+        port: Number(process.env.PORT) || 5002,
         frontendUrl: process.env.FRONTEND_URL || ""
     },
     db: {

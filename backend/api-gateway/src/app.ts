@@ -4,6 +4,7 @@ import cors from "cors";
 import { AuthMiddleware } from "./middlewares/authMiddleware";
 import { config } from "./config";
 import { UserProxy } from "./middlewares/proxies/userProxy";
+import { AdminProxy } from "./middlewares/proxies/adminProxy";
 
 
 export class App {
@@ -29,6 +30,7 @@ export class App {
 
     private setupProxy() {
         this.app.use('/api/user', UserProxy.setupProxy());
+        this.app.use('/api/admin', AdminProxy.setupProxy());
     }
 
     public listen(port: number) {
