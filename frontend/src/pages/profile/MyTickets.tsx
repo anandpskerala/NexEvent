@@ -12,9 +12,11 @@ import { formatDate, formatTime } from '../../utils/stringUtils';
 import type { Booking } from '../../interfaces/entities/Booking';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { CancelConfirmationModal } from '../../components/modals/CancelConfirmationModal';
-import { AxiosError } from 'axios';
+import { AxiosError, type AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { Footer } from '../../components/partials/Footer';
+import config from '../../config/config';
+import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
 
 const MyTickets = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -49,11 +51,6 @@ const MyTickets = () => {
         navigate(`/booking/${eventId}`);
     };
 
-    const handleContactOrganizer = (eventId: string) => {
-        console.log('Contact organizer for event:', eventId);
-        // Open contact modal or navigate to contact page
-    };
-
     const handleCancel = async () => {
         setLoading(true);
         try {
@@ -77,6 +74,118 @@ const MyTickets = () => {
         }
     };
 
+    const handlePayment = async (booking: Booking): Promise<void> => {
+        try {
+            if (!booking) return;
+            console.log(booking);
+            if (booking.paymentMethod === "razorpay") {
+                const res: AxiosResponse<{
+                    order: {
+                        id: string;
+                        amount: number;
+                        currency: string;
+                    };
+                }> = await axiosInstance.post("/event/payment/razorpay/order", {
+                    amount: booking.totalAmount,
+                    currency: booking.eventId.currency || "INR",
+                });
+
+                const options: RazorpayOptions = {
+                    key: config.payment.RPayKey,
+                    amount: res.data.order.amount,
+                    currency: res.data.order.currency,
+                    name: booking.eventId.title,
+                    description: "Ticket Booking",
+                    order_id: res.data.order.id,
+                    handler: async (response: RazorpayResponse) => {
+                        await axiosInstance.post("/event/payment/razorpay/verify", {
+                            ...response,
+                            bookingId: booking.id,
+                            eventId: booking.eventId.id,
+                            amount: res.data.order.amount,
+                            currency: res.data.order.currency
+                        });
+                        toast.success("Payment successfull");
+                        navigate(`/payment/${booking.orderId}`);
+                    },
+                    prefill: {
+                        name: user?.firstName || "",
+                        email: user?.email || "",
+                    },
+                    theme: {
+                        color: "#0193ff",
+                    },
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', async () => {
+                    await axiosInstance.post(`/event/failed/booking`, {
+                        bookingId: booking.id,
+                        eventId: booking.eventId.id,
+                        amount: res.data.order.amount,
+                        currency: res.data.order.currency,
+                        status: 'failed'
+                    });
+                    window.location.reload();
+                })
+                rzp.open();
+            }
+
+            else if (booking.paymentMethod === "stripe") {
+                const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
+                    "/event/payment/stripe/order",
+                    {
+                        eventId: booking.eventId.id, tickets: booking.tickets, promoCode: booking.couponCode, amount: booking.totalAmount * 100,
+                        bookingId: booking.id, currency: booking.eventId.currency || "INR", orderId: booking.orderId
+                    }
+                );
+
+                window.open(
+                    res.data.order,
+                    "_blank",
+                    "width=500,height=700"
+                );
+
+                const handleMessage = async (event: MessageEvent) => {
+                    if (event.origin !== window.location.origin) return;
+
+                    const { sessionId } = event.data;
+                    if (sessionId) {
+                        try {
+                            const res = await axiosInstance.post("/event/payment/stripe/verify", { sessionId });
+                            if (res.data) {
+                                toast.success(res.data.message);
+                                navigate(`/payment/${res.data.paymentId}`);
+                            }
+                        } catch (err) {
+                            console.log(err)
+                            toast.error("Stripe verification failed");
+                        }
+                    }
+                };
+
+                window.addEventListener("message", handleMessage, { once: true });
+            }
+
+            else if (booking.paymentMethod === "wallet") {
+                const res = await axiosInstance.post(
+                    "/event/payment/wallet/pay",
+                    { eventId: booking.eventId.id, currency: booking.eventId.currency, amount: booking.totalAmount, bookingId: booking.id }
+                );
+                if (res.data.paymentId) {
+                    toast.success("Payment successful via Wallet!");
+                    navigate(`/payment/${booking.orderId}`)
+                } else {
+                    toast.error("Insufficient wallet balance.");
+                }
+            }
+
+        } catch (err) {
+            console.error("Payment error:", err);
+            toast.error("Payment failed. Please try again.");
+        }
+    };
+
     useEffect(() => {
         setLoading(true);
         try {
@@ -85,8 +194,8 @@ const MyTickets = () => {
                 if (res.data) {
                     console.log(res.data.bookings)
                     setEvents(res.data.bookings);
-                    setPage(res.data.page);
-                    setPages(res.data.pages);
+                    setPage(Number(res.data.page));
+                    setPages(Number(res.data.pages));
                 }
             }
             fetchRequest(page);
@@ -158,7 +267,7 @@ const MyTickets = () => {
                                                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between">
                                                         <div className="flex-grow">
                                                             <div className="flex gap-2">
-                                                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                                                <h3 className="text-xl font-semibold text-gray-900 mb-2 max-w-[300px] truncate">
                                                                     {event.eventId.title}
                                                                 </h3>
 
@@ -197,19 +306,19 @@ const MyTickets = () => {
 
                                                         <div className="flex flex-col gap-3 lg:ml-6">
 
-                                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                            <div className="flex flex-col md:flex-row gap-2">
                                                                 <button
                                                                     onClick={() => handleViewDetails(event.orderId as string)}
                                                                     className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
                                                                 >
                                                                     View Details
                                                                 </button>
-                                                                <button
-                                                                    onClick={() => handleContactOrganizer(event.id as string)}
-                                                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
-                                                                >
+                                                                <Link to={`/messages?user=${event.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                                                    </svg>
                                                                     Contact Organizer
-                                                                </button>
+                                                                </Link>
                                                                 {event.status === "paid" && (
                                                                     <button
                                                                         onClick={() => {
@@ -219,6 +328,15 @@ const MyTickets = () => {
                                                                         className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-red-600 rounded-md hover:bg-red-700 transition-colors duration-200 cursor-pointer"
                                                                     >
                                                                         Cancel
+                                                                    </button>
+                                                                )}
+
+                                                                {event.status === "failed" && (
+                                                                    <button
+                                                                        onClick={() => handlePayment(event)}
+                                                                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-md hover:bg-green-700 transition-colors duration-200 cursor-pointer"
+                                                                    >
+                                                                        Retry
                                                                     </button>
                                                                 )}
                                                             </div>

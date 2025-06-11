@@ -28,8 +28,13 @@ export class PaymentRepository implements IPaymentRepository {
         return doc?.toJSON();
     }
 
-    public async changeStatus(bookingId: string, status: string): Promise<IPayment | null> {
+    async changeStatus(bookingId: string, status: string): Promise<IPayment | undefined> {
         const doc = await this.model.findOneAndUpdate({bookingId}, {$set: {status}}, {new: true});
-        return doc;
+        return doc?.toJSON();
+    }
+
+    async upsert(bookingId: string, data: Partial<IPayment>): Promise<IPayment | undefined> {
+        const doc = await this.model.findOneAndUpdate({bookingId}, data, {new: true, upsert: true,});
+        return doc?.toJSON();
     }
 }

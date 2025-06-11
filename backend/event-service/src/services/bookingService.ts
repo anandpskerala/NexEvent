@@ -6,9 +6,12 @@ import { EventRepository } from '../repositories/EventRepository';
 import { IBooking } from '../shared/types/IBooking';
 import { Response } from 'express';
 import { fetchUsers } from '../shared/utils/getUsers';
+import { PaymentRepository } from '../repositories/PaymentRepository';
+import { PaymentMethod, PaymentStatus } from '../shared/types/Payments';
+import { WalletRepository } from '../repositories/WalletRepository';
 
 export class BookingService {
-    constructor(private repo: BookingRepository, private eventRepo: EventRepository) { }
+    constructor(private repo: BookingRepository, private eventRepo: EventRepository, private paymentRepo: PaymentRepository, private walletRepo: WalletRepository) { }
 
     public async createBooking(data: IBooking) {
         try {
@@ -90,8 +93,43 @@ export class BookingService {
     public async cancelBooking(bookingId: string) {
         try {
             await this.repo.cancelBooking(bookingId);
+            const doc = await this.paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
+            await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
             return {
                 message: "Tickets cancelled",
+                status: StatusCode.OK
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async failedBooking(bookingId: string, eventId: string, amount: number, currency: string, userId: string) {
+        try {
+            const booked = await this.paymentRepo.upsert(bookingId, {
+                userId,
+                eventId,
+                bookingId,
+                method: PaymentMethod.RAZORPAY,
+                amount: amount / 100,
+                currency,
+                status: PaymentStatus.FAILED
+            });
+            
+            if (booked) {
+                await this.repo.update(booked.bookingId, {
+                paymentId: booked.id,
+                paymentMethod: booked.method,
+                status: PaymentStatus.FAILED
+            })
+            }
+
+            return {
+                message: "Payment Failed",
                 status: StatusCode.OK
             }
         } catch (error) {
@@ -141,7 +179,7 @@ export class BookingService {
         }
     }
 
-    public async getOrganizerBookings(userId: string, page: number, limit: number) {
+    public async getOrganizerBookings(userId: string, search: string, page: number, limit: number) {
         try {
             const skip = (page - 1) * limit;
             const events = await this.eventRepo.getAllEvents({ userId }, skip, limit);
@@ -155,7 +193,9 @@ export class BookingService {
                 }
             }
 
-            const bookings = await this.repo.getBookingWithQuery({ eventId: { $in: eventIds } }, skip, limit);
+            const bookings = await this.repo.getBookingWithQuery({ $or: [
+                {orderId: {$regex: search, $options: "i"}}
+            ], eventId: { $in: eventIds } }, skip, limit);
             const userIds = [...new Set(bookings.items.map(b => b.userId))];
 
             const userMap = await fetchUsers(userIds);

@@ -23,24 +23,29 @@ const Home = () => {
 
 
   const handleSearch = () => {
-    const query = search !== ""? `?search=${search}`: "";
+    const query = search !== "" ? `?search=${search}` : "";
     navigate(`/events/browse${query}`);
   }
 
   useEffect(() => {
     const fetchRequest = async () => {
+      setLoading(true);
+
       try {
-        const res = await axiosInstance.get(`/event/all?limit=5`);
-        if (res.data) {
-          setEvents(res.data.events);
+        const [eventRes, categoryRes] = await Promise.all([
+          axiosInstance.get("/event/all?limit=5"),
+          axiosInstance.get("/admin/categories?limit=5"),
+        ]);
+
+        if (eventRes.data) {
+          setEvents(eventRes.data.events);
         }
 
-        const catRes = await axiosInstance.get("/admin/categories?limit=5");
-        if (catRes.data) {
-          setCatgories(catRes.data.categories);
+        if (categoryRes.data) {
+          setCatgories(categoryRes.data.categories);
         }
       } catch (error) {
-        console.error(error)
+        console.error("Error fetching events or categories:", error);
       } finally {
         setLoading(false);
       }
@@ -48,6 +53,7 @@ const Home = () => {
 
     fetchRequest();
   }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <NavBar isLogged={user?.isVerified} name={user?.firstName} user={user} section="home" />
@@ -74,7 +80,7 @@ const Home = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => (e.key == 'Enter' && handleSearch())}
               />
-              <button 
+              <button
                 className="absolute right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                 onClick={handleSearch}
               >

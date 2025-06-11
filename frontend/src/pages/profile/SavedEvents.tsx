@@ -35,8 +35,8 @@ const SavedEvents = () => {
                 const res = await axiosInstance.get(`/event/all-saved?page=${page}&limit=10}`);
                 if (res.data) {
                     setEvent(res.data.events);
-                    setPage(res.data.page);
-                    setPages(res.data.pages);
+                    setPage(Number(res.data.page));
+                    setPages(Number(res.data.pages));
                 }
             } catch (error) {
                 console.error(error);

@@ -155,10 +155,17 @@ export const MessageComponent = ({ user, selected }: { user: User, selected: Use
                             }}
                             className={`flex items-center p-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 ${selectedChat?.id === contact.id ? 'bg-blue-50 border-r-2 border-r-blue-500' : ''}`}
                         >
-                            <div className="relative">
-                                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
+                            <div className="relative w-12 h-12">
+                                {contact.image ? (
+                                    <img 
+                                        src={contact.image}
+                                        className='w-full h-full rounded-full'
+                                    />
+                                ):(
+                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
                                     {contact.firstName?.charAt(0)}
                                 </div>
+                                )}
                             </div>
                             <div className="ml-3 flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
@@ -176,7 +183,13 @@ export const MessageComponent = ({ user, selected }: { user: User, selected: Use
                 <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
                     <div className="flex items-center">
                         <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold">
-                            {selectedChat?.firstName?.charAt(0) || 'A'}
+                            {
+                                selectedChat?.image ? (
+                                    <img src={selectedChat.image} alt="user icon" className='w-full h-full rounded-full' />
+                                ): (
+                                    <span> {selectedChat?.firstName?.charAt(0) || 'A'} </span>
+                                )
+                            }
                         </div>
                         <div className="ml-3">
                             <h2 className="text-lg font-semibold text-gray-900">
@@ -224,38 +237,40 @@ export const MessageComponent = ({ user, selected }: { user: User, selected: Use
                     </div>
                 )}
 
-                <div className="bg-white border-t border-gray-200 p-4">
-                    <div className="flex items-center gap-5">
-                        <div className="flex-1 relative">
-                            <textarea
-                                value={newMessage}
-                                onChange={(e) => setNewMessage(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                                placeholder="Type a message..."
-                                className="w-full mt-2 px-4 py-2 pr-12 border border-gray-300 rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                rows={1}
-                                style={{ minHeight: '40px', maxHeight: '120px' }}
-                            />
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept="image/*"
-                                onChange={handleImageSelect}
-                                className="hidden"
-                            />
-                            <button onClick={() => fileInputRef.current?.click()} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full">
-                                <ImageIcon className="w-5 h-5 text-gray-600" />
+                {selectedChat && (
+                    <div className="bg-white border-t border-gray-200 p-4">
+                        <div className="flex items-center gap-5">
+                            <div className="flex-1 relative">
+                                <textarea
+                                    value={newMessage}
+                                    onChange={(e) => setNewMessage(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                    placeholder="Type a message..."
+                                    className="w-full mt-2 px-4 py-2 pr-12 border border-gray-300 rounded-full resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    rows={1}
+                                    style={{ minHeight: '40px', maxHeight: '120px' }}
+                                />
+                                <input
+                                    ref={fileInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageSelect}
+                                    className="hidden"
+                                />
+                                <button onClick={() => fileInputRef.current?.click()} className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full">
+                                    <ImageIcon className="w-5 h-5 text-gray-600" />
+                                </button>
+                            </div>
+                            <button
+                                onClick={handleSendMessage}
+                                disabled={!newMessage.trim() && !selectedImage}
+                                className="p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full transition-colors"
+                            >
+                                <SendHorizontal className="w-6 h-6" />
                             </button>
                         </div>
-                        <button
-                            onClick={handleSendMessage}
-                            disabled={!newMessage.trim() && !selectedImage}
-                            className="p-3 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white rounded-full transition-colors"
-                        >
-                            <SendHorizontal className="w-6 h-6" />
-                        </button>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     );

@@ -22,8 +22,8 @@ export class UserController {
     }
 
     public getAllUsers = async (req: Request, res: Response): Promise<void> => {
-        const { search = "", page = 1, limit = 10, role = "", status = "", myId } = req.query;
-        const result = await this.userService.getAllUsers(search as string, page as number, limit as number, role as string, status as string, myId as string);
+        const { query = "", page = 1, limit = 10, role = "", status = "", myId } = req.query;
+        const result = await this.userService.getAllUsers(query as string, page as number, limit as number, role as string, status as string, myId as string);
         res.status(result.status).json({users: result.users, page: result.page, pages: result.pages, total: result.total})
     }
 

@@ -26,7 +26,10 @@ export class CouponRepository implements ICouponRepository {
     }
 
     async findAll(name?: string, page?: number, limit?: number): Promise<{ items: ICoupon[]; total: number; }> {
-        const query = this.model.find({couponName: { $regex: name, $options: "i" }});
+        const query = this.model.find({ $or: [
+            {couponName: { $regex: name, $options: "i" }},
+            {couponCode: { $regex: name, $options: "i" }}
+        ]});
 
         if (page && limit) {
             const skip = (page - 1) * limit;

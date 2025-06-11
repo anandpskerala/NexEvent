@@ -110,8 +110,8 @@ const BrowsePage = () => {
                 const eventRes = await axiosInstance.get(`/event/all?search=${debouncedSearch}&category=${payload.category}&startDate=${payload.startDate}&endDate=${payload.endDate}&page=${page}&limit=15`);
                 if (eventRes.data) {
                     setEvents(eventRes.data.events);
-                    setPage(eventRes.data.page);
-                    setPages(eventRes.data.pages);
+                    setPage(Number(eventRes.data.page));
+                    setPages(Number(eventRes.data.pages));
                 }
             } catch (error) {
                 console.error(error)

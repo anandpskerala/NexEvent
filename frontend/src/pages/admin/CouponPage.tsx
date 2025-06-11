@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import type { ICoupon } from '../../interfaces/entities/Coupons';
@@ -8,8 +8,9 @@ import { AxiosError } from 'axios';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, Edit2, Trash2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import { formatDate } from '../../utils/stringUtils';
+import { useDebounce } from '../../hooks/useDebounce';
 
 const CouponPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -17,12 +18,18 @@ const CouponPage = () => {
     const [coupons, setCoupons] = useState<ICoupon[]>([]);
     const [page, setPage] = useState(1);
     const [pages, setPages] = useState(1);
+    const [search, setSearch] = useState("");
+    const debouncedSearch = useDebounce(search, 500);
     const [couponToDelete, setCouponToDelete] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
 
     const toggleSidebar = () => {
         setSidebarCollapse(!sidebarCollapsed);
+    };
+
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearch(e.target.value);
     };
 
     const confirmDeleteCoupon = (couponId: string) => {
@@ -50,14 +57,14 @@ const CouponPage = () => {
         }
     };
 
-    const fetchCoupons = async (pageNumber = 1) => {
+    const fetchCoupons = useCallback(async (pageNumber = 1) => {
         try {
             setLoading(true);
-            const res = await axiosInstance.get(`/admin/coupons?page=${pageNumber}&limit=10`);
+            const res = await axiosInstance.get(`/admin/coupons?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
             if (res.data) {
                 setCoupons(res.data.coupons);
-                setPage(res.data.page);
-                setPages(res.data.pages);
+                setPage(Number(res.data.page));
+                setPages(Number(res.data.pages));
             }
         } catch (error) {
             console.error(error);
@@ -65,7 +72,7 @@ const CouponPage = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [debouncedSearch]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= pages) {
@@ -97,7 +104,7 @@ const CouponPage = () => {
 
     useEffect(() => {
         fetchCoupons();
-    }, []);
+    }, [debouncedSearch, fetchCoupons]);
 
     return (
         <div className="flex h-screen bg-gray-50">
@@ -105,8 +112,24 @@ const CouponPage = () => {
             <div className="flex-1 overflow-auto">
                 <div className="p-6">
                     <AdminNavbar title="Coupons" user={user} toggleSidebar={toggleSidebar} />
-
-                    <div className="flex justify-end mb-6">
+                    <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+                        <div className="relative">
+                            <input
+                                id="search"
+                                type="text"
+                                value={search}
+                                onChange={handleSearch}
+                                placeholder="Search by name"
+                                className="w-full md:w-80 pl-3 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                aria-label="Search by name"
+                            />
+                            <button
+                                className="absolute right-0 top-0 h-full px-3 text-white bg-blue-600 rounded-r-lg"
+                                aria-label="Search"
+                            >
+                                <Search size={20} />
+                            </button>
+                        </div>
                         <Link
                             to="/admin/create-coupon"
                             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -252,9 +275,9 @@ const CouponPage = () => {
                                                 <ChevronLeft className="h-5 w-5" />
                                             </button>
                                             {Array.from({ length: pages }, (_, i) => i + 1)
-                                                .filter(pageNum => 
-                                                    pageNum === 1 || 
-                                                    pageNum === pages || 
+                                                .filter(pageNum =>
+                                                    pageNum === 1 ||
+                                                    pageNum === pages ||
                                                     Math.abs(pageNum - page) <= 1
                                                 )
                                                 .map((pageNum, index, array) => (
@@ -266,11 +289,10 @@ const CouponPage = () => {
                                                         )}
                                                         <button
                                                             onClick={() => handlePageChange(pageNum)}
-                                                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                                                                pageNum === page
+                                                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === page
                                                                     ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
                                                                     : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {pageNum}
                                                         </button>

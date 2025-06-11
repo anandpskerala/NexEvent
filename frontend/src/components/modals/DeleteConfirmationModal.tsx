@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import type { DeleteConfirmationModalProps } from '../../interfaces/props/modalProps';
 
 
-export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ isOpen, onClose, onConfirm, itemName }) => {
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ isOpen, onClose, onConfirm, itemName }) => {
     const [animateIn, setAnimateIn] = useState(false);
 
     useEffect(() => {
@@ -73,3 +73,5 @@ export const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = (
         </div>
     );
 };
+
+export default DeleteConfirmationModal;

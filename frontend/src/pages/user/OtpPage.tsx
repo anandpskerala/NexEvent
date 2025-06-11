@@ -21,7 +21,7 @@ const OtpPage = () => {
     useEffect(() => {
         const getTimer = async () => {
             try {
-                const response = await axiosInstance.get("/auth/otp");
+                const response = await axiosInstance.get("/user/otp");
                 console.log(response.data)
                 const backendTimeLeft = response.data?.timeLeft ?? 0;
                 setTimeLeft(backendTimeLeft);

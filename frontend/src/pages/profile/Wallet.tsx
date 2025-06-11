@@ -67,7 +67,7 @@ const Wallet = () => {
         const fetchWallet = async (userId: string) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/payment/wallet/${userId}`);
+                const res = await axiosInstance.get(`/event/payment/wallet/${userId}`);
                 if (res.data) {
                     setWallet(res.data.wallet);
                 }

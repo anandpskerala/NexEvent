@@ -4,7 +4,7 @@ import { useAppDispatch } from './hooks/useAppDispatch';
 import { useEffect } from 'react';
 import { setupAxiosInterceptors } from './utils/axiosInstance';
 import { verifyUser } from './store/actions/auth/verifyUser';
-// import { useNearestCity } from './hooks/useNearestCity';
+import { useNearestCity } from './hooks/useNearestCity';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -13,8 +13,8 @@ function App() {
     setupAxiosInterceptors(dispatch);
   }, [dispatch]);
 
-  // const { city, loading, error } = useNearestCity();
-  // console.log(city);
+  const { city } = useNearestCity();
+  console.log(city);
   return (
     <BrowserRouter>
       <AppRoutes />

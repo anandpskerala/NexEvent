@@ -12,7 +12,7 @@ const UserMessages = () => {
     const { user } = useSelector((state: RootState) => state.auth);
     const [searchParams] = useSearchParams();
     const chatId = searchParams.get("user");
-    const [loading, setLoading] = useState<boolean>(true);
+    const [loading, setLoading] = useState<boolean>(false);
     const [selectedChat, setSelectedChat] = useState<User | null>(null);
 
     useEffect(() => {
@@ -30,7 +30,9 @@ const UserMessages = () => {
             }
         };
 
-        fetchUser(chatId as string);
+        if (chatId) {
+            fetchUser(chatId as string);
+        }
     }, [chatId])
     if (loading) return <LazyLoadingScreen />
     return (
