@@ -30,4 +30,6 @@ export interface NearestCity {
     district: string;
     state: string;
     country: string;
+    lat: number;
+    lng: number;
 }

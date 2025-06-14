@@ -27,8 +27,8 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
             <div className="hidden md:flex space-x-6">
                 <NavLink to="/" className={`${section === "home" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Home</NavLink>
                 <NavLink to="/events/browse" className={`${section === "browse" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Browse</NavLink>
-                <NavLink to="#" className={`${section === "category" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Categories</NavLink>
-                <NavLink to="#" className={`${section === "about" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>About</NavLink>
+                <NavLink to="/messages" className={`${section === "messages" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Messages</NavLink>
+                <NavLink to="/about" className={`${section === "about" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>About</NavLink>
             </div>
 
             {isLogged ? (

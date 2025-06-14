@@ -9,7 +9,9 @@ export const useNearestCity = (): UseNearestCityResult => {
         city: '',
         district: '',
         state: '',
-        country: ''
+        country: '',
+        lat: 0,
+        lng: 0
     });
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,8 @@ export const useNearestCity = (): UseNearestCityResult => {
                         district: components.state_district,
                         state: components.state,
                         country:  components.country,
+                        lat: latitude,
+                        lng: longitude
                     }
 
                     if (nearestCity) {

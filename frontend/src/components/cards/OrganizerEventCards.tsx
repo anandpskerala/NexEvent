@@ -51,7 +51,7 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
                     <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">{category?.name}</span>
                 </div>
 
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 truncate">
                     {event.title}
                 </h2>
 

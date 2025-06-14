@@ -2,6 +2,7 @@ import { FilterQuery, Model } from "mongoose";
 import { IBookingRepository } from "./interfaces/IBookingRepository";
 import { IBooking } from "../shared/types/IBooking";
 import bookingModel from "../models/bookingModel";
+import { PaymentStatus } from "../shared/types/Payments";
 
 export class BookingRepository implements IBookingRepository {
     private model: Model<IBooking>;
@@ -38,6 +39,11 @@ export class BookingRepository implements IBookingRepository {
             items: docs,
             total: pages
         };
+    }
+
+    async findBookingsByEventID(eventId: string): Promise<IBooking[]> {
+        const docs = (await this.model.find({eventId, status: PaymentStatus.SUCCESS})).map(doc => doc.toJSON());
+        return docs;
     }
 
     async checkForPromoCode(couponCode: string, userId: string): Promise<boolean> {

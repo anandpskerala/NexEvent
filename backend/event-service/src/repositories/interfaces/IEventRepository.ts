@@ -10,6 +10,7 @@ export interface IEventRepository {
     createTicket(id: string, currency: string, entryType: string, showQuantity: boolean, refunds: boolean, tickets: ITicket[]): Promise<void>;
     getEvent(id: string): Promise<IEvent | undefined>;
     getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number): Promise<IEvent[]>;
+    getNearByEvents(latitude: number, longitude: number, maxDistanceInKm?: number): Promise<IEvent[]>;
     countDocs(query: FilterQuery<IEvent>): Promise<number>;
     checkStock(eventId: string, ticketId: string, stock: number): Promise<boolean>;
     updateTickets(eventId: string, ticketId: string, quantity: number): Promise<void>;

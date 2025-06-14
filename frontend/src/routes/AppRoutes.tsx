@@ -11,6 +11,7 @@ import { LazyLoadingScreen } from "../components/partials/LazyLoadingScreen";
 
 const Login = lazy(() => import("../pages/user/Login"));
 const SignUp = lazy(() => import("../pages/user/SignUp"));
+const AboutPage = lazy(() => import("../pages/user/AboutPage"));
 const ForgotPassword = lazy(() => import("../pages/user/ForgotPassword"));
 const ResetPassword = lazy(() => import("../pages/user/ResetPassword"));
 const OtpPage = lazy(() => import("../pages/user/OtpPage"));
@@ -52,6 +53,7 @@ const AppRoutes = () => {
     return (
         <Suspense fallback={<LazyLoadingScreen />}>
             <Routes>
+                <Route path="/about" element={<AboutPage />} />
                 <Route element={<AuthRedirect user={user} />}>
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<SignUp />} />

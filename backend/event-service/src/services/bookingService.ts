@@ -108,6 +108,39 @@ export class BookingService {
         }
     }
 
+    public async cancelAllBookings(eventId: string) {
+        try {
+            const bookings = await this.repo.findBookingsByEventID(eventId);
+            if (!bookings || bookings.length === 0) {
+                return {
+                    message: "No bookings found for this event",
+                    status: StatusCode.NOT_FOUND
+                };
+            }
+
+            for (const booking of bookings) {
+                const bookingId = booking.id;
+                await this.repo.cancelBooking(bookingId as string);
+                const paymentDoc = await this.paymentRepo.changeStatus(bookingId as string, PaymentStatus.REFUNDED);
+
+                if (paymentDoc) {
+                    await this.walletRepo.credit(paymentDoc.userId, paymentDoc.amount);
+                }
+            }
+
+            return {
+                message: "All bookings for the event have been cancelled",
+                status: StatusCode.OK
+            };
+        } catch (error) {
+            console.log(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
     public async failedBooking(bookingId: string, eventId: string, amount: number, currency: string, userId: string) {
         try {
             const booked = await this.paymentRepo.upsert(bookingId, {
@@ -119,13 +152,13 @@ export class BookingService {
                 currency,
                 status: PaymentStatus.FAILED
             });
-            
+
             if (booked) {
                 await this.repo.update(booked.bookingId, {
-                paymentId: booked.id,
-                paymentMethod: booked.method,
-                status: PaymentStatus.FAILED
-            })
+                    paymentId: booked.id,
+                    paymentMethod: booked.method,
+                    status: PaymentStatus.FAILED
+                })
             }
 
             return {
@@ -193,9 +226,11 @@ export class BookingService {
                 }
             }
 
-            const bookings = await this.repo.getBookingWithQuery({ $or: [
-                {orderId: {$regex: search, $options: "i"}}
-            ], eventId: { $in: eventIds } }, skip, limit);
+            const bookings = await this.repo.getBookingWithQuery({
+                $or: [
+                    { orderId: { $regex: search, $options: "i" } }
+                ], eventId: { $in: eventIds }
+            }, skip, limit);
             const userIds = [...new Set(bookings.items.map(b => b.userId))];
 
             const userMap = await fetchUsers(userIds);

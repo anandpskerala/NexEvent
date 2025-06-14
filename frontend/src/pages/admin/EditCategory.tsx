@@ -40,7 +40,7 @@ const EditCategory = () => {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <AdminSideBar sidebarCollapsed={sidebarCollapsed} section='coupons' />
+            <AdminSideBar sidebarCollapsed={sidebarCollapsed} section='category' />
             <div className="flex-1 overflow-auto">
                 <div className="p-6">
                     <AdminNavbar title='Create Category' user={user} toggleSidebar={toggleSidebar} />

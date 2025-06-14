@@ -48,6 +48,12 @@ export class BookingController {
         res.status(result.status).json({ message: result.message });
     }
 
+    public cancelAllBookings = async(req: Request, res: Response): Promise<void> => {
+        const {id} = req.params;
+        const result = await this.bookingService.cancelAllBookings(id);
+        res.status(result.status).json({message: result.message});
+    }
+
     public failedBooking = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { eventId, bookingId, amount, currency } = req.body;

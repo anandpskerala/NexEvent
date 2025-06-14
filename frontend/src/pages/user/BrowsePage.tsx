@@ -96,17 +96,27 @@ const BrowsePage = () => {
             }
         });
         setSearchParams(newParams);
-    }, [search, payload, searchParams, setSearchParams])
+    }, [search, payload, searchParams, setSearchParams]);
 
     useEffect(() => {
-        const fetchRequest = async () => {
-            setLoading(true);
+        const fetchCatgories = async () => {
             try {
                 const res = await axiosInstance.get("/admin/categories");
                 if (res.data) {
                     setCatgories(res.data.categories);
                 }
+            } catch (error) {
+                console.error(error)
+            }
+        } 
 
+        fetchCatgories();
+    }, [])
+
+    useEffect(() => {
+        const fetchRequest = async () => {
+            setLoading(true);
+            try {
                 const eventRes = await axiosInstance.get(`/event/all?search=${debouncedSearch}&category=${payload.category}&startDate=${payload.startDate}&endDate=${payload.endDate}&page=${page}&limit=15`);
                 if (eventRes.data) {
                     setEvents(eventRes.data.events);

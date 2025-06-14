@@ -1,5 +1,5 @@
 import React from 'react'
-import { AdminSidebarItem, BarChartIcon, BellIcon, CalendarIcon, FileTextIcon, GridIcon, HelpCircleIcon, LayersIcon, ListIcon, StarIcon, TagIcon, UsersIcon } from "../../utils/SidebarUtils"; 
+import { AdminSidebarItem, BarChartIcon, BellIcon, FileTextIcon, GridIcon, HelpCircleIcon, LayersIcon, ListIcon, StarIcon, TagIcon, UsersIcon } from "../../utils/SidebarUtils"; 
 
 export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}> = ({sidebarCollapsed, section}) => {
   return (
@@ -15,7 +15,6 @@ export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}
       <div className="flex-1">
         <AdminSidebarItem icon={<GridIcon />} text="Dashboard" href="/admin/dashboard" collapsed={sidebarCollapsed} active={section === "dashboard"} />
         <AdminSidebarItem icon={<UsersIcon />} text="Users" href="/admin/users" collapsed={sidebarCollapsed} active={section === "users"} />
-        <AdminSidebarItem icon={<CalendarIcon />} text="Events" href="/admin/users" collapsed={sidebarCollapsed} active={section === "events"} />
         <AdminSidebarItem icon={<ListIcon />} text="Organizer Requests" href="/admin/organizer-requests" collapsed={sidebarCollapsed} active={section === "organizer requests"} />
         <AdminSidebarItem icon={<TagIcon />} text="Coupons" href="/admin/coupons" collapsed={sidebarCollapsed} active={section === "coupons"} />
         <AdminSidebarItem icon={<LayersIcon />} text="Category" href="/admin/categories" collapsed={sidebarCollapsed} active={section === "category"} />

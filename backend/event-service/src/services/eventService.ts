@@ -130,7 +130,23 @@ export class EventService {
 
         } catch (error) {
             console.error("Error fetching events:", error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR,
+            };
+        }
+    }
 
+    public async getNearbyEvents(latitude: number, longitude: number) {
+        try {
+            const events = await this.eventRepo.getNearByEvents(latitude, longitude);
+            return {
+                message: "Fetched events",
+                status: StatusCode.OK,
+                events
+            }
+        } catch (error) {
+            console.error("Error fetching events:", error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR,

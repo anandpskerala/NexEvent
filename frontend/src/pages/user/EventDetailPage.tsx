@@ -12,6 +12,8 @@ import type { AllEventData } from '../../interfaces/entities/FormState';
 import type { OrganizerData } from '../../interfaces/entities/organizer';
 import type { AxiosResponse } from 'axios';
 import config from '../../config/config';
+import { ReviewCard } from '../../components/cards/ReviewCard';
+import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 
 
 const EventDetailPage = () => {
@@ -66,31 +68,33 @@ const EventDetailPage = () => {
     useEffect(() => {
         const fetchRequest = async () => {
             setLoading(true);
+
             try {
-                const eventRes = await axiosInstance.get(`/event/event/${id}`);
-                if (eventRes.data) {
-                    setEvent(eventRes.data.event);
-                    const userId = eventRes.data.event.userId;
-                    const orgRes = await axiosInstance.get(`user/request/${userId}`);
-                    if (orgRes.data) {
-                        console.log(orgRes.data)
-                        setOrganizer(orgRes.data.request);
-                    }
+                const [eventRes, savedRes] = await Promise.all([
+                    axiosInstance.get(`/event/event/${id}`),
+                    axiosInstance.get(`/event/saved/${id}`)
+                ]);
+
+                const eventData = eventRes.data?.event;
+                setEvent(eventData);
+                setSaved(savedRes.data?.saved ?? false);
+
+                if (eventData?.userId) {
+                    const orgRes = await axiosInstance.get(`/user/request/${eventData.userId}`);
+                    setOrganizer(orgRes.data?.request);
                 }
 
-                const savedRes = await axiosInstance.get(`/event/saved/${id}`);
-                if (savedRes) {
-                    setSaved(savedRes.data.saved);
-                }
             } catch (error) {
-                console.error(error);
+                console.error("Error fetching event data:", error);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchRequest();
+        if (id) fetchRequest();
     }, [id]);
+
+    if (loading) return <LazyLoadingScreen />;
     return (
         <div className="flex flex-col min-h-screen bg-white">
             <NavBar isLogged={user?.isVerified} name={user?.firstName} user={user} section="event" />
@@ -122,7 +126,7 @@ const EventDetailPage = () => {
                                         className="w-full h-48 object-cover"
                                     />
                                     <div className="absolute top-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-medium">
-                                        {captialize(event?.eventType as string)}
+                                        {captialize(event?.eventType ?? '')}
                                     </div>
                                     <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-sm hover:bg-white transition-colors">
                                         <Share2 className="h-5 w-5 text-gray-700" />
@@ -229,7 +233,7 @@ const EventDetailPage = () => {
                                         </>
                                     ) : (
                                         <div className="flex items-center justify-center py-8">
-                                            <p className="text-gray-500 italic">No reviews yet. Be the first to leave a review!</p>
+                                            <ReviewCard />
                                         </div>
                                     )}
                                 </div>

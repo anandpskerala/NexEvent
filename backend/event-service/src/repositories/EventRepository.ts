@@ -26,7 +26,7 @@ export class EventRepository implements IEventRepository {
     }
 
     async findByID(id: string): Promise<IEvent | undefined> {
-        const doc = await this.model.findOne({_id: id});
+        const doc = await this.model.findOne({ _id: id });
         return doc?.toJSON();
     }
 
@@ -58,6 +58,24 @@ export class EventRepository implements IEventRepository {
     async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number): Promise<IEvent[]> {
         const docs = (await this.model.find(query).skip(skip).limit(limit).sort({ createdAt: -1 })).map(doc => doc.toJSON());
         return docs;
+    }
+
+    async getNearByEvents(latitude: number, longitude: number, maxDistanceInKm: number = 100): Promise<IEvent[]> {
+        const maxDistanceInMeters = maxDistanceInKm * 1000;
+
+        const events = await eventModel.find({
+            location: {
+                $near: {
+                    $geometry: {
+                        type: "Point",
+                        coordinates: [longitude, latitude],
+                    },
+                    $maxDistance: maxDistanceInMeters,
+                }
+            }
+        });
+
+        return events.map(event => event.toJSON());
     }
 
     async countDocs(query: FilterQuery<IEvent>): Promise<number> {

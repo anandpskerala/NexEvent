@@ -6,6 +6,7 @@ export interface IBookingRepository {
     findByUserID(userId: string, skip: number, limit: number): Promise<{items: IBooking[], total: number}>;
     cancelBooking(bookingId: string): Promise<void>;
     getBookingWithQuery(query: FilterQuery<IBooking>, skip: number, limit: number): Promise<{items: IBooking[], total: number}>;
+    findBookingsByEventID(eventId: string): Promise<IBooking[]>;
     checkForPromoCode(couponCode: string, userId: string): Promise<boolean>;
     findByID(id: string): Promise<IBooking | undefined>;
     create(item: IBooking): Promise<IBooking>;

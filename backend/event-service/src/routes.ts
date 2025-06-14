@@ -29,6 +29,7 @@ const paymentController = new PaymentController(paymentService);
 routes.get("/all", eventController.getAllEvents);
 routes.post("/event", protectedRoute, eventController.createEvent);
 routes.get("/events", eventController.getEvents);
+routes.get("/nearbyevents", eventController.getNearByEvents);
 routes.post("/ticket", protectedRoute, eventController.createTicket);
 routes.get("/event/:id", eventController.getEvent);
 routes.patch("/event/:id", protectedRoute, eventController.editEvent);
@@ -42,6 +43,7 @@ routes.delete("/saved/:id", eventController.removeSaved); // :id - eventId
 routes.post("/booking", bookingController.create);
 routes.get("/booking/:id", bookingController.getBooking);
 routes.patch("/booking/:id", bookingController.cancelBooking);
+routes.put("/booking/:id", protectedRoute, bookingController.cancelAllBookings);
 routes.get("/bookings/:id", bookingController.getBookings);
 routes.post("/failed/booking", bookingController.failedBooking);
 routes.get("/organizer/booking", protectedRoute, bookingController.getOrganizerBookings);
