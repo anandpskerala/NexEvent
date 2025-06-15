@@ -47,7 +47,7 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
         setErrors({});
         setLoading(true);
         try {
-            await validateCoupon(formData);
+            await validateCoupon(formData, isEdit, formData.startDate ? new Date(formData.startDate) : undefined);
 
             const payload = {
                 couponCode: formData.couponCode,

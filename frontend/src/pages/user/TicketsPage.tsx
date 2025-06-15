@@ -44,9 +44,23 @@ const TicketsPage = () => {
         // Navigate back to tickets listing page
     };
 
-    const handleDownloadAllTickets = () => {
-        console.log('Download all tickets');
-        // Handle download of all tickets
+    const handleDownloadAllTickets = async (bookingId: string) => {
+        try {
+            const res = await axiosInstance.get(`/event/ticket/download/${bookingId}`, {
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `ticket-${bookingId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Download failed', error);
+        }
     };
 
     const getTicketDescription = (ticketId: string) => {
@@ -207,11 +221,11 @@ const TicketsPage = () => {
                             {booking?.status === "paid" && (
                                 <div className="mt-8 flex justify-end">
                                 <button
-                                    onClick={handleDownloadAllTickets}
+                                    onClick={() => handleDownloadAllTickets(id as string)}
                                     className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200"
                                 >
                                     <Download className="w-4 h-4 mr-2" />
-                                    Download All Tickets
+                                    Download Ticket
                                 </button>
                             </div>
                             )}
