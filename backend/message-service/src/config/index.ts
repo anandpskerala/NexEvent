@@ -9,7 +9,8 @@ export const config = {
         frontendUrl: process.env.FRONTEND_URL || ""
     },
     db: {
-        mongoURI: process.env.MONGO_URI || ""
+        mongoURI: process.env.MONGO_URI || "",
+        redisURI: process.env.REDIS_URI || ""
     },
     cloudinary: {
         cloudName: process.env.CLOUD_NAME,

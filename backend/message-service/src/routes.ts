@@ -11,5 +11,6 @@ const controller = new MessageController(logic);
 routes.post("/chat", controller.sendMessage);
 routes.post("/interactions", controller.getInteractions);
 routes.get("/conversations/:id", controller.getMessages);
+routes.patch("/conversations/:id", controller.markAsRead);
 
 export default routes;

@@ -5,6 +5,9 @@ import App from './App.tsx'
 import { Provider } from 'react-redux'
 import store from './store/index.ts'
 import { Toaster } from 'sonner';
+import { setupAxiosInterceptors } from './utils/axiosInstance.ts'
+
+setupAxiosInterceptors(store.dispatch)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -35,7 +35,6 @@ export const setupAxiosInterceptors = (dispatch: AppDispatch) => {
 
       if (error.response?.status === 401 && !originalRequest._retry) {
         if (isRefreshing) {
-          // Wait until token is refreshed and retry the original request
           return new Promise((resolve, reject) => {
             failedQueue.push({
               resolve: () => resolve(axiosInstance(originalRequest)),

@@ -12,5 +12,6 @@ export interface User {
     authProvider?: string;
     organizer: Organization;
     image?: string;
+    unreadCount?: number;
     createdAt: string;
 }

@@ -311,12 +311,9 @@ const MyTickets = () => {
                                                                     onClick={() => handleViewDetails(event.orderId as string)}
                                                                     className="px-4 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-600 rounded-md hover:bg-blue-50 transition-colors duration-200 cursor-pointer"
                                                                 >
-                                                                    View Details
+                                                                    Details
                                                                 </button>
-                                                                <Link to={`/messages?user=${event.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                                                    </svg>
+                                                                <Link to={`/messages?user=${event.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 px-2">
                                                                     Contact Organizer
                                                                 </Link>
                                                                 {event.status === "paid" && (
@@ -331,7 +328,7 @@ const MyTickets = () => {
                                                                     </button>
                                                                 )}
 
-                                                                {event.status === "failed" && (
+                                                                {(event.status === "failed" || event.status === "pending") && (
                                                                     <button
                                                                         onClick={() => handlePayment(event)}
                                                                         className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-green-600 rounded-md hover:bg-green-700 transition-colors duration-200 cursor-pointer"

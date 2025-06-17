@@ -5,6 +5,7 @@ export interface Message {
     chatId?: string;
     content?: string;
     media?: string;
+    isRead?: boolean;
     createdAt?: string;
     updatedAt?: string;
 }

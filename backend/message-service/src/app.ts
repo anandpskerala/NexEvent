@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import routes from "./routes";
 import connectDB from "./config/db";
+import { connectRedis } from "./config/redis";
 
 export class App {
     private app: Application;
@@ -22,6 +23,7 @@ export class App {
 
     public async listen(port: number) {
         await connectDB();
+        await connectRedis();
         this.app.listen(port, () => {    
             console.log(`Message service started on port ${port}`);
         })

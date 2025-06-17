@@ -38,8 +38,8 @@ export class ChatRepository implements IChatRepository {
 
     async getInteractions(userId: string): Promise<string[]> {
         const messages = await this.model.find({
-            $or: [{ sender: userId }, { reciever: userId }]
-        }).select('sender reciever');
+            $or: [{ sender: userId }, { receiver: userId }]
+        }).select('sender receiver');
 
         const interacted = new Set<string>();
         messages.forEach(msg => {
@@ -51,20 +51,31 @@ export class ChatRepository implements IChatRepository {
         return ids;
     }
 
-    async getMessage(peer1: string, peer2: string): Promise<Message[]> {
+    async getMessage(peer1: string, peer2: string, limit: number = 20, offset: number = 0): Promise<{ messages: Message[], total: number}> {
         try {
-            const messages = (await this.model.find({
-                $or: [
-                    { sender: peer1, receiver: peer2 },
-                    { sender: peer2, receiver: peer1 }
-                ]
-            }).sort({ createdAt: 1 })).map(doc => doc.toJSON());
 
-            return messages as Message[];
+            const chatRoom = await this.findRoom(peer1, peer2);
+            const query = { chatId: chatRoom };
+            const [items, total] = await Promise.all([
+                this.model
+                    .find(query)
+                    .sort({ createdAt: 1 })
+                    .skip(offset)
+                    .limit(limit),
+                this.model.countDocuments(query),
+            ]);
+            const messages = items.map(doc => doc.toJSON())
+
+            return { messages: messages as Message[], total };
         } catch (err) {
             console.error("MongoDB query failed:", err);
             throw err;
         }
+    }
+
+    async markAsRead(peer1: string, peer2: string) {
+        const chatRoom = await this.findRoom(peer1, peer2);
+        await this.model.updateMany({chatId: chatRoom}, {$set: {isRead: true}});
     }
 
     async create(data: Partial<Message>): Promise<Message> {

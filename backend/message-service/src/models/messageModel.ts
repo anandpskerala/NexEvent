@@ -19,9 +19,13 @@ const schema = new Schema<Message>({
         type: String
     },
     media: {
-            type: String,
-        },
+        type: String,
     },
+    isRead: {
+        type: Boolean,
+        default: false
+    }
+},
     {
         timestamps: true,
     }
