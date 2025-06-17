@@ -53,4 +53,9 @@ export class RequestController {
         const result = await this.requestService.updateRequest(id, status);
         res.status(result.status).json({message: result.message});
     }
-}
+
+    public deleteRequest = async (req: Request, res: Response): Promise<void> => {
+        const { id } = req.params;
+        const result = await this.requestService.deleteRequest(id);
+        res.status(result.status).json({message: result.message});
+    }}

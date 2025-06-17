@@ -123,7 +123,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
         res = await axiosInstance.post(`/messages/interactions`, { userId: user.id });
       }
       if (res.data) {
-        const users = debouncedSearch ? res.data : res.data.users;
+        const users = res.data.users;
         setChats([
           ...(selectedChat && !users.some((u: User) => u.id === selectedChat.id)
             ? [selectedChat]
@@ -433,8 +433,8 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
 
         {selectedChat && (
           <div
-            className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 scrollbar-hide"
-            ref={messagesContainerRef} // Attach ref to the scrollable container
+            className="flex-1 bg-gray-300 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 scrollbar-hide"
+            ref={messagesContainerRef}
           >
             {isLoadingMore && (
               <div className="flex justify-center">

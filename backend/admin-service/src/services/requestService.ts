@@ -74,9 +74,39 @@ export class RequestService {
 
     public async updateRequest(id: string, status: "pending" | "accepted" | "rejected") {
         try {
-            await this.repo.updateRequest(id, {status});
+            await this.repo.updateRequest(id, { status });
             return {
                 message: "Status Updated",
+                status: StatusCode.OK
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async deleteRequest(id: string) {
+        try {
+            if (!id) {
+                return {
+                    message: "ID is required",
+                    status: StatusCode.BAD_REQUEST
+                }
+            }
+
+            const res = await this.repo.deleteRequest(id);
+            if (!res) {
+                return {
+                    message: "Failed to delete the request",
+                    status: StatusCode.BAD_REQUEST
+                }
+            }
+
+            return {
+                message: "Request deleted",
                 status: StatusCode.OK
             }
         } catch (error) {

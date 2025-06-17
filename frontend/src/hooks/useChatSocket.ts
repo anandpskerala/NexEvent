@@ -15,6 +15,8 @@ export const useChatSocket = (
     }, [onNewMessage]);
 
     useEffect(() => {
+        if (socketRef.current) return;
+        
         const socket = io(config.socket, {
             withCredentials: true,
             query: { userId },
@@ -32,7 +34,10 @@ export const useChatSocket = (
         });
 
         return () => {
-            socket.disconnect();
+            if (socketRef.current) {
+                socketRef.current.disconnect();
+                socketRef.current = null;
+            }
         };
     }, [userId]);
 };

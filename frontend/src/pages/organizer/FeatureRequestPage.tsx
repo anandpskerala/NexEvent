@@ -122,7 +122,7 @@ const FeatureRequestPage: React.FC = () => {
                                 </p>
                                 <button
                                     onClick={resetForm}
-                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
                                 >
                                     Submit Another Request
                                 </button>
@@ -244,7 +244,6 @@ const FeatureRequestPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Use Case */}
                                 <div>
                                     <label htmlFor="useCase" className="block text-sm font-medium text-gray-700 mb-2">
                                         Use Case / Problem Statement *
@@ -267,7 +266,6 @@ const FeatureRequestPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Additional Information */}
                                 <div>
                                     <label htmlFor="additionalInfo" className="block text-sm font-medium text-gray-700 mb-2">
                                         Additional Information
@@ -283,13 +281,12 @@ const FeatureRequestPage: React.FC = () => {
                                     />
                                 </div>
 
-                                {/* Submit Button */}
                                 <div className="pt-4">
                                     <button
                                         type="button"
                                         onClick={handleSubmit}
                                         disabled={isSubmitting}
-                                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center"
+                                        className="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center cursor-pointer"
                                     >
                                         {isSubmitting ? (
                                             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />

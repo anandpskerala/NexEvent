@@ -39,8 +39,9 @@ routes.patch("/coupon/:id", protectedRoute, couponController.updateCoupon);
 routes.delete("/coupon/:id", protectedRoute, couponController.deleteCoupon);
 
 routes.post("/request", organizerRoute, requestController.createRequest);
-routes.get("/request", requestController.getRequest);
+routes.get("/request/:id", requestController.getRequest);
 routes.get("/requests", requestController.getRequests);
 routes.patch("/request/:id", protectedRoute, requestController.updateRequest);
+routes.delete("/request/:id", protectedRoute, requestController.deleteRequest);
 
 export default routes;

@@ -5,11 +5,12 @@ import { useSelector } from 'react-redux';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import type { FeatureRequest } from '../../interfaces/entities/FeatureRequest';
-import { formatDate } from '../../utils/stringUtils';
+import { captialize, formatDate } from '../../utils/stringUtils';
 import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
 
 type ModalMode = 'view' | 'edit' | 'create';
 type StatusType = "pending" | "accepted" | "rejected";
@@ -20,6 +21,7 @@ const FeatureRequestAdmin = () => {
     const [requests, setRequests] = useState<FeatureRequest[]>([]);
     const [filteredRequests, setFilteredRequests] = useState<FeatureRequest[]>([]);
     const [showModal, setShowModal] = useState<boolean>(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState<ModalMode>('view');
     const [selectedRequest, setSelectedRequest] = useState<FeatureRequest | null>(null);
     const [page, setPage] = useState(1);
@@ -84,6 +86,23 @@ const FeatureRequestAdmin = () => {
         setSelectedRequest({ ...selectedRequest!, status: newStatus as StatusType })
     };
 
+    const handleDelete = async () => {
+        if (!selectedRequest) return;
+        try {
+            const res = await axiosInstance.delete(`/admin/request/${selectedRequest?.id}`);
+            if (res.data) {
+                setRequests(requests.filter((request) => request.id != selectedRequest?.id));
+                setSelectedRequest(null);
+                setIsModalOpen(false);
+                toast.success(res.data.message);
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message);
+            }
+        }
+    }
+
     const handleApply = async (id: string, data: FeatureRequest) => {
         try {
             await axiosInstance.patch(`/admin/request/${id}`, data);
@@ -103,16 +122,6 @@ const FeatureRequestAdmin = () => {
             }
         }
     }
-
-    const handleDelete = (id: string | undefined): void => {
-        if (!id) return;
-
-        if (window.confirm('Are you sure you want to delete this feature request?')) {
-            setRequests((prevRequests: FeatureRequest[]) =>
-                prevRequests.filter((req: FeatureRequest) => req.id !== id)
-            );
-        }
-    };
 
     const openModal = (mode: ModalMode, request: FeatureRequest | null = null): void => {
         setModalMode(mode);
@@ -160,19 +169,19 @@ const FeatureRequestAdmin = () => {
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                                                        {request.category}
+                                                        {captialize(request.category)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getPriorityColor(request.priority)}`}>
-                                                        {request.priority}
+                                                        {captialize(request.priority)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex items-center space-x-2">
                                                         {getStatusIcon(request.status)}
                                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(request.status)}`}>
-                                                            {request.status}
+                                                            {captialize(request.status as string)}
                                                         </span>
                                                     </div>
                                                 </td>
@@ -183,14 +192,17 @@ const FeatureRequestAdmin = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             onClick={() => openModal('view', request)}
-                                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                                                            className="p-1 text-blue-600 transition-colors cursor-pointer"
                                                             title="View Details"
                                                         >
                                                             <Eye className="w-4 h-4" />
                                                         </button>
                                                         <button
-                                                            onClick={() => handleDelete(request.id)}
-                                                            className="p-1 text-gray-400 hover:text-red-600 transition-colors"
+                                                            onClick={() => {
+                                                                setSelectedRequest(request);
+                                                                setIsModalOpen(true);
+                                                            }}
+                                                            className="p-1 text-red-600 transition-colors cursor-pointer"
                                                             title="Delete"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
@@ -216,7 +228,7 @@ const FeatureRequestAdmin = () => {
                     </div>
 
                     {showModal && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                        <div className="fixed inset-0 bg-black/90 bg-opacity-50 flex items-center justify-center p-4 z-50">
                             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                                 <div className="p-6 border-b border-gray-200">
                                     <div className="flex items-center justify-between">
@@ -226,7 +238,7 @@ const FeatureRequestAdmin = () => {
                                         </h2>
                                         <button
                                             onClick={closeModal}
-                                            className="text-gray-400 hover:text-gray-600 transition-colors"
+                                            className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
                                         >
                                             <XCircle className="w-6 h-6" />
                                         </button>
@@ -266,7 +278,7 @@ const FeatureRequestAdmin = () => {
                                                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                                                                 handleStatusChange(selectedRequest.id, e.target.value as StatusType)
                                                             }
-                                                            className={`text-xs font-medium border rounded px-2 py-1 ${getStatusColor(selectedRequest.status)}`}
+                                                            className={`text-xs font-medium border rounded px-2 py-1 ${getStatusColor(selectedRequest.status)} cursor-pointer`}
                                                         >
                                                             <option value="pending">Pending</option>
                                                             <option value="accepted">Accepted</option>
@@ -305,14 +317,23 @@ const FeatureRequestAdmin = () => {
                                 </div>
 
                                 <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
-                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                            onClick={() => handleApply(selectedRequest?.id as string, selectedRequest as FeatureRequest)}>
+                                    <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
+                                        onClick={() => handleApply(selectedRequest?.id as string, selectedRequest as FeatureRequest)}>
                                         {modalMode !== 'edit' ? 'Save Changes' : 'Create Request'}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     )}
+                    <DeleteConfirmationModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                            setSelectedRequest(null);
+                        }}
+                        onConfirm={handleDelete}
+                        itemName={`${selectedRequest?.featureTitle} feature`}
+                    />
                 </div>
             </div>
         </div>
