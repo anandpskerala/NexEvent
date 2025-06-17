@@ -11,6 +11,9 @@ export const config = {
     db: {
         mongoURI: process.env.MONGO_URI || ""
     },
+    services: {
+        user: process.env.USER_SERVICE || ""
+    },
     cloudinary: {
         cloudName: process.env.CLOUD_NAME,
         apiKey: process.env.CLOUD_API_KEY,

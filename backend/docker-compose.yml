@@ -38,6 +38,7 @@ services:
       - ./admin-service/.env
     environment:
       - KAFKA_BROKER=kafka:9092
+      - USER_SERVICE=http://user-service:5001
     depends_on:
       - kafka
     networks:

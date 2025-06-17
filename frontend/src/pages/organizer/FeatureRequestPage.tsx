@@ -5,24 +5,16 @@ import { OrganizerSideBar } from '../../components/partials/OrganizerSidebar';
 import type { RootState } from '../../store';
 import { useSelector } from 'react-redux';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
-
-interface FormData {
-    featureTitle: string;
-    category: string;
-    priority: string;
-    description: string;
-    useCase: string;
-    additionalInfo: string;
-}
-
-interface FormErrors {
-    [key: string]: string;
-}
+import type { FeatureRequestFormData } from '../../interfaces/entities/FormState';
+import type { FeatureFormErrors } from '../../interfaces/entities/ErrorState';
+import { validateForm, validationSchema } from '../../interfaces/validators/featureFormValidator';
+import axiosInstance from '../../utils/axiosInstance';
+import { toast } from 'sonner';
 
 const FeatureRequestPage: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
     const [sidebarCollapsed, setSidebarCollapse] = useState<boolean>(true);
-    const [formData, setFormData] = useState<FormData>({
+    const [formData, setFormData] = useState<FeatureRequestFormData>({
         featureTitle: '',
         category: '',
         priority: 'medium',
@@ -31,44 +23,14 @@ const FeatureRequestPage: React.FC = () => {
         additionalInfo: ''
     });
 
-    const [errors, setErrors] = useState<FormErrors>({});
+    const [errors, setErrors] = useState<FeatureFormErrors>({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     const toggleSidebar = () => {
         setSidebarCollapse(!sidebarCollapsed);
     };
-
-    // Yup validation schema
-    const validationSchema = Yup.object().shape({
-        name: Yup.string()
-            .required('Name is required')
-            .min(2, 'Name must be at least 2 characters')
-            .max(50, 'Name must be less than 50 characters'),
-        email: Yup.string()
-            .required('Email is required')
-            .email('Please enter a valid email address'),
-        featureTitle: Yup.string()
-            .required('Feature title is required')
-            .min(5, 'Feature title must be at least 5 characters')
-            .max(100, 'Feature title must be less than 100 characters'),
-        category: Yup.string()
-            .required('Please select a category'),
-        priority: Yup.string()
-            .required('Priority is required')
-            .oneOf(['low', 'medium', 'high', 'critical'], 'Invalid priority level'),
-        description: Yup.string()
-            .required('Feature description is required')
-            .min(20, 'Please provide a more detailed description (at least 20 characters)')
-            .max(1000, 'Description must be less than 1000 characters'),
-        useCase: Yup.string()
-            .required('Use case is required')
-            .min(10, 'Use case must be at least 10 characters')
-            .max(500, 'Use case must be less than 500 characters'),
-        additionalInfo: Yup.string()
-            .max(500, 'Additional information must be less than 500 characters')
-    });
-
+    
     const categories = [
         { value: 'booking', label: 'Booking Management' },
         { value: 'payment', label: 'Payment & Billing' },
@@ -87,25 +49,6 @@ const FeatureRequestPage: React.FC = () => {
         { value: 'high', label: 'High - Important for business', color: 'text-orange-600' },
         { value: 'critical', label: 'Critical - Blocking current operations', color: 'text-red-600' }
     ];
-
-    const validateForm = async (): Promise<boolean> => {
-        try {
-            await validationSchema.validate(formData, { abortEarly: false });
-            setErrors({});
-            return true;
-        } catch (error) {
-            if (error instanceof Yup.ValidationError) {
-                const newErrors: FormErrors = {};
-                error.inner.forEach((err) => {
-                    if (err.path) {
-                        newErrors[err.path] = err.message;
-                    }
-                });
-                setErrors(newErrors);
-            }
-            return false;
-        }
-    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -126,18 +69,21 @@ const FeatureRequestPage: React.FC = () => {
     };
 
     const handleSubmit = async () => {
-        const isValid = await validateForm();
-
+        const isValid = await validateForm(formData, setErrors);
+        console.log(isValid)
         if (!isValid) {
+            console.log("Not valid")
             return;
         }
 
         setIsSubmitting(true);
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
-            setIsSubmitted(true);
+            const res = await axiosInstance.post(`/admin/request`, formData);
+            if (res.data) {
+                setIsSubmitted(true);
+                toast.success(res.data.message);
+            }
         } catch (error) {
             console.error('Submission error:', error);
         } finally {
@@ -161,10 +107,10 @@ const FeatureRequestPage: React.FC = () => {
     if (isSubmitted) {
         return (
             <div className="flex h-screen bg-gray-50">
-                <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='bookings' />
+                <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='request a feature' />
                 <div className="flex-1 overflow-auto">
                     <div className="p-6">
-                        <AdminNavbar title='Bookings' user={user} toggleSidebar={toggleSidebar} />
+                        <AdminNavbar title='Feature Request' user={user} toggleSidebar={toggleSidebar} />
                         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
                             <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
                                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -190,12 +136,11 @@ const FeatureRequestPage: React.FC = () => {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='bookings' />
+            <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='request a feature' />
             <div className="flex-1 overflow-auto mt-5">
                 <AdminNavbar title='Request for feature' user={user} toggleSidebar={toggleSidebar} />
                 <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
                     <div className="max-w-4xl mx-auto">
-                        {/* Header */}
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                                 <Lightbulb className="w-8 h-8 text-white" />
@@ -210,7 +155,6 @@ const FeatureRequestPage: React.FC = () => {
                         <div className="bg-white rounded-2xl shadow-xl p-8">
                             <div className="space-y-6">
 
-                                {/* Feature Title */}
                                 <div>
                                     <label htmlFor="featureTitle" className="block text-sm font-medium text-gray-700 mb-2">
                                         Feature Title *
@@ -233,7 +177,6 @@ const FeatureRequestPage: React.FC = () => {
                                     )}
                                 </div>
 
-                                {/* Category and Priority */}
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <div>
                                         <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">

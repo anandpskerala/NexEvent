@@ -47,6 +47,7 @@ const EditCategory = lazy(() => import("../pages/admin/EditCategory"));
 const CouponPage = lazy(() => import("../pages/admin/CouponPage"));
 const CreateCoupon = lazy(() => import("../pages/admin/CreateCoupon"));
 const EditCoupon = lazy(() => import("../pages/admin/EditCoupon"));
+const FeatureRequestAdmin = lazy(() => import("../pages/admin/FeatureRequestAdmin"));
 
 const AppRoutes = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -99,6 +100,7 @@ const AppRoutes = () => {
                     <Route path="/admin/coupons" element={<CouponPage />} />
                     <Route path="/admin/create-coupon" element={<CreateCoupon />} />
                     <Route path="/admin/edit-coupon/:id" element={<EditCoupon />} />
+                    <Route path="/admin/feature-request" element={<FeatureRequestAdmin />} />
                 </Route>
             </Routes>
         </Suspense>

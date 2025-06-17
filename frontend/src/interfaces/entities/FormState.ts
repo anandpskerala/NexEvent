@@ -98,3 +98,12 @@ export interface Ticket {
     startDate: Date;
     endDate: Date;
 }
+
+export interface FeatureRequestFormData {
+    featureTitle: string;
+    category: string;
+    priority: string;
+    description: string;
+    useCase: string;
+    additionalInfo: string;
+}

@@ -64,7 +64,6 @@ export class MessageService {
     public async getInteractedChats(userId: string) {
         try {
             const ids = await this.repo.getInteractions(userId);
-            console.log(ids)
             if (ids.length === 0) {
                 return {
                     message: "No Interactions found",

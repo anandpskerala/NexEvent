@@ -20,7 +20,7 @@ export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}
         <AdminSidebarItem icon={<LayersIcon />} text="Category" href="/admin/categories" collapsed={sidebarCollapsed} active={section === "category"} />
         <AdminSidebarItem icon={<BarChartIcon />} text="Analytics" href="/admin/users" collapsed={sidebarCollapsed} active={section === "analytics"} />
         <AdminSidebarItem icon={<FileTextIcon />} text="Reports" href="/admin/users" collapsed={sidebarCollapsed} active={section === "reports"} />
-        <AdminSidebarItem icon={<StarIcon />} text="Feature Requests" href="/admin/users" collapsed={sidebarCollapsed} active={section === "feature requests"} />
+        <AdminSidebarItem icon={<StarIcon />} text="Feature Requests" href="/admin/feature-request" collapsed={sidebarCollapsed} active={section === "feature requests"} />
         <AdminSidebarItem icon={<BellIcon />} text="Notifications" href="/admin/users" collapsed={sidebarCollapsed} active={section === "notifications"} />
         <AdminSidebarItem icon={<HelpCircleIcon />} text="Help & Support" href="/admin/users" collapsed={sidebarCollapsed} active={section === "help & support"} />
       </div>
