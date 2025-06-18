@@ -8,6 +8,9 @@ import axiosInstance from '../../utils/axiosInstance';
 import { formatDate } from '../../utils/stringUtils';
 import Pagination from '../../components/partials/Pagination';
 import { Eye, Trash2 } from 'lucide-react';
+import { AxiosError } from 'axios';
+import { toast } from 'sonner';
+import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
 
 const UserReportsPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -18,6 +21,7 @@ const UserReportsPage = () => {
     const [pages, setPages] = useState(1);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteOpen, setIsDeleteOpen] = useState(false);
     const [selectedReport, setSelectedReport] = useState<Reports | null>(null);
     const [newStatus, setNewStatus] = useState('');
     const [updating, setUpdating] = useState(false);
@@ -65,6 +69,19 @@ const UserReportsPage = () => {
             setUpdating(false);
         }
     };
+
+    const handleDelete = async (id: string) => {
+        try {
+            const res = await axiosInstance.delete(`/admin/request/${id}`);
+            if (res.data) {
+                toast.success(res.data.message);
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message);
+            }
+        }
+    }
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -171,6 +188,10 @@ const UserReportsPage = () => {
                                                             <Eye size={18} />
                                                         </button>
                                                         <button
+                                                        onClick={() => {
+                                                            setSelectedReport(report);
+                                                            setIsDeleteOpen(true);
+                                                        }}
                                                             className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 border border-red-600 transition-colors cursor-pointer"
                                                             title="Delete"
                                                         >
@@ -244,6 +265,15 @@ const UserReportsPage = () => {
                     </div>
                 </div>
             )}
+            <DeleteConfirmationModal 
+                isOpen={isDeleteOpen} 
+                onClose={() => {
+                    setSelectedReport(null);
+                    setIsDeleteOpen(false);
+                }} 
+                onConfirm={() => handleDelete(selectedReport?.id as string) } 
+                itemName={`${selectedReport?.reportedBy} 's report`}            
+            />
         </div>
     )
 }

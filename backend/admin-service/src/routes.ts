@@ -51,7 +51,8 @@ routes.patch("/request/:id", protectedRoute, requestController.updateRequest);
 routes.delete("/request/:id", protectedRoute, requestController.deleteRequest);
 
 routes.post("/report", reportController.createReport);
-routes.put("/report/:id/status", protectedRoute, reportController.updateReport)
+routes.put("/report/:id/status", protectedRoute, reportController.updateReport);
+routes.delete("/report/:id", protectedRoute, reportController.deleteReport);
 routes.get("/reports", reportController.getReports);
 
 export default routes;

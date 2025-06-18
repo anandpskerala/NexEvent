@@ -34,4 +34,10 @@ export class ReportController {
         const result = await this.reportService.updateRequest(id, status);
         res.status(result.status).json({message: result.message});
     }
+
+    public deleteReport = async (req: Request, res: Response): Promise<void> => {
+        const { id } = req.params;
+        const result = await this.reportService.deleteReport(id);
+        res.status(result.status).json({message: result.message});
+    }
 }

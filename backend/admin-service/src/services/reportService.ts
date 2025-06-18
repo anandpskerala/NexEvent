@@ -71,4 +71,20 @@ export class ReportService {
             }
         }
     }
+
+    public async deleteReport(id: string) {
+        try {
+            await this.repo.deleteRequest(id);
+            return {
+                message: "Report deleted",
+                status: StatusCode.OK
+            }
+        } catch (error) {
+            console.log(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
 }

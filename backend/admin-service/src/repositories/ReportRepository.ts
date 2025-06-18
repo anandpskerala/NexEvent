@@ -42,4 +42,8 @@ export class ReportRepository implements IReportRepository {
         const doc = await this.model.findOne({userId, reportedBy});
         return !!doc;
     }
+
+    async deleteRequest(id: string): Promise<void> {
+        await this.model.deleteOne({_id: id});
+    }
 }
