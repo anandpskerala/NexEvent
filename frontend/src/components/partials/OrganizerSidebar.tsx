@@ -1,6 +1,6 @@
 import React from 'react'
 import { SidebarItem } from '../../utils/SidebarUtils'
-import { BarChart2, Calendar, GitPullRequest, Home, MessageSquare, Ticket, Users } from 'lucide-react'
+import { BarChart2, Calendar, GitPullRequest, Home, MessageSquare, Ticket} from 'lucide-react'
 
 export const OrganizerSideBar: React.FC<{sidebarCollapsed: boolean, section: string}> = ({sidebarCollapsed, section}) => {
   return (
@@ -18,7 +18,6 @@ export const OrganizerSideBar: React.FC<{sidebarCollapsed: boolean, section: str
         <SidebarItem icon={<Calendar size={16}  />} text="Events" href="/organizer/events" collapsed={sidebarCollapsed} active={section === "events"} />
         <SidebarItem icon={<Ticket size={16} />} text="Bookings" href="/organizer/bookings" collapsed={sidebarCollapsed} active={section === "bookings"} />
         <SidebarItem icon={<MessageSquare size={16}  />} text="Messages" href="/messages" collapsed={sidebarCollapsed} active={section === "messages"} />
-        <SidebarItem icon={<Users size={16}  />} text="Attendees" href="/organizer/attendees" collapsed={sidebarCollapsed} active={section === "attendees"} />
         <SidebarItem icon={<GitPullRequest size={16}  />} text="Request a feature" href="/organizer/request-a-feature" collapsed={sidebarCollapsed} active={section === "request a feature"} />
         <SidebarItem icon={<BarChart2 size={16}  />} text="Analytics" href="/organizer/analytics" collapsed={sidebarCollapsed} active={section === "analytics"} />
       </div>

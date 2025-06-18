@@ -1,11 +1,3 @@
-export type GroupBy = "today" | "week" | "month" | "year";
-
-export interface RevenueAnalyticsResultRaw {
-  _id: string;
-  totalRevenue: number;
-  totalBookings: number;
-}
-
 export interface RevenueAnalyticsGraphPoint {
   date: string;
   revenue: number;

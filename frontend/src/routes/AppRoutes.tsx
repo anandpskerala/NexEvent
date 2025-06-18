@@ -1,7 +1,6 @@
-import { useSelector } from "react-redux";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Suspense, lazy } from "react";
-import type { RootState } from "../store";
+import { useAppSelector, type RootState } from "../store";
 import { AuthRedirect } from "./AuthRedirect";
 import { ProtectedRoute } from "./ProtectedRoutes";
 import { AdminRoutes } from "./AdminRoutes";
@@ -37,6 +36,8 @@ const EditEvent = lazy(() => import("../pages/organizer/EditEvent"));
 const CreateTicket = lazy(() => import("../pages/organizer/CreateTicket"));
 const EditTicket = lazy(() => import("../pages/organizer/EditTicket"));
 const FeatureRequestPage = lazy(() => import("../pages/organizer/FeatureRequestPage"));
+const OrganizerDashboard = lazy(() => import("../pages/organizer/OrganizerDashboard"));
+const OrganizerAnalytics = lazy(() => import("../pages/organizer/OrganizerAnalytics"));
 
 const UserManagement = lazy(() => import("../pages/admin/UserManagement"));
 const OrganizerRequests = lazy(() => import("../pages/admin/OrganizerRequests"));
@@ -49,9 +50,11 @@ const CreateCoupon = lazy(() => import("../pages/admin/CreateCoupon"));
 const EditCoupon = lazy(() => import("../pages/admin/EditCoupon"));
 const FeatureRequestAdmin = lazy(() => import("../pages/admin/FeatureRequestAdmin"));
 const UserReportsPage = lazy(() => import("../pages/admin/UserReportsPage"));
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const AdminAnalytics = lazy(() => import("../pages/admin/AdminAnalytics"));
 
 const AppRoutes = () => {
-    const { user } = useSelector((state: RootState) => state.auth);
+    const { user } = useAppSelector((state: RootState) => state.auth);
 
     return (
         <Suspense fallback={<LazyLoadingScreen />}>
@@ -89,6 +92,8 @@ const AppRoutes = () => {
                     <Route path="/organizer/edit-ticket/:id" element={<EditTicket />} />
                     <Route path="/organizer/bookings" element={<OrganizerBooking />} />
                     <Route path="/organizer/request-a-feature" element={<FeatureRequestPage />} />
+                    <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+                    <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
                 </Route>
 
                 <Route element={<AdminRoutes user={user} />}>
@@ -103,6 +108,8 @@ const AppRoutes = () => {
                     <Route path="/admin/edit-coupon/:id" element={<EditCoupon />} />
                     <Route path="/admin/feature-request" element={<FeatureRequestAdmin />} />
                     <Route path="/admin/user-reports" element={<UserReportsPage />} />
+                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                    <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 </Route>
             </Routes>
         </Suspense>

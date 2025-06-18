@@ -10,6 +10,8 @@ import { PaymentRepository } from "./repositories/PaymentRepository";
 import { WalletRepository } from "./repositories/WalletRepository";
 import { PaymentService } from "./services/paymentService";
 import { PaymentController } from "./controllers/paymentController";
+import { AnalyticService } from "./services/analyticService";
+import { AnalyticsController } from "./controllers/analyticsController";
 
 
 const routes = Router();
@@ -21,10 +23,12 @@ const walletRepo = new WalletRepository();
 const eventService = new EventService(eventRepo);
 const bookingService = new BookingService(bookingRepo, eventRepo, paymentRepo, walletRepo);
 const paymentService = new PaymentService(paymentRepo, walletRepo, bookingRepo, eventRepo);
+const analyticService = new AnalyticService(bookingRepo);
 
 const eventController =  new EventController(eventService);
 const bookingController = new BookingController(bookingService)
 const paymentController = new PaymentController(paymentService);
+const analyticsController = new AnalyticsController(analyticService);
 
 routes.get("/all", eventController.getAllEvents);
 routes.post("/event", protectedRoute, eventController.createEvent);
@@ -56,5 +60,8 @@ routes.post('/payment/stripe/order', paymentController.creatOrderStripe);
 routes.post('/payment/stripe/verify', paymentController.verifyStripeOrder);
 routes.post('/payment/wallet/pay', paymentController.walletPay);
 routes.get('/payment/wallet/:id', paymentController.walletDetails);
+
+routes.get("/analytics/revenue", analyticsController.getRevenueReports);
+routes.get("/analytics/topselling", analyticsController.getTopSellingReports);
 
 export default routes;

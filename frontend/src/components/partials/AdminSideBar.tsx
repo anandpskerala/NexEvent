@@ -1,5 +1,5 @@
 import React from 'react'
-import { AdminSidebarItem, BarChartIcon, BellIcon, FileTextIcon, GridIcon, HelpCircleIcon, LayersIcon, ListIcon, StarIcon, TagIcon, UsersIcon } from "../../utils/SidebarUtils"; 
+import { AdminSidebarItem, BarChartIcon, BellIcon, FileTextIcon, GridIcon, LayersIcon, ListIcon, StarIcon, TagIcon, UsersIcon } from "../../utils/SidebarUtils"; 
 
 export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}> = ({sidebarCollapsed, section}) => {
   return (
@@ -18,11 +18,10 @@ export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}
         <AdminSidebarItem icon={<ListIcon />} text="Organizer Requests" href="/admin/organizer-requests" collapsed={sidebarCollapsed} active={section === "organizer requests"} />
         <AdminSidebarItem icon={<TagIcon />} text="Coupons" href="/admin/coupons" collapsed={sidebarCollapsed} active={section === "coupons"} />
         <AdminSidebarItem icon={<LayersIcon />} text="Category" href="/admin/categories" collapsed={sidebarCollapsed} active={section === "category"} />
-        <AdminSidebarItem icon={<BarChartIcon />} text="Analytics" href="/admin/users" collapsed={sidebarCollapsed} active={section === "analytics"} />
+        <AdminSidebarItem icon={<BarChartIcon />} text="Analytics" href="/admin/analytics" collapsed={sidebarCollapsed} active={section === "analytics"} />
         <AdminSidebarItem icon={<FileTextIcon />} text="Reports" href="/admin/user-reports" collapsed={sidebarCollapsed} active={section === "reports"} />
         <AdminSidebarItem icon={<StarIcon />} text="Feature Requests" href="/admin/feature-request" collapsed={sidebarCollapsed} active={section === "feature requests"} />
         <AdminSidebarItem icon={<BellIcon />} text="Notifications" href="/admin/users" collapsed={sidebarCollapsed} active={section === "notifications"} />
-        <AdminSidebarItem icon={<HelpCircleIcon />} text="Help & Support" href="/admin/users" collapsed={sidebarCollapsed} active={section === "help & support"} />
       </div>
     </div>
   )
