@@ -57,7 +57,7 @@ export class RequestService {
             });
             return {
                 message: "Request fetched",
-                status: StatusCode.CREATED,
+                status: StatusCode.OK,
                 total: result.total,
                 page,
                 pages: Math.ceil(result.total / limit),

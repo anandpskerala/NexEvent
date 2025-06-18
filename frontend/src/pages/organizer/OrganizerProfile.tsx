@@ -9,12 +9,14 @@ import { useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import type { User } from '../../interfaces/entities/user';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
+import { UserReportModal } from '../../components/modals/UserReportModal';
 
 const OrganizerProfile = () => {
     const { id } = useParams();
     const { user } = useSelector((state: RootState) => state.auth);
     const [userData, setUserData] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -91,16 +93,25 @@ const OrganizerProfile = () => {
                         </div>
 
                         <div className="pt-20">
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-3xl font-bold text-gray-900">
-                                    {userData?.firstName} {userData?.lastName}
-                                </h1>
-                                {userData?.isVerified && (
-                                    <CheckCircle className="w-6 h-6 text-blue-500" aria-label="Verified Account" />
-                                )}
-                                {userData?.isBlocked && (
-                                    <XCircle className="w-6 h-6 text-red-500" aria-label="Account Blocked" />
-                                )}
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3 mb-2">
+                                    <h1 className="text-3xl font-bold text-gray-900">
+                                        {userData?.firstName} {userData?.lastName}
+                                    </h1>
+                                    {userData?.isVerified && (
+                                        <CheckCircle className="w-6 h-6 text-blue-500" aria-label="Verified Account" />
+                                    )}
+                                    {userData?.isBlocked && (
+                                        <XCircle className="w-6 h-6 text-red-500" aria-label="Account Blocked" />
+                                    )}
+                                </div>
+
+                                <button
+                                onClick={() => setIsModalOpen(true)}
+                                    className="px-2 py-1 bg-red-500 text-white rounded-md cursor-pointer"
+                                >
+                                    Report
+                                </button>
                             </div>
 
                             <p className="text-gray-600 text-lg mb-4">{typeof organizer !== "undefined" ? 'Event Organizer' : 'User'}</p>
@@ -140,11 +151,6 @@ const OrganizerProfile = () => {
                                         <p className="text-lg font-semibold text-gray-900">{organizer.organization}</p>
                                     </div>
 
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-1">Contact Name</label>
-                                        <p className="text-gray-900">{organizer.name}</p>
-                                    </div>
-
                                     {organizer.website && (
                                         <div>
                                             <label className="block text-sm font-medium text-gray-500 mb-1">Website</label>
@@ -173,13 +179,8 @@ const OrganizerProfile = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-1">Applied On</label>
+                                        <label className="block text-sm font-medium text-gray-500 mb-1">Joined On</label>
                                         <p className="text-gray-900">{formatDate(organizer.createdAt)}</p>
-                                    </div>
-
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-500 mb-1">Last Updated</label>
-                                        <p className="text-gray-900">{formatDate(organizer.updatedAt)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -214,6 +215,14 @@ const OrganizerProfile = () => {
                         </div>
                     </div>
                 </div>
+                <UserReportModal
+                        isOpen={isModalOpen}
+                        onClose={() => {
+                            setIsModalOpen(false);
+                        }}
+                        userId={`${id}`}
+                        reporter={user?.id as string}
+                    />
             </div>
             <Footer />
         </div>

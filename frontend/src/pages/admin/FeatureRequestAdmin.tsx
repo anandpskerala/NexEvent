@@ -192,17 +192,17 @@ const FeatureRequestAdmin = () => {
                                                     <div className="flex items-center space-x-2">
                                                         <button
                                                             onClick={() => openModal('view', request)}
-                                                            className="p-1 text-blue-600 transition-colors cursor-pointer"
+                                                            className="p-1 bg-blue-100 text-blue-600 hover:bg-blue-200 border border-blue-600 rounded transition-colors cursor-pointer"
                                                             title="View Details"
                                                         >
-                                                            <Eye className="w-4 h-4" />
+                                                            <Eye size={18} />
                                                         </button>
                                                         <button
                                                             onClick={() => {
                                                                 setSelectedRequest(request);
                                                                 setIsModalOpen(true);
                                                             }}
-                                                            className="p-1 text-red-600 transition-colors cursor-pointer"
+                                                            className="p-1 rounded bg-red-100 text-red-600 hover:bg-red-200 border border-red-600 transition-colors cursor-pointer"
                                                             title="Delete"
                                                         >
                                                             <Trash2 className="w-4 h-4" />

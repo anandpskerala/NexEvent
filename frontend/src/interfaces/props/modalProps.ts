@@ -68,3 +68,10 @@ export interface UseNearestCityResult {
   loading: boolean;
   error: string | null;
 }
+
+export interface UserReportProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  reporter: string;
+}

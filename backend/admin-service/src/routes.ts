@@ -10,6 +10,9 @@ import { organizerRoute } from "./middlewares/organizerRoute";
 import { RequestController } from "./controllers/requestController";
 import { RequestService } from "./services/requestService";
 import { RequestRepository } from "./repositories/RequestRepository";
+import { ReportRepository } from "./repositories/ReportRepository";
+import { ReportService } from "./services/reportService";
+import { ReportController } from "./controllers/reportController";
 
 
 const routes = Router();
@@ -17,14 +20,17 @@ const routes = Router();
 const categoryRepo = new CategoryRepository();
 const couponRepo = new CouponRepository();
 const requestRepo = new RequestRepository();
+const reportRepo = new ReportRepository();
 
 const categoryService = new CategoryService(categoryRepo);
 const couponService = new CouponService(couponRepo);
 const requestService = new RequestService(requestRepo);
+const reportService = new ReportService(reportRepo);
 
 const categoryController = new CategoryController(categoryService);
 const couponController = new CouponController(couponService);
 const requestController = new RequestController(requestService);
+const reportController = new ReportController(reportService);
 
 routes.post("/category", protectedRoute, categoryController.createCategory);
 routes.get("/categories", categoryController.getCategories);
@@ -43,5 +49,9 @@ routes.get("/request/:id", requestController.getRequest);
 routes.get("/requests", requestController.getRequests);
 routes.patch("/request/:id", protectedRoute, requestController.updateRequest);
 routes.delete("/request/:id", protectedRoute, requestController.deleteRequest);
+
+routes.post("/report", reportController.createReport);
+routes.put("/report/:id/status", protectedRoute, reportController.updateReport)
+routes.get("/reports", reportController.getReports);
 
 export default routes;

@@ -8,8 +8,8 @@ import { AxiosError } from 'axios';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { formatDate } from '../../utils/stringUtils';
+import { Plus, Trash2, ChevronLeft, ChevronRight, Search, Edit } from 'lucide-react';
+import { captialize, formatDate } from '../../utils/stringUtils';
 import { useDebounce } from '../../hooks/useDebounce';
 
 const CouponPage = () => {
@@ -211,21 +211,21 @@ const CouponPage = () => {
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(coupon.status)}`}>
-                                                        {coupon.status}
+                                                        {captialize(coupon.status)}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                     <div className="flex space-x-2">
                                                         <Link
                                                             to={`/admin/edit-coupon/${coupon.couponCode}`}
-                                                            className="text-green-600 hover:text-green-900 p-1 rounded"
+                                                            className="bg-blue-100 text-blue-600 hover:bg-blue-200 p-1 rounded cursor-pointer"
                                                             title="Edit Coupon"
                                                         >
-                                                            <Edit2 className="w-4 h-4" />
+                                                            <Edit size={18} />
                                                         </Link>
                                                         <button
                                                             onClick={() => confirmDeleteCoupon(coupon.id)}
-                                                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                                                            className="bg-red-100 text-red-600 hover:bg-red-200 p-1 rounded cursor-pointer"
                                                             title="Delete Coupon"
                                                         >
                                                             <Trash2 className="w-4 h-4" />
@@ -239,7 +239,6 @@ const CouponPage = () => {
                             </table>
                         </div>
 
-                        {/* Pagination */}
                         {pages > 1 && (
                             <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
                                 <div className="flex-1 flex justify-between sm:hidden">
