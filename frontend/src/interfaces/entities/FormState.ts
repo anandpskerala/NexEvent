@@ -71,6 +71,7 @@ export interface AllEventData {
     tags: string[];
     eventFormat: string;
     location?: Location;
+    status?: string;
     startTime?: string;
     endTime?: string;
     startDate?: string;

@@ -37,6 +37,17 @@ export class BookingService {
                 }
             }
 
+            if (!data.paymentMethod) {
+                data.paymentMethod = "wallet";
+                data.status = "paid";
+
+                const event = await this.eventRepo.findByID(typeof data.eventId == "string" ? String(data.eventId): String(data.eventId.id));
+                if (event?.tickets) {
+                    for (const bookedTicket of data.tickets) {
+                        await this.eventRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
+                    }
+                }
+            }
             const booking = await this.repo.create(data);
             return {
                 message: "Booking initiated",
@@ -94,7 +105,9 @@ export class BookingService {
         try {
             await this.repo.cancelBooking(bookingId);
             const doc = await this.paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
-            await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
+            if (!doc?.amount &&  Number(doc?.amount) > 0) {
+                await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
+            }
             return {
                 message: "Tickets cancelled",
                 status: StatusCode.OK
@@ -111,10 +124,11 @@ export class BookingService {
     public async cancelAllBookings(eventId: string) {
         try {
             const bookings = await this.repo.findBookingsByEventID(eventId);
+            await this.eventRepo.updateEvent(eventId, {status: "cancelled"})
             if (!bookings || bookings.length === 0) {
                 return {
-                    message: "No bookings found for this event",
-                    status: StatusCode.NOT_FOUND
+                    message: "All bookings for the event have been cancelled",
+                    status: StatusCode.OK
                 };
             }
 
@@ -123,7 +137,7 @@ export class BookingService {
                 await this.repo.cancelBooking(bookingId as string);
                 const paymentDoc = await this.paymentRepo.changeStatus(bookingId as string, PaymentStatus.REFUNDED);
 
-                if (paymentDoc) {
+                if (paymentDoc && paymentDoc.amount > 0) {
                     await this.walletRepo.credit(paymentDoc.userId, paymentDoc.amount);
                 }
             }
@@ -194,7 +208,7 @@ export class BookingService {
             doc.moveDown();
             doc.fontSize(16).text(`Event: ${booking.eventId.title}`);
             doc.text(`Date: ${new Date(booking.eventId.startDate as string).toDateString()}`);
-            doc.text(`Location: ${booking.eventId.location.place}`);
+            doc.text(`Location: ${booking.eventId?.location?.place || "Virtual"}`);
             doc.text(`Total Amount: ₹${booking.totalAmount}`);
             doc.text(`Order ID: ${booking.orderId}`);
             doc.moveDown().text(`Thank you for your booking!`);

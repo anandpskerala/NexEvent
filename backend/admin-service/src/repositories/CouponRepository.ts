@@ -5,31 +5,33 @@ import couponModel from "../models/couponModel";
 
 export class CouponRepository implements ICouponRepository {
     private model: Model<ICoupon>;
-    
+
     constructor() {
         this.model = couponModel;
     }
 
     async findByName(name: string): Promise<ICoupon | undefined> {
-        const doc = await this.model.findOne({couponName: { $regex: name, $options: "i" }});
+        const doc = await this.model.findOne({ couponName: { $regex: name, $options: "i" } });
         return doc?.toJSON();
     }
 
     async findByCode(couponCode: string): Promise<ICoupon | undefined> {
-        const doc = await this.model.findOne({couponCode: { $regex: couponCode, $options: "i" }});
+        const doc = await this.model.findOne({ couponCode: { $regex: couponCode, $options: "i" } });
         return doc?.toJSON();
     }
 
     async findByID(id: string): Promise<ICoupon | undefined> {
-        const doc = await this.model.findOne({_id: id});
+        const doc = await this.model.findOne({ _id: id });
         return doc?.toJSON();
     }
 
     async findAll(name?: string, page?: number, limit?: number): Promise<{ items: ICoupon[]; total: number; }> {
-        const query = this.model.find({ $or: [
-            {couponName: { $regex: name, $options: "i" }},
-            {couponCode: { $regex: name, $options: "i" }}
-        ]});
+        const query = this.model.find({
+            $or: [
+                { couponName: { $regex: name, $options: "i" } },
+                { couponCode: { $regex: name, $options: "i" } }
+            ]
+        });
 
         if (page && limit) {
             const skip = (page - 1) * limit;
@@ -38,7 +40,7 @@ export class CouponRepository implements ICouponRepository {
 
         const [docs, total] = await Promise.all([
             query.sort({ createdAt: -1 }),
-            this.model.countDocuments({couponName: { $regex: name, $options: "i" }})
+            this.model.countDocuments({ couponName: { $regex: name, $options: "i" } })
         ]);
 
         const items = docs.map(doc => doc.toJSON());
@@ -52,10 +54,21 @@ export class CouponRepository implements ICouponRepository {
     }
 
     async update(id: string, item: Partial<ICoupon>): Promise<void> {
-        await this.model.updateOne({_id: id}, {$set: item});
+        await this.model.updateOne({ _id: id }, { $set: item });
     }
 
     async delete(id: string): Promise<void> {
-        await this.model.deleteOne({_id: id});
+        await this.model.deleteOne({ _id: id });
+    }
+
+    async updateExpired(): Promise<void> {
+        const now = new Date();
+
+        const result = await this.model.updateMany(
+            { endDate: { $lt: now }, status: { $ne: "Expired" } },
+            { $set: { status: "Expired" } }
+        );
+
+        console.log(`[CRON] Updated ${result.modifiedCount} expired coupons.`);
     }
 }

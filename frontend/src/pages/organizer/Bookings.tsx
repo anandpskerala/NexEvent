@@ -168,7 +168,7 @@ const Bookings = () => {
                                                                 </div>
                                                                 <div className="text-sm text-gray-500 flex items-center gap-1">
                                                                     <MapPin className="w-3 h-3" />
-                                                                    {booking.eventId.location.place}
+                                                                    {booking.eventId?.location?.place || "Virtual"}
                                                                 </div>
                                                             </div>
                                                         </td>

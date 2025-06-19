@@ -83,8 +83,8 @@ export class EventRepository implements IEventRepository {
         return count;
     }
 
-    async updateEvent(event: IEvent): Promise<void> {
-        await this.model.updateOne({ _id: event.id }, { $set: { ...event } });
+    async updateEvent(id: string, event: Partial<IEvent>): Promise<void> {
+        await this.model.updateOne({ _id: id }, { $set: { ...event } });
     }
 
     async checkStock(eventId: string, ticketId: string, stock: number): Promise<boolean> {
@@ -135,5 +135,21 @@ export class EventRepository implements IEventRepository {
             events: docs,
             total
         }
+    }
+
+    async updateEnded(): Promise<void> {
+        const now = new Date();
+
+        const result = await eventModel.updateMany(
+            {
+                endDate: { $lt: now },
+                status: { $nin: ["ended", "cancelled"] }
+            },
+            {
+                $set: { status: "ended" }
+            }
+        );
+
+        console.log(`[${new Date().toISOString()}] Events marked as 'ended': ${result.modifiedCount}`);
     }
 }

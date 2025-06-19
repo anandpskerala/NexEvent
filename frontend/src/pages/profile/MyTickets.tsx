@@ -285,7 +285,7 @@ const MyTickets = () => {
                                                                 </div>
                                                                 <div className="flex items-center gap-1">
                                                                     <MapPin className="w-4 h-4" />
-                                                                    <span>{event.eventId?.location?.place}</span>
+                                                                    <span>{event.eventId?.location?.place || 'Virtual'}</span>
                                                                 </div>
                                                             </div>
 
@@ -316,7 +316,7 @@ const MyTickets = () => {
                                                                 <Link to={`/messages?user=${event.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2 px-2">
                                                                     Contact Organizer
                                                                 </Link>
-                                                                {event.status === "paid" && (
+                                                                {(event.status === "paid" && event.totalAmount > 0) && (
                                                                     <button
                                                                         onClick={() => {
                                                                             setConfirmModal(true);

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { Booking } from '../../interfaces/entities/Booking';
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ const TicketsPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
     const [loading, setLoading] = useState<boolean>(true);
     const [booking, setBooking] = useState<Booking | null>();
+    const navigate = useNavigate();
 
     type Status = 'paid' | 'pending' | 'failed' | 'cancelled';
 
@@ -40,8 +41,7 @@ const TicketsPage = () => {
     };
 
     const handleBackToTickets = () => {
-        console.log('Navigate back to tickets list');
-        // Navigate back to tickets listing page
+        navigate(-1);
     };
 
     const handleDownloadAllTickets = async (bookingId: string) => {
@@ -131,7 +131,7 @@ const TicketsPage = () => {
                                         </div>
                                         <div className="flex items-center gap-1">
                                             <MapPin className="w-4 h-4" />
-                                            <span>{booking?.eventId.location.place}</span>
+                                            <span>{booking?.eventId?.location?.place || "Virtual"}</span>
                                         </div>
                                     </div>
                                     {getStatusBadge(booking?.status as Status)}
@@ -181,7 +181,6 @@ const TicketsPage = () => {
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                {/* Order Details */}
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Order Number</span>
@@ -220,14 +219,23 @@ const TicketsPage = () => {
 
                             {booking?.status === "paid" && (
                                 <div className="mt-8 flex justify-end">
-                                <button
-                                    onClick={() => handleDownloadAllTickets(id as string)}
-                                    className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200"
-                                >
-                                    <Download className="w-4 h-4 mr-2" />
-                                    Download Ticket
-                                </button>
-                            </div>
+                                    {booking.eventId.eventType !== "virtual" ? (
+                                        <button
+                                        onClick={() => handleDownloadAllTickets(id as string)}
+                                        className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                                    >
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Download Ticket
+                                    </button>
+                                    ): (
+                                        <Link 
+                                            to={`/meeting/${booking.eventId.id}`}
+                                            className="inline-flex items-center px-6 py-3 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors duration-200 cursor-pointer"
+                                        >
+                                            Get Virtual Link
+                                        </Link>
+                                    )}
+                                </div>
                             )}
                         </div>
                     </div>

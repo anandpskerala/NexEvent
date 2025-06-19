@@ -261,7 +261,7 @@ const ConfirmationPage = () => {
                                                 </div>
                                                 <div className="flex items-center text-gray-600">
                                                     <MapPin className="w-4 h-4 mr-2" />
-                                                    {booking.eventId.location.place}
+                                                    {booking.eventId?.location?.place || 'Virtual'}
                                                 </div>
                                             </div>
                                         </div>
@@ -351,12 +351,20 @@ const ConfirmationPage = () => {
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-3">
+                                        {booking.eventId.eventType !== "virtual" ? (
                                         <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
                                             onClick={() => downloadTicket(id as string)}
                                         >
                                             <Download className="w-4 h-4" />
                                             Download Ticket
-                                        </button>
+                                        </button>) : (
+                                            <Link 
+                                            to={`/meeting/${booking.eventId.id}`}
+                                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                        >
+                                            Get Virtual Link
+                                        </Link>
+                                        )}
                                         <Link to="/account/tickets" className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
                                             <Eye className="w-4 h-4" />
                                             View My Tickets

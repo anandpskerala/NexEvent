@@ -38,12 +38,12 @@ const EventDetailPage = () => {
     const isEventNotActive = useMemo(() => {
         const now = new Date();
         const eventDate = new Date(event?.startDate as string);
-        if (event?.availableTickets === 0 || now > eventDate) {
+        if (event?.availableTickets === 0 || now > eventDate || event?.status === "cancelled" || event?.status === "ended") {
             return true;
         }
-
         return false;
     }, [event]);
+
 
     const bookTicket = (id: string) => {
         navigate(`/event/bookings/${id}`);

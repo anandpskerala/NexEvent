@@ -8,4 +8,5 @@ export interface ICouponRepository {
     create(item: Partial<ICoupon>): Promise<ICoupon>;
     update(id: string, item: Partial<ICoupon>): Promise<void>;
     delete(id: string): Promise<void>;
+    updateExpired(): Promise<void>;
 }

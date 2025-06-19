@@ -157,15 +157,27 @@ export class EventService {
 
     public async getEvents(userId: string, search: string, page: number, limit: number): Promise<EventPaginationType> {
         try {
-            const query: FilterQuery<IEvent> = {
+            const baseConditions: FilterQuery<IEvent> = {
                 userId: new Types.ObjectId(userId),
+                status: { $nin: ["cancelled", "ended"] }
             };
 
+            let query: FilterQuery<IEvent>;
+
             if (search) {
-                query.$or = [
-                    { title: { $regex: search, $options: 'i' } },
-                    { 'location.place': { $regex: search, $options: 'i' } }
-                ];
+                query = {
+                    $and: [
+                        baseConditions,
+                        {
+                            $or: [
+                                { title: { $regex: search, $options: 'i' } },
+                                { 'location.place': { $regex: search, $options: 'i' } }
+                            ]
+                        }
+                    ]
+                };
+            } else {
+                query = baseConditions;
             }
 
             const skip = (page - 1) * limit;
@@ -207,7 +219,7 @@ export class EventService {
                 event.endDate = event.startDate;
             }
 
-            await this.eventRepo.updateEvent(event);
+            await this.eventRepo.updateEvent(event.id as string, event);
             return {
                 message: "Event updated",
                 status: StatusCode.OK,
