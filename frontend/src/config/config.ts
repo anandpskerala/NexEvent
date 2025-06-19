@@ -21,6 +21,9 @@ const config = {
     payment: {
         RPayKey: import.meta.env.VITE_RAZORPAY_KEY_ID,
         StripeKey: import.meta.env.VITE_STRIPE_KEY,
+    },
+    liveKit: {
+        url: import.meta.env.VITE_LIVEKIT_URL,
     }
 }
 

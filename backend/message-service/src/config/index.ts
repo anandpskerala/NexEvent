@@ -20,5 +20,9 @@ export const config = {
     service: {
         kafka: process.env.KAFKA_BROKER || 'host.docker.internal:9092',
         user: process.env.USER_SERVICE || ""
+    },
+    liveKit: {
+        apiKey: process.env.LIVEKIT_API_KEY,
+        apiSecret: process.env.LIVEKIT_API_SECRET
     }
 }
