@@ -1,4 +1,4 @@
-import type { Organization } from "./organizer";
+import type { Organization } from "./Organizer";
 
 export interface User {
     id: string;

@@ -9,7 +9,7 @@ import { AxiosError } from 'axios';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import type { EventFormProps } from '../../interfaces/props/formProps';
 import type { EventData } from '../../interfaces/entities/FormState';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 import type { EventErrorState } from '../../interfaces/entities/ErrorState';
 import config from '../../config/config';
 import { validateEvent } from '../../interfaces/validators/eventValidator';
@@ -185,7 +185,7 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
         const fetchCategories = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/admin/categories`);
+                const res = await axiosInstance.get(`/admin/category`);
                 setCategories(res.data.categories);
             } catch (error) {
                 console.error(error);

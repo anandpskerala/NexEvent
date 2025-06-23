@@ -10,7 +10,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 import { useDebounce } from '../../hooks/useDebounce';
 
 
@@ -23,7 +23,6 @@ const CategoryPage = () => {
     const [search, setSearch] = useState("");
     const debouncedSearch = useDebounce(search, 500);
     const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
-    console.log(page, pages)
 
     const toggleSidebar = () => {
         setSidebarCollapse(!sidebarCollapsed);
@@ -54,21 +53,22 @@ const CategoryPage = () => {
     };
 
     useEffect(() => {
-        try {
-            const fetchRequest = async (pageNumber = 1) => {
-                const res = await axiosInstance.get(`/admin/categories?search=${debouncedSearch}&page=${pageNumber}&limit=10`)
+        const fetchRequest = async (pageNumber = 1) => {
+            try {
+                const res = await axiosInstance.get(`/admin/category?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
                 if (res.data) {
                     setCategories(res.data.categories);
                     setPage(Number(res.data.page));
                     setPages(Number(res.data.pages));
                 }
-                console.log(res)
+            } catch (error) {
+                console.error("Failed to fetch categories", error);
             }
-            fetchRequest();
-        } catch (error) {
-            console.error(error)
-        }
-    }, [categoryToDelete, debouncedSearch])
+        };
+
+        fetchRequest();
+    }, [categoryToDelete, debouncedSearch]);
+
 
     return (
         <div className="flex h-screen bg-gray-50">

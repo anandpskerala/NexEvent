@@ -7,7 +7,7 @@ import { AlertTriangle } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
-import type { Organization } from '../../interfaces/entities/organizer';
+import type { Organization } from '../../interfaces/entities/Organizer';
 import { RegistrationCard } from '../../components/cards/RegistrationCard';
 
 const OrganizerRequests = () => {

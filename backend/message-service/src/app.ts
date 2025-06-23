@@ -1,5 +1,5 @@
 import express, { Application } from "express";
-import routes from "./routes";
+import router from "./routes";
 import connectDB from "./config/db";
 import { connectRedis } from "./config/redis";
 
@@ -18,7 +18,7 @@ export class App {
     }
 
     private setupRoutes() {
-        this.app.use("/", routes);
+        this.app.use("/", router);
     }
 
     public async listen(port: number) {

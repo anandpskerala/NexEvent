@@ -8,6 +8,7 @@ import kafka from "../kafka";
 import { TOPICS } from "../kafka/topics";
 import redisClient from "../config/redis";
 import { IUser } from "../shared/types/IUser";
+import { INotification } from "../shared/types/INotfication";
 
 export class MessageService {
     private producer: KafkaProducer;
@@ -21,6 +22,12 @@ export class MessageService {
             const unreadKey = `unread:${data.receiver}:${data.sender}`;
             await redisClient.incr(unreadKey);
             await redisClient.expire(unreadKey, 24 * 60 * 60);
+            const testNoti: INotification = {
+                userId: message.receiver,
+                title: "New Message",
+                message: "New message from a user"
+            }
+            redisClient.publish(`notifications:${testNoti.userId}`, JSON.stringify(testNoti));
             this.producer.sendData<Message>(TOPICS.NEW_MESSAGE, message);
             return {
                 message: "Message sent",

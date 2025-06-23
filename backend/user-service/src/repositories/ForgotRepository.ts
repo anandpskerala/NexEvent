@@ -20,6 +20,11 @@ export class ForgotRepository implements IForgotRepository {
         return doc?.toJSON()
     }
 
+    async findByRequestId(id: string):  Promise<IForgotRequest | undefined> {
+        const doc = await this.model.findOne({requestId: id});
+        return doc?.toJSON();
+    }
+
     async create(item: Partial<IForgotRequest>): Promise<IForgotRequest> {
         const doc = await this.model.create(item);
         return doc.toJSON();

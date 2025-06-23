@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { User } from '../../interfaces/entities/user';
+import type { User } from '../../interfaces/entities/User';
 import axiosInstance from '../../utils/axiosInstance';
 import type { Message } from '../../interfaces/entities/Message';
 import { formatDateTime } from '../../utils/stringUtils';

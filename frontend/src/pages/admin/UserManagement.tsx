@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { AxiosError } from "axios";
 import { AdminNavbar } from "../../components/partials/AdminNavbar";
 import { FormSkeleton } from "../../components/skeletons/FormSkeleton";
-import type { User } from "../../interfaces/entities/user";
+import type { User } from "../../interfaces/entities/User";
 import { validateUser } from "../../interfaces/validators/usermanagevalidator";
 import { useDebounce } from "../../hooks/useDebounce";
 

@@ -1,5 +1,5 @@
 import { type ActionReducerMapBuilder, createSlice } from "@reduxjs/toolkit";
-import type { User } from "../../interfaces/entities/user";
+import type { User } from "../../interfaces/entities/User";
 import { loginUser } from "../actions/auth/loginUser";
 import { toast } from "sonner";
 import { googleAuth } from "../actions/auth/googleAuth";

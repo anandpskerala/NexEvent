@@ -1,5 +1,5 @@
 import type { AllEventData } from "./FormState";
-import type { User } from "./user";
+import type { User } from "./User";
 
 export type PaymentMethod = "razorpay" | "stripe" | "wallet";
 

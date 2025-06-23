@@ -7,9 +7,10 @@ import axiosInstance from "../../utils/axiosInstance";
 import { EventCard } from "../../components/cards/EventCard";
 import { EventFormSkeleton } from "../../components/skeletons/EventsFormSkeleton";
 import { CategoryCard } from "../../components/cards/CategoryCard";
-import type { Category } from "../../interfaces/entities/category";
+import type { Category } from "../../interfaces/entities/Category";
 import type { AllEventData } from "../../interfaces/entities/FormState";
 import { Link, useNavigate } from "react-router-dom";
+import { useUserLocation } from "../../hooks/useUserLocation";
 
 
 const Home = () => {
@@ -19,6 +20,7 @@ const Home = () => {
   const [nearByEvents, setNearByEvents] = useState<AllEventData[]>([]);
   const [categories, setCatgories] = useState<Category[]>([]);
   const [search, setSearch] = useState<string>("");
+  const { location, loading: locationLoading } = useUserLocation();
 
   const navigate = useNavigate();
 
@@ -35,8 +37,8 @@ const Home = () => {
       try {
         const [eventRes, nearbyEvent, categoryRes] = await Promise.all([
           axiosInstance.get("/event/all?limit=5"),
-          axiosInstance.get("/event/nearbyevents"),
-          axiosInstance.get("/admin/categories?limit=5"),
+          axiosInstance.get(`/event/nearbyevents?lat=${location?.lat}&lng=${location?.lng}`),
+          axiosInstance.get("/admin/category/?limit=5"),
         ]);
 
         if (eventRes.data) {
@@ -57,8 +59,10 @@ const Home = () => {
       }
     };
 
-    fetchRequest();
-  }, []);
+    if (!locationLoading && location?.lat !== 0 && location?.lng !== 0) {
+      fetchRequest();
+    }
+  }, [location, locationLoading]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">

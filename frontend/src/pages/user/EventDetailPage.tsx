@@ -9,7 +9,7 @@ import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton
 import { captialize, formatPrice } from '../../utils/stringUtils';
 import { AdvancedMarker, APIProvider, Map } from '@vis.gl/react-google-maps';
 import type { AllEventData } from '../../interfaces/entities/FormState';
-import type { OrganizerData } from '../../interfaces/entities/organizer';
+import type { OrganizerData } from '../../interfaces/entities/Organizer';
 import type { AxiosResponse } from 'axios';
 import config from '../../config/config';
 import { ReviewCard } from '../../components/cards/ReviewCard';

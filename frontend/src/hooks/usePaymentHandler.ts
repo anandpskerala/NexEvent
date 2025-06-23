@@ -7,7 +7,7 @@ import config from "../config/config";
 import type { AllEventData } from "../interfaces/entities/FormState";
 import type { Booking } from "../interfaces/entities/Booking";
 import type { RazorpayOptions, RazorpayResponse } from "../interfaces/entities/RazorPay";
-import type { User } from "../interfaces/entities/user";
+import type { User } from "../interfaces/entities/User";
 
 
 export const usePaymentHandler = (user: User, sessionId?: string) => {

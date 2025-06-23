@@ -3,7 +3,6 @@ import { StatusCode } from "../shared/constants/statusCode";
 
 export const protectedRoute = async (req: Request, res: Response, next: NextFunction) => {
     const roles = req.headers['x-user-roles'];
-    console.log(roles)
 
     if (!roles?.includes("organizer")) {
         res.status(StatusCode.UNAUTHORIZED).json({message: "Forbidden: You don't have organizer access"});

@@ -285,7 +285,7 @@ export class AuthService {
                 }
             }
 
-            const request = await this.forgotRepo.findByID(requestId);
+            const request = await this.forgotRepo.findByRequestId(requestId);
             if (!request) {
                 return {
                     message: "Request timeout / Not found",
@@ -293,7 +293,7 @@ export class AuthService {
                 }
             }
 
-            const user = await this.userRepo.findByID(new String(request.userId).toString());
+            const user = await this.userRepo.findByID(String(request.userId).toString());
             if (!user) {
                 return {
                     message: "User doesn't exists",
@@ -301,7 +301,7 @@ export class AuthService {
                 }
             }
 
-            await this.forgotRepo.delete(request.requestId);
+            await this.forgotRepo.delete(request.id);
 
             const hashedPassword = await this.authUtils.hashPassword(newPassword);
             await this.userRepo.update(user.id as string, { password: hashedPassword });

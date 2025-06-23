@@ -3,7 +3,7 @@ import type { RootState } from '../../store';
 import { NavBar } from '../../components/partials/NavBar';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { MessageComponent } from '../../components/messages/MessageComponent';
-import type { User } from '../../interfaces/entities/user';
+import type { User } from '../../interfaces/entities/User';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';

@@ -7,7 +7,7 @@ import type { RootState } from '../../store';
 import { Footer } from '../../components/partials/Footer';
 import { useParams } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosInstance';
-import type { User } from '../../interfaces/entities/user';
+import type { User } from '../../interfaces/entities/User';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { UserReportModal } from '../../components/modals/UserReportModal';
 

@@ -32,7 +32,7 @@ const FeatureRequestAdmin = () => {
     useEffect(() => {
         const fetchRequest = async (page: number, limit: number) => {
             try {
-                const res = await axiosInstance.get(`/admin/requests?page=${page}&limit=${limit}`);
+                const res = await axiosInstance.get(`/admin/request?page=${page}&limit=${limit}`);
                 if (res.data) {
                     setRequests(res.data.requests);
                     setPages(res.data.pages);

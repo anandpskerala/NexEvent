@@ -6,7 +6,7 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { CategoryForm } from '../../components/forms/CategoryForm';
 import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 
 
 const EditCategory = () => {

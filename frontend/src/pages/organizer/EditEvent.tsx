@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { EventForm } from '../../components/forms/EventForm';
 import type { AllEventData } from '../../interfaces/entities/FormState';
-import type { User } from '../../interfaces/entities/user';
+import type { User } from '../../interfaces/entities/User';
 
 const EditEvent = () => {
     const { id } = useParams();

@@ -60,7 +60,7 @@ const CouponPage = () => {
     const fetchCoupons = useCallback(async (pageNumber = 1) => {
         try {
             setLoading(true);
-            const res = await axiosInstance.get(`/admin/coupons?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
+            const res = await axiosInstance.get(`/admin/coupon?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
             if (res.data) {
                 setCoupons(res.data.coupons);
                 setPage(Number(res.data.page));

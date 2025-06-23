@@ -97,7 +97,7 @@ const UserReportsPage = () => {
         const fetchReports = async (page: number, limit: number) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/admin/reports?page=${page}&limit=${limit}`);
+                const res = await axiosInstance.get(`/admin/report?page=${page}&limit=${limit}`);
                 if (res.data) {
                     setReports(res.data.reports);
                     setPage(res.data.page);

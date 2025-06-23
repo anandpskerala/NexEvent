@@ -1,5 +1,5 @@
 import type { Location } from "./FormState";
-import type { User } from "./user";
+import type { User } from "./User";
 
 export interface Booking {
     id: string;

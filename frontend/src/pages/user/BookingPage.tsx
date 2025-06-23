@@ -258,6 +258,8 @@ const BookingPage = () => {
                 const res = await axiosInstance.get(`/event/event/${id}`);
                 if (res.data) {
                     setEvent(res.data.event);
+                    const ticket = res.data.event.tickets[0];
+                    updateTicketQuantity(ticket.id, 1, ticket.price, ticket.name);
                 }
             } catch (error) {
                 setEvent(undefined);

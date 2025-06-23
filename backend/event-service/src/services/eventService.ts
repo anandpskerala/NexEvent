@@ -108,6 +108,7 @@ export class EventService {
                     { 'location.place': { $regex: search.trim(), $options: 'i' } }
                 ];
             }
+
             if (category && Types.ObjectId.isValid(category)) {
                 filter.category = new Types.ObjectId(category);
             }

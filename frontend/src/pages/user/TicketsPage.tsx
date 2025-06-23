@@ -208,7 +208,7 @@ const TicketsPage = () => {
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-gray-600">Service Fee</span>
-                                        <span className="font-medium text-gray-900">{formatCurrency(5, booking?.eventId.currency)}</span>
+                                        <span className="font-medium text-gray-900">{formatCurrency(booking?.eventId.entryType === "free" ? 0: 5, booking?.eventId.currency)}</span>
                                     </div>
                                     <div className="flex justify-between text-base font-semibold border-t pt-3">
                                         <span className="text-gray-900">Total</span>

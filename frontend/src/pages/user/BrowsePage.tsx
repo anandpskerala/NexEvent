@@ -9,7 +9,7 @@ import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton
 import { EventGrid } from '../../components/cards/EventGrid';
 import { Footer } from '../../components/partials/Footer';
 import Pagination from '../../components/partials/Pagination';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import type { BrowsePayloadData } from '../../interfaces/entities/Payload';
 import { useSearchParams } from 'react-router-dom';
@@ -101,14 +101,14 @@ const BrowsePage = () => {
     useEffect(() => {
         const fetchCatgories = async () => {
             try {
-                const res = await axiosInstance.get("/admin/categories");
+                const res = await axiosInstance.get("/admin/category");
                 if (res.data) {
                     setCatgories(res.data.categories);
                 }
             } catch (error) {
                 console.error(error)
             }
-        } 
+        }
 
         fetchCatgories();
     }, [])
@@ -117,7 +117,7 @@ const BrowsePage = () => {
         const fetchRequest = async () => {
             setLoading(true);
             try {
-                const eventRes = await axiosInstance.get(`/event/all?search=${debouncedSearch}&category=${payload.category}&startDate=${payload.startDate}&endDate=${payload.endDate}&page=${page}&limit=15`);
+                const eventRes = await axiosInstance.get(`/event/all?search=${debouncedSearch}&category=${payload.category}&startDate=${payload.startDate}&endDate=${payload.endDate}&page=${page}&limit=25`);
                 if (eventRes.data) {
                     setEvents(eventRes.data.events);
                     setPage(Number(eventRes.data.page));
@@ -239,6 +239,23 @@ const BrowsePage = () => {
                                                     />
                                                 </div>
                                             </div>
+
+                                            {/* <div className="flex justify-end px-4 mt-4">
+                                                <div className="relative">
+                                                    <select
+                                                        name="sortBy"
+                                                        value={tempPayload.sortBy}
+                                                        onChange={(e) => {
+                                                            setPayload(prev => ({ ...prev, sortBy: e.target.value }))
+                                                        }}
+                                                        className="bg-white border border-gray-300 rounded-lg py-2 px-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                        <option value="startDate">Upcoming</option>
+                                                        <option value="createdAt">Newest</option>
+                                                        <option value="title">Alphabetical</option>
+                                                    </select>
+                                                </div>
+                                            </div> */}
 
                                             {/* <div className="flex flex-col">
                                                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Location</label>

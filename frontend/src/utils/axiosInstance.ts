@@ -2,6 +2,7 @@ import axios, { AxiosError, type AxiosInstance, type AxiosResponse, type Interna
 import config from "../config/config";
 import { logout } from "../store/actions/auth/logout";
 import { type AppDispatch } from "../store";
+import { fetchAccessToken } from "./fetchRefreshToken";
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: config.backendUrl,
@@ -47,19 +48,7 @@ export const setupAxiosInterceptors = (dispatch: AppDispatch) => {
         isRefreshing = true;
 
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
-
-          await axios.post(
-            `${config.backendUrl}/user/token/refresh`,
-            {},
-            {
-              withCredentials: true,
-              signal: controller.signal,
-            }
-          );
-          clearTimeout(timeoutId);
-
+          await fetchAccessToken();
           processQueue(null, true);
           return axiosInstance(originalRequest);
         } catch (refreshError) {
