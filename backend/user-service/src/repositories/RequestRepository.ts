@@ -1,6 +1,6 @@
 import { Model } from "mongoose";
 import { IRequestRepository } from "./interfaces/IRequestRepository";
-import { IRequest } from "../shared/types/organizerRequest";
+import { IRequest } from "../shared/types/IRequest";
 import requestModel from "../models/requestModel";
 
 export class RequestRepository implements IRequestRepository {

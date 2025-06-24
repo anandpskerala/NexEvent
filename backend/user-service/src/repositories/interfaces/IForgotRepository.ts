@@ -1,4 +1,4 @@
-import { IForgotRequest } from "../../shared/types/forgotRequest";
+import { IForgotRequest } from "../../shared/types/IForgotRequest";
 
 export interface IForgotRepository {
     findByUserId(userId: string): Promise<IForgotRequest | undefined>;

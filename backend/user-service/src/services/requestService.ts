@@ -3,8 +3,8 @@ import { StatusCode } from "../shared/constants/statusCode";
 import { CloudinaryService } from "../shared/utils/cloudinary";
 import { RequestRepository } from "../repositories/RequestRepository";
 import { UserRepository } from "../repositories/UserRepository";
-import { IRequest } from "../shared/types/organizerRequest";
-import { UserReturnType, RequestPaginationType, RequestReturnType } from "../shared/types/returnTypes";
+import { IRequest } from "../shared/types/IRequest";
+import { UserReturnType, RequestPaginationType, RequestReturnType } from "../shared/types/ReturnTypes";
 
 export class RequestService {
     private cloudinary: CloudinaryService;

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../shared/types/user";
+import { IUser } from "../shared/types/IUser";
 import { UserRepository } from "../repositories/UserRepository";
 import { UserService } from "../services/userService";
 import { UserController } from "../controllers/userController";

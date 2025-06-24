@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import { UserRepository } from "../repositories/UserRepository";
 import { StatusCode } from "../shared/constants/statusCode";
 import { AuthUtils } from "../shared/utils/authUtils";
-import { OtpReturnType, UserReturnType } from "../shared/types/returnTypes";
+import { OtpReturnType, UserReturnType } from "../shared/types/ReturnTypes";
 import { OtpRepository } from "../repositories/OtpRepository";
 import { Response } from "express";
 import { config } from "../config";

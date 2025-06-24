@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { MapPin, Calendar, Clock, Share2, User, Heart } from 'lucide-react';
+import { MapPin, Calendar, Clock, Share2, User as UserIcon, Heart } from 'lucide-react';
 import { NavBar } from '../../components/partials/NavBar';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
@@ -14,6 +14,7 @@ import type { AxiosResponse } from 'axios';
 import config from '../../config/config';
 import { ReviewCard } from '../../components/cards/ReviewCard';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
+import type { User } from '../../interfaces/entities/User';
 
 
 const EventDetailPage = () => {
@@ -161,7 +162,7 @@ const EventDetailPage = () => {
                                             </div>
 
                                             <div className="flex items-start">
-                                                <User className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
+                                                <UserIcon className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" />
                                                 <span className="text-gray-700">By {organizer?.organization}</span>
                                             </div>
                                         </div>
@@ -233,7 +234,7 @@ const EventDetailPage = () => {
                                         </>
                                     ) : (
                                         <div className="flex items-center justify-center py-8">
-                                            <ReviewCard />
+                                            <ReviewCard id={id as string} user={user as User} />
                                         </div>
                                     )}
                                 </div>

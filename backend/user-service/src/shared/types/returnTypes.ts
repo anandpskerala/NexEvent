@@ -1,6 +1,6 @@
 import { StatusCode } from "../constants/statusCode";
-import { IRequest } from "./organizerRequest";
-import { IUser } from "./user";
+import { IRequest } from "./IRequest";
+import { IUser } from "./IUser";
 
 export interface UserReturnType {
     message: string;
