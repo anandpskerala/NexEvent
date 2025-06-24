@@ -11,7 +11,7 @@ export class AuthMiddleware {
         "/api/user/auth/logout",
         "/api/user/auth/forgot-password",
         "/api/user/auth/reset-password",
-        "/api/user/token/refresh"
+        "/api/user/auth/token/refresh"
     ];
 
     private isPublicRoute(path: string) {

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { NotificationService } from "../services/notificationService";
-import { redisSubClient } from "../config/redis";
+import redisClient from "../config/redis";
 
 export class NotificationController {
     constructor(private notificationService: NotificationService) { }
@@ -8,19 +8,29 @@ export class NotificationController {
     public notificationStream = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
 
-        res.set({
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache',
-            'Connection': 'keep-alive',
-        });
+        const subClient = redisClient.duplicate();
+        await subClient.connect()
 
-        redisSubClient.subscribe(`notifications:${id}`, (message) => {
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+
+        const unread = await this.notificationService.getUnreads(id);
+        res.write(`event: init\ndata: ${JSON.stringify(unread.result)}\n\n`);
+
+        subClient.subscribe(`notifications:${id}`, (message) => {
             res.write(`data: ${message}\n\n`);
         });
 
         req.on('close', () => {
-            redisSubClient.unsubscribe();
-            redisSubClient.quit();
+            subClient.unsubscribe(`notifications:${id}`);
+            subClient.quit();
         });
+    }
+
+    public readNotifications = async (req: Request, res: Response): Promise<void> => {
+        const { id } = req.params;
+        const result = await this.notificationService.markAllAsRead(id);
+        res.status(result.status).json({message: result.message});
     }
 }

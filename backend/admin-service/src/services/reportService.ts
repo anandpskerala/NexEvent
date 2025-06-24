@@ -1,9 +1,16 @@
+import kafka from "../kafka";
+import { KafkaProducer } from "../kafka/producer";
+import { TOPICS } from "../kafka/topics";
 import { ReportRepository } from "../repositories/ReportRepository";
 import { StatusCode } from "../shared/constants/statusCode";
+import { INotification } from "../shared/types/INotification";
 import { IReport, ReportActions } from "../shared/types/IReport";
 
 export class ReportService {
-    constructor(private repo: ReportRepository) { }
+    private producer: KafkaProducer;
+    constructor(private repo: ReportRepository) {
+        this.producer = new KafkaProducer(kafka);
+     }
 
     public async createRequest(data: IReport) {
         try {
@@ -58,7 +65,14 @@ export class ReportService {
 
     public async updateRequest(id: string, status: ReportActions) {
         try {
-            await this.repo.updateReport(id,  {status});
+            const report = await this.repo.updateReport(id, { status });
+            if (report) {
+                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                    userId: report.reportedBy,
+                    title: "User report update",
+                    message: `Your report has been ${status}`
+                })
+            }
             return {
                 message: "Report updated",
                 status: StatusCode.OK

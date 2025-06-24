@@ -19,6 +19,13 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
 
     const dispatch = useAppDispatch();
 
+    const modalOption = async () => {
+        if (!showNotifications) {
+            setShowNotifications(true);
+        } else {
+            setShowNotifications(false);
+        }
+    };
 
     return (
         <nav className="flex items-center justify-between px-6 py-5 shadow-md fixed w-full bg-white z-30">
@@ -41,7 +48,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                     <div className="relative">
                         <NotificationBell
                             count={notifications.length}
-                            onClick={() => setShowNotifications(!showNotifications)}
+                            onClick={modalOption}
                         />
                         {showNotifications && notifications.length > 0 && (
                             <div className="absolute top-12 -right-15 w-80 max-h-96 overflow-y-auto bg-white shadow-lg border rounded-xl z-50">
@@ -49,7 +56,10 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                 <ul className="divide-y">
                                     {notifications.map((n) => (
                                         <li key={n.id} className="p-3 hover:bg-gray-50">
-                                            <div className="font-medium">{n.title}</div>
+                                            <div className="flex items-center justify-between w-full">
+                                                <span className={`font-medium ${n.read ? 'text-gray-500' : 'text-black'}`}>{n.title}</span>
+                                                <span className={`p-1.5 rounded-4xl text-xs ${n.read ?'' :'bg-amber-300'}`}></span>
+                                            </div>
                                             <div className="text-sm text-gray-500">{n.message}</div>
                                         </li>
                                     ))}

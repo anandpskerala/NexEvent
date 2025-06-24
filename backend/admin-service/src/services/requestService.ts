@@ -1,10 +1,17 @@
+import kafka from "../kafka";
+import { KafkaProducer } from "../kafka/producer";
+import { TOPICS } from "../kafka/topics";
 import { RequestRepository } from "../repositories/RequestRepository";
 import { StatusCode } from "../shared/constants/statusCode";
+import { INotification } from "../shared/types/INotification";
 import { IRequests } from "../shared/types/IRequests";
 import { fetchUsers } from "../shared/utils/getUsers";
 
 export class RequestService {
-    constructor(private repo: RequestRepository) { }
+    private producer: KafkaProducer;
+    constructor(private repo: RequestRepository) {
+        this.producer = new KafkaProducer(kafka);
+    }
 
     public async createRequest(data: IRequests) {
         try {
@@ -74,7 +81,14 @@ export class RequestService {
 
     public async updateRequest(id: string, status: "pending" | "accepted" | "rejected") {
         try {
-            await this.repo.updateRequest(id, { status });
+            const request = await this.repo.updateRequest(id, { status });
+            if (request) {
+                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                    userId: request.userId,
+                    title: "Feature request update",
+                    message: `Your feature request has been ${status}`
+                })
+            }
             return {
                 message: "Status Updated",
                 status: StatusCode.OK

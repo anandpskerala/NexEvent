@@ -6,7 +6,7 @@ export const fetchAccessToken = async () => {
     const timeoutId = setTimeout(() => controller.abort(), 5000);
 
     await axios.post(
-        `${config.backendUrl}/user/token/refresh`,
+        `${config.backendUrl}/user/auth/token/refresh`,
         {},
         {
             withCredentials: true,

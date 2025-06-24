@@ -20,9 +20,17 @@ export const useNotification = (userId: string | undefined) => {
             withCredentials: true,
         });
 
+        eventSource.addEventListener("init", (event) => {
+            const unread: Notification[] = JSON.parse(event.data);
+            console.log(unread)
+            setNotifications((prev) => [...unread, ...prev]);
+        });
+
+
         eventSource.onmessage = (event) => {
             retryCountRef.current = 0;
             const data: Notification = JSON.parse(event.data);
+            console.log(data);
             setNotifications((prev) => [data, ...prev]);
         };
 
@@ -53,5 +61,5 @@ export const useNotification = (userId: string | undefined) => {
         };
     }, [userId]);
 
-    return { notifications };
+    return { notifications, setNotifications };
 };
