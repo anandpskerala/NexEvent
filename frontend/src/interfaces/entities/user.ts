@@ -13,5 +13,7 @@ export interface User {
     organizer: Organization;
     image?: string;
     unreadCount?: number;
+    lastMessage?: string;
+    lastMessageAt?: string;
     createdAt: string;
 }

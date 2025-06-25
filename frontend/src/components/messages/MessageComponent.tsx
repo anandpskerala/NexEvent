@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { User } from '../../interfaces/entities/User';
 import axiosInstance from '../../utils/axiosInstance';
 import type { Message } from '../../interfaces/entities/Message';
-import { formatDateTime } from '../../utils/stringUtils';
+import { formatDateTime, formatLastMessageTime } from '../../utils/stringUtils';
 import { MoreVertical, Search, SendHorizontal, X, ArrowLeft, Menu, Paperclip } from 'lucide-react';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import { useDebounce } from '../../hooks/useDebounce';
@@ -29,15 +29,17 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
   const [offset, setOffset] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMoreMessages, setHasMoreMessages] = useState(true);
+  const [isSending, setIsSending] = useState<boolean>(false);
   const messagesStartRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const limit = 20;
 
   const scrollToBottom = () => {
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
+    });
   };
+
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -61,7 +63,10 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
     if ((!newMessage.trim() && !selectedImage) || !selectedChat) return;
     const optimisticId = uuidv4();
 
+    if (isSending) return;
+
     try {
+      setIsSending(true)
       let mediaUrl: string | undefined;
 
       if (selectedImage) {
@@ -96,6 +101,18 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
       );
       sentMessageIdsRef.current.delete(optimisticId);
 
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat.id === selectedChat.id
+            ? {
+              ...chat,
+              lastMessage: messageData.content,
+              lastMessageAt: messageData.createdAt
+            }
+            : chat
+        )
+      );
+
       setNewMessage('');
       handleRemoveImage();
     } catch (error) {
@@ -104,6 +121,8 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
         prev.filter((msg) => msg.id !== optimisticId)
       );
       sentMessageIdsRef.current.delete(optimisticId);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -117,19 +136,31 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
   const fetchUsers = async (query = '') => {
     try {
       let res: AxiosResponse;
+
       if (debouncedSearch) {
         res = await axiosInstance.get(`/user/users?query=${query}&myId=${user.id}`);
       } else {
         res = await axiosInstance.post(`/messages/interactions`, { userId: user.id });
       }
+
       if (res.data) {
         const users = res.data.users;
-        setChats([
-          ...(selectedChat && !users.some((u: User) => u.id === selectedChat.id)
-            ? [selectedChat]
-            : []),
+
+        const allUsers = [
+          ...(selectedChat && !users.some((u: User) => u.id === selectedChat.id) ? [selectedChat] : []),
           ...users.filter((u: User) => u.id !== selectedChat?.id),
-        ]);
+        ];
+
+        const selected = selectedChat ? allUsers.find((u) => u.id === selectedChat.id) : null;
+        const others = allUsers.filter((u) => u.id !== selectedChat?.id);
+
+        const sortedOthers = others.sort((a, b) =>
+          new Date(b.lastMessageAt || 0).getTime() - new Date(a.lastMessageAt || 0).getTime()
+        );
+
+        const finalChats = selected ? [selected, ...sortedOthers] : sortedOthers;
+
+        setChats(finalChats);
       }
     } catch (error) {
       console.error('Failed to fetch users', error);
@@ -192,6 +223,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
     if (selectedChat?.id !== contact.id) {
       setSearchQuery('');
       setSelectedChat(contact);
+      setChats([contact, ...chats.filter(c => c.id !== contact.id)]);
       setMessages([]);
       setOffset(0);
       setHasMoreMessages(true);
@@ -210,27 +242,37 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
   };
 
   const handleIncomingMessage = useCallback(
-    (msg: Message) => {
+    async (msg: Message) => {
       if (sentMessageIdsRef.current.has(msg.id)) return;
-      if (msg.sender === user.id) return;
+
+      if (msg.receiver !== user.id) return;
+
       if (msg.sender !== selectedChat?.id) {
         setChats((prev) =>
           prev.map((chat) =>
             chat.id === msg.sender
-              ? { ...chat, unreadCount: (chat.unreadCount || 0) + 1 }
+              ? {
+                ...chat,
+                unreadCount: (chat.unreadCount || 0) + 1,
+                lastMessage: msg.content,
+                lastMessageAt: msg.createdAt
+              }
               : chat
           )
         );
         return;
       }
+
       setMessages((prev) => [...prev, msg]);
       scrollToBottom();
+
       if (document.hasFocus()) {
         handleRead(msg.sender);
       }
     },
     [selectedChat, user.id]
   );
+
 
   useChatSocket(user.id, handleIncomingMessage);
 
@@ -240,6 +282,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
 
   useEffect(() => {
     if (selectedChat?.id) {
+      handleChatSelect(selectedChat)
       fetchMessages(selectedChat.id, 0);
     }
   }, [selectedChat?.id]);
@@ -377,6 +420,10 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
                       {contact.unreadCount}
                     </span>
                   )}
+                </div>
+                <div className="flex flex-row justify-between items-center">
+                  <p className="text-sm text-gray-600 truncate">{contact.lastMessage || "Say hi!"}</p>
+                  <span className="text-xs">{formatLastMessageTime(contact.lastMessageAt || new Date().toISOString())}</span>
                 </div>
               </div>
             </div>

@@ -5,5 +5,7 @@ export interface IChatRepository {
     sendMessage(data: Partial<Message>): Promise<Message>;
     getInteractions(userId: string): Promise<string[]>;
     getMessage(peer1: string, peer2: string): Promise<{ messages: Message[], total: number}>;
+    markAsRead(peer1: string, peer2: string): Promise<void>;
     create(data: Partial<Message>): Promise<Message>;
+    getLastMessage(peer1: string, peer2: string): Promise<Message | undefined>;
 }

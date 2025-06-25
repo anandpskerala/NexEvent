@@ -66,3 +66,29 @@ export const formatTimeAgo = (isoDate: string): string => {
 
     return `${Math.floor(diff / 31536000)} year(s) ago`;
 };
+
+export const formatLastMessageTime = (isoString: string): string => {
+    const date = new Date(isoString);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    if (
+        date.getDate() === yesterday.getDate() &&
+        date.getMonth() === yesterday.getMonth() &&
+        date.getFullYear() === yesterday.getFullYear()
+    ) {
+        return "Yesterday";
+    }
+
+    return date.toLocaleDateString(undefined, {
+        month: "short",
+        day: "numeric",
+    });
+};
+

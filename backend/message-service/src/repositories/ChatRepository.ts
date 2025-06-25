@@ -73,7 +73,7 @@ export class ChatRepository implements IChatRepository {
         }
     }
 
-    async markAsRead(peer1: string, peer2: string) {
+    async markAsRead(peer1: string, peer2: string): Promise<void> {
         const chatRoom = await this.findRoom(peer1, peer2);
         await this.model.updateMany({chatId: chatRoom}, {$set: {isRead: true}});
     }
@@ -81,5 +81,11 @@ export class ChatRepository implements IChatRepository {
     async create(data: Partial<Message>): Promise<Message> {
         const doc = await this.model.create(data);
         return doc.toJSON();
+    }
+
+    async getLastMessage(peer1: string, peer2: string): Promise<Message | undefined> {
+        const chatRoom = await this.findRoom(peer1, peer2);
+        const doc = await this.model.findOne({chatId: chatRoom}).sort({createdAt: -1}).select("content createdAt");
+        return doc?.toJSON();
     }
 }

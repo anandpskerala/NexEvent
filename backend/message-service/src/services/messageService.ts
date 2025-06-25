@@ -86,9 +86,13 @@ export class MessageService {
                 users.map(async (user: IUser) => {
                     const key = `unread:${userId}:${user.id}`;
                     const count = await redisClient.get(key);
+
+                    const lastMessage = await this.repo.getLastMessage(userId, user.id as string);
                     return {
                         ...user,
-                        unreadCount: parseInt(count || "0", 10)
+                        unreadCount: parseInt(count || "0", 10),
+                        lastMessage: lastMessage?.content || null,
+                        lastMessageAt: lastMessage?.createdAt || null
                     };
                 })
             );
