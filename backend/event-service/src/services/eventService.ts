@@ -1,4 +1,4 @@
-import { FilterQuery, Types } from "mongoose";
+import { FilterQuery, SortOrder, Types } from "mongoose";
 import { StatusCode } from "../shared/constants/statusCode";
 import { CloudinaryService } from "../shared/utils/cloudinary";
 import { EventRepository } from "../repositories/EventRepository";
@@ -73,7 +73,7 @@ export class EventService {
         }
     }
 
-    public async getEvent(id: string): Promise<RawReturnType> {
+    public async getEvent(id: string, userId: string): Promise<RawReturnType> {
         try {
             const event = await this.eventRepo.getEvent(id);
             if (!event) {
@@ -83,10 +83,16 @@ export class EventService {
                 }
             }
 
+            const saved = await this.eventRepo.getSavedEvent(id, userId);
+            const enrichedEvent = {
+                ...event,
+                isSaved: saved ? true : false
+            }
+
             return {
                 message: "Fetched user",
                 status: StatusCode.OK,
-                event
+                event: enrichedEvent
             }
         } catch (error) {
             console.log(error);
@@ -98,7 +104,7 @@ export class EventService {
     }
 
 
-    public async getAllEvents(search: string, page: number, limit: number, category?: string): Promise<EventPaginationType> {
+    public async getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string): Promise<EventPaginationType> {
         try {
             const filter: FilterQuery<IEvent> = {};
 
@@ -113,12 +119,43 @@ export class EventService {
                 filter.category = new Types.ObjectId(category);
             }
 
-            const skip = (page - 1) * limit;
+            if (eventStatus) {
+                filter.status = eventStatus;
+            }
+
+            if (eventType) {
+                filter.eventType = eventType;
+            }
+
+            let sortFilter: Record<string, SortOrder> = { createdAt: -1 };
+            if (sortBy) {
+                if (sortBy === "a-z") {
+                    sortFilter = { title: 1 };
+                } else if (sortBy === "z-a") {
+                    sortFilter = { title: -1 };
+                } else {
+                    sortFilter = { [sortBy]: -1 };
+                }
+            }
+
+            const currentPage = Math.max(1, page || 1);
+            const currentLimit = Math.max(1, limit || 10);
+            const skip = (currentPage - 1) * currentLimit;
 
             const [total, events] = await Promise.all([
                 this.eventRepo.countDocs(filter),
-                this.eventRepo.getAllEvents(filter, skip, limit)
+                this.eventRepo.getAllEvents(filter, skip, limit, sortFilter)
             ]);
+
+            const enrichedEvents = await Promise.all(
+                events.map(async (event) => {
+                    const saved = await this.eventRepo.getSavedEvent(event?.id as string, userId);
+                    return {
+                        ...event,
+                        isSaved: !!saved
+                    };
+                })
+            );
 
             return {
                 message: "Fetched events",
@@ -126,7 +163,7 @@ export class EventService {
                 total,
                 page,
                 pages: Math.ceil(total / limit),
-                events
+                events: enrichedEvents
             };
 
         } catch (error) {
@@ -138,13 +175,22 @@ export class EventService {
         }
     }
 
-    public async getNearbyEvents(latitude: number, longitude: number) {
+    public async getNearbyEvents(userId: string, latitude: number, longitude: number) {
         try {
             const events = await this.eventRepo.getNearByEvents(latitude, longitude);
+            const enrichedEvents = await Promise.all(
+                events.map(async (event) => {
+                    const saved = await this.eventRepo.getSavedEvent(event?.id as string, userId);
+                    return {
+                        ...event,
+                        isSaved: !!saved
+                    };
+                })
+            );
             return {
                 message: "Fetched events",
                 status: StatusCode.OK,
-                events
+                events: enrichedEvents
             }
         } catch (error) {
             console.error("Error fetching events:", error);

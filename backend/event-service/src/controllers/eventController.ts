@@ -35,14 +35,25 @@ export class EventController {
     }
 
     public getEvent = async (req: Request, res: Response): Promise<void> => {
+        const userId = req.headers['x-user-id'] as string;
         const { id } = req.params;
-        const result = await this.eventService.getEvent(id);
+        const result = await this.eventService.getEvent(id, userId);
         res.status(result.status).json({message: result.message, event: result.event});
     }
 
     public getAllEvents = async (req: Request, res: Response): Promise<void> => {
-        const { search = "", page = 1, limit = 10, category = "" } = req.query;
-        const result = await this.eventService.getAllEvents(search as string, page as number, limit as number, category as string);
+        const userId = req.headers['x-user-id'] as string;
+        const { search = "", page = 1, limit = 10, category = "", eventStatus = "", eventType = "", sortBy = "createdAt" } = req.query;
+        const result = await this.eventService.getAllEvents(
+            userId, 
+            search as string,
+            page as number, 
+            limit as number, 
+            category as string, 
+            eventStatus as string, 
+            eventType as string, 
+            sortBy as string
+        );
         res.status(result.status).json({
             message: result.message,
             total: result.total,
@@ -53,8 +64,9 @@ export class EventController {
     }
 
     public getNearByEvents = async (req: Request, res: Response): Promise<void> => {
+        const userId = req.headers['x-user-id'] as string;
         const { lat = 0, lng = 0 } = req.query;
-        const result = await this.eventService.getNearbyEvents(lat as number, lng as number);
+        const result = await this.eventService.getNearbyEvents(userId, lat as number, lng as number);
         res.status(result.status).json({message: result.message, events: result.events});
     }
 

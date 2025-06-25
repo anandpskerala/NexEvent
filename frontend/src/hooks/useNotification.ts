@@ -22,7 +22,6 @@ export const useNotification = (userId: string | undefined) => {
 
         eventSource.addEventListener("init", (event) => {
             const unread: Notification[] = JSON.parse(event.data);
-            console.log(unread)
             setNotifications((prev) => [...unread, ...prev]);
         });
 

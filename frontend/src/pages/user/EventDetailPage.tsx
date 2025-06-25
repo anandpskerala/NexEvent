@@ -24,7 +24,7 @@ const EventDetailPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [event, setEvent] = useState<AllEventData>();
     const [organizer, setOrganizer] = useState<OrganizerData>();
-    const [isSaved, setSaved] = useState<boolean>(false);
+    // const [isSaved, setSaved] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const mapCenter = useMemo(() => {
@@ -53,13 +53,21 @@ const EventDetailPage = () => {
     const updateSaved = async () => {
         try {
             let res: AxiosResponse;
-            if (isSaved) {
+            if (event?.isSaved) {
                 res = await axiosInstance.delete(`/event/saved/${event?.id}`);
             } else {
                 res = await axiosInstance.post(`/event/saved/${user?.id}`, { eventId: event?.id })
             }
             if (res.data) {
-                setSaved(res.data.saved);
+                //#todo remove
+                // setSaved(res.data.saved);
+                const saved = res.data.saved as boolean;
+                if (event) {
+                    setEvent({
+                        ...event,
+                        isSaved: saved
+                    })
+                }
             }
         } catch (error) {
             console.error(error);
@@ -71,14 +79,12 @@ const EventDetailPage = () => {
             setLoading(true);
 
             try {
-                const [eventRes, savedRes] = await Promise.all([
+                const [eventRes] = await Promise.all([
                     axiosInstance.get(`/event/event/${id}`),
-                    axiosInstance.get(`/event/saved/${id}`)
                 ]);
 
                 const eventData = eventRes.data?.event;
                 setEvent(eventData);
-                setSaved(savedRes.data?.saved ?? false);
 
                 if (eventData?.userId) {
                     const orgRes = await axiosInstance.get(`/user/request/${eventData.userId}`);
@@ -141,7 +147,7 @@ const EventDetailPage = () => {
                                             className="absolute z-10 right-0 md:right-5 -top-1 p-2 bg-gray-300 rounded-full"
                                             onClick={() => updateSaved()}
                                         >
-                                            <Heart className={`text-white ${isSaved ? 'fill-red-500' : 'fill-white/50'} hover:fill-red-500 cursor-pointer`} />
+                                            <Heart className={`text-white ${event?.isSaved ? 'fill-red-500' : 'fill-white/50'} hover:fill-red-500 cursor-pointer`} />
                                         </button>
                                     </div>
 

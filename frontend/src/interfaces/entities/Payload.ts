@@ -27,7 +27,10 @@ export interface ProfilePayload {
 
 export interface BrowsePayloadData {
     category?: string;
+    eventType?: string;
+    eventStatus?: string;
     location?: string;
+    sortBy?: string;
     startDate?: string;
     endDate?: string;
 }

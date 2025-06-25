@@ -78,6 +78,7 @@ export interface AllEventData {
     endDate?: string;
     currency: string;
     entryType: string;
+    isSaved: boolean;
     showQuantity: boolean;
     refunds: boolean;
     tickets?: Ticket[];

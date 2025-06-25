@@ -1,4 +1,4 @@
-import { FilterQuery, Model, Types } from "mongoose";
+import { FilterQuery, Model, SortOrder, Types } from "mongoose";
 import { IEventRepository } from "./interfaces/IEventRepository";
 import { IEvent } from "../shared/types/IEvent";
 import { ISavedEvents } from "../shared/types/ISavedEvents";
@@ -55,8 +55,8 @@ export class EventRepository implements IEventRepository {
         return this.model.hydrate(doc[0])?.toJSON();
     }
 
-    async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number): Promise<IEvent[]> {
-        const docs = (await this.model.find(query).skip(skip).limit(limit).sort({ createdAt: -1 })).map(doc => doc.toJSON());
+    async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]> {
+        const docs = (await this.model.find(query).sort(sortFilter ? sortFilter: {createdAt: -1}).skip(skip).limit(limit)).map(doc => doc.toJSON());
         return docs;
     }
 
