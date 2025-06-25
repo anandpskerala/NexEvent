@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { OrganizerSideBar } from '../../components/partials/OrganizerSidebar';
 import { EventForm } from '../../components/forms/EventForm';
-import type { User } from '../../interfaces/entities/user';
+import type { User } from '../../interfaces/entities/User';
 
 const CreateEvent = () => {
     const user  = useSelector((state: RootState) => state.auth.user);

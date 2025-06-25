@@ -55,8 +55,8 @@ const EventPage = () => {
             const res = await axiosInstance.get(`/event/events?search=${debouncedSearch}&page=${page}&userId=${user?.id}&limit=10`);
             if (res.data) {
                 setEvents(res.data.events);
-                setPage(res.data.page);
-                setPages(res.data.pages);
+                setPage(Number(res.data.page));
+                setPages(Number(res.data.pages));
             }
             console.log(res);
         } catch (error) {

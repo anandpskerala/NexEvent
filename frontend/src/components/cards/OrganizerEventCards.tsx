@@ -1,8 +1,10 @@
 import { MapPin } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../../utils/axiosInstance";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import type { EventCardProps } from "../../interfaces/props/formProps";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 
 const capitalize = (str: string) => {
@@ -12,6 +14,24 @@ const capitalize = (str: string) => {
 export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
     const [category, setCategory] = useState<{ name: string }>();
     const imageUrl = event.image || "https://via.placeholder.com/400x200.png?text=Event+Banner";
+    const navigate =  useNavigate();
+
+    const cancelEvent = async (eventId: string) => {
+        try {
+            const res = await axiosInstance.put(`/event/booking/${eventId}`);
+            if (res.data) {
+                toast.success(res.data.message);
+            }
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message);
+            }
+        }
+    }
+
+    const manageEvent = (eventId: string) => {
+        navigate(`/organizer/edit-event/${eventId}`)
+    }
 
     useEffect(() => {
         const fetchRequest = async () => {
@@ -26,7 +46,7 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
             }
         };
         fetchRequest();
-    }, [event.category])
+    }, [event.category]);
     return (
         <div className="max-w-xs w-full rounded-2xl shadow-md bg-white overflow-hidden transition-transform hover:scale-[1.02] duration-200">
             <div className="relative">
@@ -51,7 +71,7 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
                     <span className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full text-xs">{category?.name}</span>
                 </div>
 
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-gray-900 truncate">
                     {event.title}
                 </h2>
 
@@ -61,12 +81,20 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
                 </div>
 
                 <div className="flex flex-col md:flex-row w-full pt-3 gap-2">
-                    <button className="w-full bg-red-500 text-white text-center p-2 rounded-md">
-                        Cancel
+                    <button 
+                        className={`w-full ${event.status === 'upcoming'? 'bg-red-500 cursor-pointer': 'bg-gray-500 cursor-not-allowed'} text-white text-center p-2 rounded-md`}
+                        onClick={() => cancelEvent(event.id as string)}
+                        disabled={event.status !== "upcoming"}
+                    >
+                        {event.status === "upcoming" ? "Cancel": (event.status === "cancelled"? "Cancelled": "Cancel")}
                     </button>
-                    <Link to={`/organizer/edit-event/${event.id}`} className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold p-2 rounded-md transition">
+                    <button
+                        onClick={() => manageEvent(event.id as string)}
+                        className={`w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold p-2 rounded-md transition ${event.status === "cancelled" ? 'cursor-not-allowed': 'cursor-pointer'}`}
+                        disabled={event.status === "cancelled"} 
+                    >
                         Manage Event
-                    </Link>
+                    </button>
                 </div>
             </div>
         </div >

@@ -71,6 +71,7 @@ export interface AllEventData {
     tags: string[];
     eventFormat: string;
     location?: Location;
+    status?: string;
     startTime?: string;
     endTime?: string;
     startDate?: string;
@@ -97,4 +98,13 @@ export interface Ticket {
     description: string;
     startDate: Date;
     endDate: Date;
+}
+
+export interface FeatureRequestFormData {
+    featureTitle: string;
+    category: string;
+    priority: string;
+    description: string;
+    useCase: string;
+    additionalInfo: string;
 }

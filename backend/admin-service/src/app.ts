@@ -1,6 +1,7 @@
 import express, { Application } from "express";
 import connectDB from "./config/db";
-import routes from "./routes";
+import router from "./routes";
+
 
 
 export class App {
@@ -14,11 +15,11 @@ export class App {
 
     private setupMiddlewares() {
         this.app.use(express.json());
-        this.app.use(express.urlencoded({extended: true}));
+        this.app.use(express.urlencoded({ extended: true }));
     }
 
     private setupRotes() {
-        this.app.use("/", routes);
+        this.app.use("/", router);
     }
 
     public async listen(port: number) {

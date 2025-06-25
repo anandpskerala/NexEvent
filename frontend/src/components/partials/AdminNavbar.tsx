@@ -4,15 +4,27 @@ import { Link } from 'react-router-dom';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { logout } from '../../store/actions/auth/logout';
 import type { AdminNavbarProps } from "../../interfaces/props/navBarProps";
+import { NotificationBell } from "../messages/NotificationBell";
+import { useNotification } from "../../hooks/useNotification";
 
 
 
 export const AdminNavbar: React.FC<AdminNavbarProps> = ({ title, user, toggleSidebar }) => {
     const dispatch = useAppDispatch();
     const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
+    const { notifications } = useNotification(user?.id);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     const toggleProfileOptions = () => {
         setShowProfileOptions(!showProfileOptions);
+    };
+
+    const modalOption = async () => {
+        if (!showNotifications) {
+            setShowNotifications(true);
+        } else {
+            setShowNotifications(false);
+        }
     };
     return (
         <div className="flex relative justify-between items-center mb-6">
@@ -25,12 +37,41 @@ export const AdminNavbar: React.FC<AdminNavbarProps> = ({ title, user, toggleSid
                 </button>
                 <h1 className="text-xl md:text-2xl font-semibold">{title}</h1>
             </div>
-            <button
-                className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer"
-                onClick={() => toggleProfileOptions()}
-            >
-                {user?.firstName[0].toUpperCase()}
-            </button>
+
+            <div className="flex relative items-center gap-5">
+                <div className="relative">
+                    <NotificationBell
+                        count={notifications.length}
+                        onClick={modalOption}
+                    />
+                    {showNotifications && notifications.length > 0 && (
+                        <div className="absolute top-12 -right-15 w-80 max-h-96 overflow-y-auto bg-white shadow-lg border rounded-xl z-50">
+                            <div
+                                className="absolute flex w-full inset-0 bg-opacity-50 transition-opacity"
+                                onClick={() => modalOption()}
+                            />
+                            <div className="p-3 border-b font-semibold">Notifications</div>
+                            <ul className="divide-y">
+                                {notifications.map((n) => (
+                                    <li key={n.id} className="p-3 hover:bg-gray-50">
+                                            <div className="flex items-center justify-between w-full">
+                                                <span className={`font-medium ${n.read ? 'text-gray-500' : 'text-black'}`}>{n.title}</span>
+                                                <span className={`p-1.5 rounded-4xl text-xs ${n.read ?'' :'bg-amber-300'}`}></span>
+                                            </div>
+                                            <div className="text-sm text-gray-500">{n.message}</div>
+                                        </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+                <button
+                    className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white cursor-pointer"
+                    onClick={() => toggleProfileOptions()}
+                >
+                    {user?.firstName[0].toUpperCase()}
+                </button>
+            </div>
 
             {showProfileOptions && (
                 <div className="absolute right-0 top-14 w-64 z-20 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden transform animate-in slide-in-from-top-2 duration-200">

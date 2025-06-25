@@ -4,16 +4,28 @@ import { Link, NavLink } from "react-router-dom"
 import type { NavBarProps } from "../../interfaces/props/navBarProps"
 import { logout } from "../../store/actions/auth/logout"
 import { useAppDispatch } from "../../hooks/useAppDispatch"
+import { useNotification } from "../../hooks/useNotification"
+import { NotificationBell } from "../messages/NotificationBell"
 
 
 export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest", user, section }) => {
     const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
+    const { notifications } = useNotification(user?.id);
+    const [showNotifications, setShowNotifications] = useState(false);
 
     const toggleProfileOptions = () => {
         setShowProfileOptions(!showProfileOptions);
     };
 
     const dispatch = useAppDispatch();
+
+    const modalOption = async () => {
+        if (!showNotifications) {
+            setShowNotifications(true);
+        } else {
+            setShowNotifications(false);
+        }
+    };
 
     return (
         <nav className="flex items-center justify-between px-6 py-5 shadow-md fixed w-full bg-white z-30">
@@ -27,18 +39,35 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
             <div className="hidden md:flex space-x-6">
                 <NavLink to="/" className={`${section === "home" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Home</NavLink>
                 <NavLink to="/events/browse" className={`${section === "browse" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Browse</NavLink>
-                <NavLink to="#" className={`${section === "category" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Categories</NavLink>
-                <NavLink to="#" className={`${section === "about" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>About</NavLink>
+                <NavLink to="/messages" className={`${section === "messages" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>Messages</NavLink>
+                <NavLink to="/about" className={`${section === "about" ? 'text-blue-700 font-bold' : 'text-gray-600'} hover:text-gray-900`}>About</NavLink>
             </div>
 
             {isLogged ? (
                 <div className="flex relative items-center gap-5">
-                    <Link to="#" className="">
-                        <svg width="37" height="38" viewBox="0 0 37 38" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M27.3584 22.6797C27.5928 22.9141 27.71 23.2266 27.71 23.5C27.6709 24.1641 27.2021 24.75 26.4209 24.75H11.46C10.6787 24.75 10.21 24.1641 10.21 23.5C10.1709 23.2266 10.2881 22.9141 10.5225 22.6797C11.2646 21.8594 12.71 20.6484 12.71 16.625C12.71 13.6172 14.8193 11.1953 17.71 10.5703V9.75C17.71 9.08594 18.2568 8.5 18.96 8.5C19.624 8.5 20.1709 9.08594 20.1709 9.75V10.5703C23.0615 11.1953 25.1709 13.6172 25.1709 16.625C25.1709 20.6484 26.6162 21.8594 27.3584 22.6797ZM12.8271 22.875H25.0537C24.2334 21.8203 23.335 19.9844 23.2959 16.6641C23.2959 16.6641 23.335 16.6641 23.335 16.625C23.335 14.2422 21.3428 12.25 18.96 12.25C16.5381 12.25 14.585 14.2422 14.585 16.625C14.585 16.6641 14.585 16.6641 14.585 16.6641C14.5459 19.9844 13.6475 21.8203 12.8271 22.875ZM18.96 28.5C17.5537 28.5 16.46 27.4062 16.46 26H21.4209C21.4209 27.4062 20.3271 28.5 18.96 28.5Z" fill="#4B5563" />
-                        </svg>
+                    <div className="relative">
+                        <NotificationBell
+                            count={notifications.length}
+                            onClick={modalOption}
+                        />
+                        {showNotifications && notifications.length > 0 && (
+                            <div className="absolute top-12 -right-15 w-80 max-h-96 overflow-y-auto bg-white shadow-lg border rounded-xl z-50">
+                                <div className="p-3 border-b font-semibold">Notifications</div>
+                                <ul className="divide-y">
+                                    {notifications.map((n) => (
+                                        <li key={n.id} className="p-3 hover:bg-gray-50">
+                                            <div className="flex items-center justify-between w-full">
+                                                <span className={`font-medium ${n.read ? 'text-gray-500' : 'text-black'}`}>{n.title}</span>
+                                                <span className={`p-1.5 rounded-4xl text-xs ${n.read ?'' :'bg-amber-300'}`}></span>
+                                            </div>
+                                            <div className="text-sm text-gray-500">{n.message}</div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
 
-                    </Link>
                     {user?.image ? (
                         <img
                             src={user.image}

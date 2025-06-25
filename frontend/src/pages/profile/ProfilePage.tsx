@@ -55,7 +55,7 @@ const ProfilePage = () => {
         setErrors({});
         try {
             await validatePassword(passwordData);
-            const response = await axiosInstance.patch("/auth/change-password", passwordData);
+            const response = await axiosInstance.patch("/user/auth/change-password", passwordData);
             if (response.data) {
                 toast.success(response.data.message);
                 setPasswordData({

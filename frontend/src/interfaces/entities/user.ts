@@ -1,4 +1,4 @@
-import type { Organization } from "./organizer";
+import type { Organization } from "./Organizer";
 
 export interface User {
     id: string;
@@ -12,5 +12,8 @@ export interface User {
     authProvider?: string;
     organizer: Organization;
     image?: string;
+    unreadCount?: number;
+    lastMessage?: string;
+    lastMessageAt?: string;
     createdAt: string;
 }

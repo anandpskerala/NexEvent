@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import QRcode from "qrcode";
 import axiosInstance from '../../utils/axiosInstance';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+import { AxiosError, type AxiosResponse } from 'axios';
 import { Calendar, CheckCircle, Clock, Download, Eye, MapPin, QrCode, XCircle } from 'lucide-react';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import type { RootState } from '../../store';
@@ -12,6 +12,8 @@ import { NavBar } from '../../components/partials/NavBar';
 import type { Booking } from '../../interfaces/entities/Booking';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { formatCurrency, formatDate } from '../../utils/stringUtils';
+import config from '../../config/config';
+import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
 
 const ConfirmationPage = () => {
     const { id } = useParams();
@@ -19,25 +21,139 @@ const ConfirmationPage = () => {
     const [booking, setBooking] = useState<Booking | null>();
     const [loading, setLoading] = useState<boolean>(true);
     const [qrcode, setQrCode] = useState<string>("");
+    const navigate = useNavigate();
 
     const downloadTicket = async (bookingId: string) => {
-    try {
-        const res = await axiosInstance.get(`/event/ticket/download/${bookingId}`, {
-            responseType: 'blob',
-        });
+        try {
+            const res = await axiosInstance.get(`/event/ticket/download/${bookingId}`, {
+                responseType: 'blob',
+            });
 
-        const blob = new Blob([res.data], { type: 'application/pdf' });
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `ticket-${bookingId}.pdf`);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-    } catch (error) {
-        console.error('Download failed', error);
-    }
-};
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `ticket-${bookingId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Download failed', error);
+        }
+    };
+
+    const handlePayment = async (): Promise<void> => {
+        try {
+            if (!booking) return;
+            console.log(booking);
+            if (booking.paymentMethod === "razorpay") {
+                const res: AxiosResponse<{
+                    order: {
+                        id: string;
+                        amount: number;
+                        currency: string;
+                    };
+                }> = await axiosInstance.post("/event/payment/razorpay/order", {
+                    amount: booking.totalAmount,
+                    currency: booking.eventId.currency || "INR",
+                });
+
+                const options: RazorpayOptions = {
+                    key: config.payment.RPayKey,
+                    amount: res.data.order.amount,
+                    currency: res.data.order.currency,
+                    name: booking.eventId.title,
+                    description: "Ticket Booking",
+                    order_id: res.data.order.id,
+                    handler: async (response: RazorpayResponse) => {
+                        await axiosInstance.post("/event/payment/razorpay/verify", {
+                            ...response,
+                            bookingId: booking.id,
+                            eventId: booking.eventId.id,
+                            amount: res.data.order.amount,
+                            currency: res.data.order.currency
+                        });
+                        toast.success("Payment successfull");
+                        navigate(`/payment/${booking.orderId}`);
+                    },
+                    prefill: {
+                        name: user?.firstName || "",
+                        email: user?.email || "",
+                    },
+                    theme: {
+                        color: "#0193ff",
+                    },
+                };
+
+                const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', async () => {
+                    await axiosInstance.post(`/event/failed/booking`, {
+                        bookingId: booking.id,
+                        eventId: booking.eventId.id,
+                        amount: res.data.order.amount,
+                        currency: res.data.order.currency,
+                        status: 'failed'
+                    });
+                    window.location.reload();
+                })
+                rzp.open();
+            }
+
+            else if (booking.paymentMethod === "stripe") {
+                const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
+                    "/event/payment/stripe/order",
+                    {
+                        eventId: booking.eventId.id, tickets: booking.tickets, promoCode: booking.couponCode, amount: booking.totalAmount * 100,
+                        bookingId: booking.id, currency: booking.eventId.currency || "INR", orderId: booking.orderId
+                    }
+                );
+
+                window.open(
+                    res.data.order,
+                    "_blank",
+                    "width=500,height=700"
+                );
+
+                const handleMessage = async (event: MessageEvent) => {
+                    if (event.origin !== window.location.origin) return;
+
+                    const { sessionId } = event.data;
+                    if (sessionId) {
+                        try {
+                            const res = await axiosInstance.post("/event/payment/stripe/verify", { sessionId });
+                            if (res.data) {
+                                toast.success(res.data.message);
+                                navigate(`/payment/${res.data.paymentId}`);
+                            }
+                        } catch (err) {
+                            console.log(err)
+                            toast.error("Stripe verification failed");
+                        }
+                    }
+                };
+
+                window.addEventListener("message", handleMessage, { once: true });
+            }
+
+            else if (booking.paymentMethod === "wallet") {
+                const res = await axiosInstance.post(
+                    "/event/payment/wallet/pay",
+                    { eventId: booking.eventId.id, currency: booking.eventId.currency, amount: booking.totalAmount, bookingId: booking.id }
+                );
+                if (res.data.paymentId) {
+                    toast.success("Payment successful via Wallet!");
+                    navigate(`/payment/${booking.orderId}`)
+                } else {
+                    toast.error("Insufficient wallet balance.");
+                }
+            }
+
+        } catch (err) {
+            console.error("Payment error:", err);
+            toast.error("Payment failed. Please try again.");
+        }
+    };
+
 
     useEffect(() => {
         const getBookingDetails = async () => {
@@ -47,7 +163,7 @@ const ConfirmationPage = () => {
 
                 if (res.data) {
                     setBooking(res.data.booking);
-                    const qr = await QRcode.toDataURL(JSON.stringify({eventId: booking?.eventId.id, booking: booking?.id}));
+                    const qr = await QRcode.toDataURL(JSON.stringify({ eventId: booking?.eventId.id, booking: booking?.id }));
                     setQrCode(qr);
                 }
             } catch (error) {
@@ -145,7 +261,7 @@ const ConfirmationPage = () => {
                                                 </div>
                                                 <div className="flex items-center text-gray-600">
                                                     <MapPin className="w-4 h-4 mr-2" />
-                                                    {booking.eventId.location.place}
+                                                    {booking.eventId?.location?.place || 'Virtual'}
                                                 </div>
                                             </div>
                                         </div>
@@ -235,12 +351,20 @@ const ConfirmationPage = () => {
                                     </div>
 
                                     <div className="flex flex-col sm:flex-row gap-3">
+                                        {booking.eventId.eventType !== "virtual" ? (
                                         <button className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
                                             onClick={() => downloadTicket(id as string)}
                                         >
                                             <Download className="w-4 h-4" />
                                             Download Ticket
-                                        </button>
+                                        </button>) : (
+                                            <Link 
+                                            to={`/meeting/${booking.eventId.id}`}
+                                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                        >
+                                            Get Virtual Link
+                                        </Link>
+                                        )}
                                         <Link to="/account/tickets" className="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-3 px-6 rounded-lg font-medium transition-colors flex items-center justify-center gap-2">
                                             <Eye className="w-4 h-4" />
                                             View My Tickets
@@ -254,14 +378,14 @@ const ConfirmationPage = () => {
                                         {'Your payment could not be processed. Please check your payment details and try again.'}
                                     </p>
                                     <div className="space-y-3">
-                                        {/* {onRetry && (
-                            <button
-                                onClick={onRetry}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
-                            >
-                                Try Again
-                            </button>
-                        )} */}
+                                        {booking?.status === "failed" && (
+                                            <button
+                                                onClick={() => handlePayment()}
+                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                                            >
+                                                Try Again
+                                            </button>
+                                        )}
                                         <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium transition-colors">
                                             Contact Support
                                         </button>

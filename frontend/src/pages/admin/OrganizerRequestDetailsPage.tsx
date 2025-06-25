@@ -6,7 +6,7 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
 import { OrganizerRequestDetails } from '../../components/forms/OrganizerRequestDetails';
-import type { OrganizerData } from '../../interfaces/entities/organizer';
+import type { OrganizerData } from '../../interfaces/entities/Organizer';
 
 const OrganizerRequestDetailsPage = () => {
     const { id } = useParams();

@@ -72,3 +72,7 @@ export interface CouponErrorState {
     maxAmount?: string;
     [key: string]: string | undefined;
 }
+
+export interface FeatureFormErrors {
+    [key: string]: string;
+}

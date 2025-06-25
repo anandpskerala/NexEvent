@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
-import type { OrganizerData } from '../../interfaces/entities/organizer';
+import type { OrganizerData } from '../../interfaces/entities/Organizer';
 import { Footer } from '../../components/partials/Footer';
 
 

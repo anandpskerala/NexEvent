@@ -1,5 +1,5 @@
-import type { NearestCity, OrganizerData } from "../entities/organizer";
-import type { User } from "../entities/user";
+import type { UserPosition, OrganizerData } from "../entities/Organizer";
+import type { User } from "../entities/User";
 
 export interface ImageUploaderModalProps {
   isOpen: boolean;
@@ -63,8 +63,15 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export interface UseNearestCityResult {
-  city?: NearestCity;
+export interface UserLocationResult {
+  location?: UserPosition;
   loading: boolean;
   error: string | null;
+}
+
+export interface UserReportProps {
+  isOpen: boolean;
+  onClose: () => void;
+  userId: string;
+  reporter: string;
 }

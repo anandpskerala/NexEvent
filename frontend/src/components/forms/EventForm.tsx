@@ -9,55 +9,12 @@ import { AxiosError } from 'axios';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import type { EventFormProps } from '../../interfaces/props/formProps';
 import type { EventData } from '../../interfaces/entities/FormState';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 import type { EventErrorState } from '../../interfaces/entities/ErrorState';
 import config from '../../config/config';
+import { validateEvent } from '../../interfaces/validators/eventValidator';
 
 
-
-const locationSchema = yup.object({
-  place: yup.string().when('$eventType', {
-    is: 'offline',
-    then: (schema) => schema.required('Location is required for offline events'),
-    otherwise: (schema) => schema.notRequired(),
-  }),
-  coordinates: yup.array()
-    .of(yup.number().typeError('Coordinates must be numbers'))
-    .length(2, 'Coordinates must be an array of two numbers [lng, lat]')
-    .when('$eventType', {
-      is: 'offline',
-      then: (schema) => schema.required('Coordinates are required for offline events'),
-      otherwise: (schema) => schema.notRequired(),
-    }),
-});
-
-
-const eventValidationSchema = yup.object().shape({
-    title: yup.string().trim().required('Event title is required'),
-    description: yup.string().trim().required('Event description is required'),
-    eventType: yup.string().oneOf(['offline', 'virtual']).required(),
-    category: yup.string().trim().required('Category is required'),
-    image: yup.mixed().test('fileOrUrl', 'Image must be a file or a URL', (value) => {
-        return value === null || typeof value === 'string' || value instanceof File;
-    }),
-    tags: yup.array().of(yup.string().trim()).min(1, 'At least one tag is required'),
-    eventFormat: yup.string().oneOf(['single', 'multiple']).required(),
-    location: locationSchema,
-    startDate: yup.string().required('Start date is required'),
-    endDate: yup.string().when('eventFormat', {
-        is: 'multiple',
-        then: (schema) =>
-            schema
-                .required('End date is required for multi-day events')
-                .test('is-after', 'End date must be after start date', function (value) {
-                    const { startDate } = this.parent;
-                    return !value || !startDate || new Date(value) >= new Date(startDate);
-                }),
-        otherwise: (schema) => schema.notRequired(),
-    }),
-    startTime: yup.string().required('Start time is required'),
-    endTime: yup.string().required('End time is required'),
-});
 
 export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit = false }) => {
     const [event, setEvent] = useState<EventData>({
@@ -190,7 +147,7 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
         setErrors({});
         setProcessing(true);
         try {
-            await eventValidationSchema.validate(event, { abortEarly: false, context: { eventType: event.eventType } });
+            await validateEvent(event);
             let image = event.image;
             if (event.image && event.image instanceof File) {
                 image = await uploadToCloudinary(event.image)
@@ -228,7 +185,7 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
         const fetchCategories = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/admin/categories`);
+                const res = await axiosInstance.get(`/admin/category`);
                 setCategories(res.data.categories);
             } catch (error) {
                 console.error(error);

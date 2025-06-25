@@ -6,7 +6,7 @@ import type { EventCardProps } from '../../interfaces/props/formProps'
 
 export const EventCard: React.FC<EventCardProps> = ({ event }) => {
     return (
-        <div className="bg-white rounded-lg shadow-md h-full md:min-h-[300px] overflow-hidden relative w-full md:max-w-sm mx-auto">
+        <div className="bg-white rounded-lg shadow-md h-full overflow-hidden relative w-full md:max-w-sm mx-auto">
 
             <div className="absolute top-2 right-2">
                 <Heart className="text-white fill-white/50 hover:fill-red-500 cursor-pointer" />
@@ -21,7 +21,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
             </div>
 
             <div className="p-4">
-                <h3 className="text-md font-semibold mb-2">{event.title}</h3>
+                <h3 className="text-md font-semibold mb-2 truncate" title={event.title}>{event.title}</h3>
 
                 <div className="space-y-2">
                     <div className="flex items-center text-gray-600 overflow-hidden">

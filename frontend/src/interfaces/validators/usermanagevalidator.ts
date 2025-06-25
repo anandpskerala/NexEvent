@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import type { User } from '../entities/user';
+import type { User } from '../entities/User';
 
 const schema = Yup.object().shape({
   email: Yup.string()

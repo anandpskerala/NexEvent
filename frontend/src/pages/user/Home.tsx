@@ -7,47 +7,63 @@ import axiosInstance from "../../utils/axiosInstance";
 import { EventCard } from "../../components/cards/EventCard";
 import { EventFormSkeleton } from "../../components/skeletons/EventsFormSkeleton";
 import { CategoryCard } from "../../components/cards/CategoryCard";
-import type { Category } from "../../interfaces/entities/category";
+import type { Category } from "../../interfaces/entities/Category";
 import type { AllEventData } from "../../interfaces/entities/FormState";
 import { Link, useNavigate } from "react-router-dom";
+import { useUserLocation } from "../../hooks/useUserLocation";
 
 
 const Home = () => {
   const { user } = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState<boolean>(true);
   const [events, setEvents] = useState<AllEventData[]>([]);
+  const [nearByEvents, setNearByEvents] = useState<AllEventData[]>([]);
   const [categories, setCatgories] = useState<Category[]>([]);
   const [search, setSearch] = useState<string>("");
+  const { location, loading: locationLoading } = useUserLocation();
 
   const navigate = useNavigate();
 
 
   const handleSearch = () => {
-    const query = search !== ""? `?search=${search}`: "";
+    const query = search !== "" ? `?search=${search}` : "";
     navigate(`/events/browse${query}`);
   }
 
   useEffect(() => {
     const fetchRequest = async () => {
+      setLoading(true);
+
       try {
-        const res = await axiosInstance.get(`/event/all?limit=5`);
-        if (res.data) {
-          setEvents(res.data.events);
+        const [eventRes, nearbyEvent, categoryRes] = await Promise.all([
+          axiosInstance.get("/event/all?limit=5"),
+          axiosInstance.get(`/event/nearbyevents?lat=${location?.lat}&lng=${location?.lng}`),
+          axiosInstance.get("/admin/category/?limit=5"),
+        ]);
+
+        if (eventRes.data) {
+          setEvents(eventRes.data.events);
         }
 
-        const catRes = await axiosInstance.get("/admin/categories?limit=5");
-        if (catRes.data) {
-          setCatgories(catRes.data.categories);
+        if (nearbyEvent.data) {
+          setNearByEvents(nearbyEvent.data.events);
+        }
+
+        if (categoryRes.data) {
+          setCatgories(categoryRes.data.categories);
         }
       } catch (error) {
-        console.error(error)
+        console.error("Error fetching events or categories:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRequest();
-  }, []);
+    if (!locationLoading && location?.lat !== 0 && location?.lng !== 0) {
+      fetchRequest();
+    }
+  }, [location, locationLoading]);
+
   return (
     <div className="flex flex-col min-h-screen bg-white">
       <NavBar isLogged={user?.isVerified} name={user?.firstName} user={user} section="home" />
@@ -74,7 +90,7 @@ const Home = () => {
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyDown={(e) => (e.key == 'Enter' && handleSearch())}
               />
-              <button 
+              <button
                 className="absolute right-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 cursor-pointer"
                 onClick={handleSearch}
               >
@@ -110,12 +126,44 @@ const Home = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {events.map((event, index) => (
-                  <div key={index} className="group cursor-pointer">
-                    <EventCard event={event} />
-                  </div>
+                  !["ended", "cancelled"].includes(event.status as string) && (
+                    <div key={index} className="group cursor-pointer">
+                      <EventCard event={event} />
+                    </div>
+                  )
                 ))}
               </div>
             </section>
+
+            {nearByEvents.length !== 0 && (
+              <section className="py-16">
+                <div className="flex items-center justify-between mb-12">
+                  <div>
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="w-3 h-3 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
+                      <span className="text-orange-600 font-semibold text-xs uppercase tracking-wider">Nearby Events</span>
+                    </div>
+                    <h2 className="text-xl md:text-3xl font-black text-gray-900 mb-2">
+                      Events Near your locality
+                    </h2>
+                  </div>
+                  <Link to="/events/browse" className="hidden md:flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold group cursor-pointer">
+                    View All
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  {nearByEvents.map((event, index) => (
+                    <div key={index} className="group cursor-pointer">
+                      <EventCard event={event} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
             <section className="py-10 bg-gradient-to-br from-gray-50 to-blue-50/50 -mx-4 md:-mx-6 px-4 md:px-6 rounded-3xl shadow">
               <div className="flex items-center justify-between mb-12">

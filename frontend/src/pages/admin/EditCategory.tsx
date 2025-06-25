@@ -6,7 +6,7 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { CategoryForm } from '../../components/forms/CategoryForm';
 import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
-import type { Category } from '../../interfaces/entities/category';
+import type { Category } from '../../interfaces/entities/Category';
 
 
 const EditCategory = () => {
@@ -40,7 +40,7 @@ const EditCategory = () => {
 
     return (
         <div className="flex h-screen bg-gray-50">
-            <AdminSideBar sidebarCollapsed={sidebarCollapsed} section='coupons' />
+            <AdminSideBar sidebarCollapsed={sidebarCollapsed} section='category' />
             <div className="flex-1 overflow-auto">
                 <div className="p-6">
                     <AdminNavbar title='Create Category' user={user} toggleSidebar={toggleSidebar} />

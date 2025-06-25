@@ -47,7 +47,7 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
         setErrors({});
         setLoading(true);
         try {
-            await validateCoupon(formData);
+            await validateCoupon(formData, isEdit, formData.startDate ? new Date(formData.startDate) : undefined);
 
             const payload = {
                 couponCode: formData.couponCode,
@@ -199,7 +199,11 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                             type="date"
                             id="startDate"
                             name="startDate"
-                            value={new Date(formData.startDate as string).toISOString().split("T")[0]}
+                            value={
+                                formData.startDate
+                                    ? new Date(formData.startDate).toISOString().split("T")[0]
+                                    : ''
+                            }
                             onChange={handleInputChange}
                             required
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -218,7 +222,11 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                             type="date"
                             id="endDate"
                             name="endDate"
-                            value={new Date(formData.endDate as string).toISOString().split("T")[0]}
+                            value={
+                                formData.endDate
+                                    ? new Date(formData.endDate).toISOString().split("T")[0]
+                                    : ''
+                            }
                             onChange={handleInputChange}
                             required
                             min={formData.startDate}
@@ -329,7 +337,7 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                         type="submit"
                         className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors cursor-pointer"
                     >
-                       {isEdit ? (isloading ? 'Saving': 'Save') : (isloading ? 'Creating': 'Create')} Coupon {isloading && '...' }
+                        {isEdit ? (isloading ? 'Saving' : 'Save') : (isloading ? 'Creating' : 'Create')} Coupon {isloading && '...'}
                     </button>
                 </div>
             </form>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { LogOut, MessageSquare, Wallet, History, Heart, Ticket, Settings, Camera } from 'lucide-react'
+import { LogOut, MessageSquare, Wallet, Heart, Ticket, Settings, Camera } from 'lucide-react'
 import { useAppDispatch } from '../../hooks/useAppDispatch'
 import { logout } from '../../store/actions/auth/logout'
-import type { User } from '../../interfaces/entities/user'
+import type { User } from '../../interfaces/entities/User'
 import { Link } from 'react-router-dom'
 import { ImageUploadModal } from '../modals/ImageUploadModal'
 import { uploadToCloudinary } from '../../utils/cloudinary'
@@ -54,11 +54,6 @@ export const UserSidebar: React.FC<{ user?: User | null | undefined, section: st
                 <Link to="/account/saved-events" className={`w-1/2 md:w-full ${section == "saved" ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'} py-2 px-2 md:px-4 rounded flex items-center justify-center md:justify-start`}>
                     <Heart size={18} className="mr-0 md:mr-2" />
                     <span className="hidden md:flex">Saved Events</span>
-                </Link>
-
-                <Link to="/account/past-events" className={`w-1/2 md:w-full ${section == "past" ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'} py-2 px-2 md:px-4 rounded flex items-center justify-center md:justify-start`}>
-                    <History size={18} className="mr-0 md:mr-2" />
-                    <span className="hidden md:flex">Past Events</span>
                 </Link>
 
                 <Link to="/messages" className={`w-1/2 md:w-full ${section == "messages" ? 'bg-blue-500 text-white' : 'text-gray-700 hover:bg-gray-100'} py-2 px-2 md:px-4 rounded flex items-center justify-center md:justify-start`}>

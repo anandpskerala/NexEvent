@@ -96,7 +96,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave }) 
                 <input
                   type="text"
                   name="firstName"
-                  value={formData.firstName}
+                  value={formData.firstName || ''}
                   onChange={handleChange}
                   placeholder="First Name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -110,7 +110,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave }) 
                 <input
                   type="text"
                   name="lastName"
-                  value={formData.lastName}
+                  value={formData.lastName || ''}
                   onChange={handleChange}
                   placeholder="Last Name"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -127,7 +127,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave }) 
               <input
                 type="email"
                 name="email"
-                value={formData.email}
+                value={formData.email || ''}
                 placeholder="Email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed transition-colors"
                 disabled

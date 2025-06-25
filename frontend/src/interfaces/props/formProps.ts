@@ -1,9 +1,9 @@
-import type { Category } from "../entities/category";
+import type { Category } from "../entities/Category";
 import type { ICoupon } from "../entities/Coupons";
 import type { TicketErrorState } from "../entities/ErrorState";
 import type { AllEventData, EventData, Ticket } from "../entities/FormState";
-import type { OrganizerData } from "../entities/organizer";
-import type { User } from "../entities/user";
+import type { OrganizerData } from "../entities/Organizer";
+import type { User } from "../entities/User";
 
 export interface RequestFormProps {
     userId?: string

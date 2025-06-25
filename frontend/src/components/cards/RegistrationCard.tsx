@@ -1,6 +1,6 @@
 import { Mail, ExternalLink, Info, Building } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import type { Organization } from '../../interfaces/entities/organizer';
+import type { Organization } from '../../interfaces/entities/Organizer';
 
 
 

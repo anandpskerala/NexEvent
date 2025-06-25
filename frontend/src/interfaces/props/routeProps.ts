@@ -1,4 +1,4 @@
-import type { User } from "../entities/user";
+import type { User } from "../entities/User";
 
 export interface AdminProps {
     user?: User | null

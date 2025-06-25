@@ -1,4 +1,4 @@
-import type { User } from "./user";
+import type { User } from "./User";
 
 export interface OrganizerData {
     id: string;
@@ -25,9 +25,7 @@ export interface Organization {
     email: string;
 }
 
-export interface NearestCity {
-    city: string;
-    district: string;
-    state: string;
-    country: string;
+export interface UserPosition {
+    lat: number;
+    lng: number;
 }

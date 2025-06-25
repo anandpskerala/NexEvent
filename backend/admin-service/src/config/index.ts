@@ -11,6 +11,10 @@ export const config = {
     db: {
         mongoURI: process.env.MONGO_URI || ""
     },
+    services: {
+        user: process.env.USER_SERVICE || "",
+        kafka: process.env.KAFKA_BROKER || 'host.docker.internal:9092',
+    },
     cloudinary: {
         cloudName: process.env.CLOUD_NAME,
         apiKey: process.env.CLOUD_API_KEY,

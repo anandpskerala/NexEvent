@@ -258,7 +258,17 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                                 <h2 className="text-lg font-medium text-gray-900">Verification Documents</h2>
                             </div>
                             <div className="w-full mx-auto">
-                                <img src={request.documents} alt="Verification document" className="w-full h-auto rounded shadow-sm mt-10" />
+                                {request.documents ? (
+                                    <div className="w-full mx-auto">
+                                        <img
+                                            src={request.documents}
+                                            alt="Verification document"
+                                            className="w-full h-auto rounded shadow-sm mt-10"
+                                        />
+                                    </div>
+                                ) : (
+                                    <p className="ml-7 text-gray-500 italic">No document uploaded</p>
+                                )}
                             </div>
                         </div>
                     )

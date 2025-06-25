@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { UserService } from "../services/userService";
-import { IUser } from "../shared/types/user";
+import { IUser } from "../shared/types/IUser";
 import { StatusCode } from "../shared/constants/statusCode";
 import { TOPICS } from "../kafka/topics";
 import { UserProducer } from "../kafka/producer/userProducer";
@@ -22,9 +22,9 @@ export class UserController {
     }
 
     public getAllUsers = async (req: Request, res: Response): Promise<void> => {
-        const { search = "", page = 1, limit = 10, role = "", status = "", myId } = req.query;
-        const result = await this.userService.getAllUsers(search as string, page as number, limit as number, role as string, status as string, myId as string);
-        res.status(result.status).json({users: result.users, page: result.page, pages: result.pages, total: result.total})
+        const { query = "", page = 1, limit = 10, role = "", status = "", myId } = req.query;
+        const result = await this.userService.getAllUsers(query as string, page as number, limit as number, role as string, status as string, myId as string);
+        res.status(result.status).json({message: result.message, users: result.users, page: result.page, pages: result.pages, total: result.total})
     }
 
     public updateProfile = async (req: Request, res: Response): Promise<void> => {
@@ -55,9 +55,9 @@ export class UserController {
         res.status(result.status).json({message: result.message});
     }
 
-    // public getBulkUsers = async (req: Request, res: Response): Promise<void> => {
-    //     const { ids } = req.body;
-    //     const result = await this.userService.getUsersBulk(ids);
-    //     res.status(result.status).json({message: result.message, users: result.users});
-    // }
+    public getBulkUsers = async (req: Request, res: Response): Promise<void> => {
+        const { ids } = req.body;
+        const result = await this.userService.getUsersBulk(ids);
+        res.status(result.status).json({message: result.message, users: result.users});
+    }
 }

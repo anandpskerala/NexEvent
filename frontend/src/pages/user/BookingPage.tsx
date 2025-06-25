@@ -17,6 +17,7 @@ declare global {
     interface Window {
         Razorpay: new (options: RazorpayOptions) => {
             open: () => void;
+            on(event: "payment.failed", handler: () => void): void;
         };
     }
 }
@@ -40,15 +41,20 @@ const BookingPage = () => {
     const [params] = useSearchParams();
     const sessionId = params.get("session_id");
     const navigate = useNavigate();
-    // const hasRun = useRef(false);
 
     const processingFee = 5;
-    const { subtotal, discount, total } = useMemo(() => {
-        const subtotal = Object.values(tickets).reduce((acc, ticket) => acc + ticket.price * ticket.quantity, 0);
-        const discount = couponData?.discount || 0
-        const total = subtotal + (subtotal > 0 ? 5 : 0) - discount;
-        return { subtotal, discount, total };
+    const { subtotal, discount, total, isFreeEvent } = useMemo(() => {
+        const subtotal = Object.values(tickets).reduce((acc, ticket) => {
+            const price = ticket.price || 0;
+            return acc + price * ticket.quantity;
+        }, 0);
+        const isFreeEvent = Object.values(tickets).every(ticket => (ticket.price || 0) === 0);
+        const discount = couponData?.discount || 0;
+        const total = isFreeEvent ? 0 : subtotal + (subtotal > 0 ? 5 : 0) - discount;
+        return { subtotal, discount, total, isFreeEvent };
     }, [tickets, couponData?.discount]);
+
+    console.log(subtotal, discount, total);
 
     const updateTicketQuantity = (
         ticketId: string,
@@ -94,7 +100,7 @@ const BookingPage = () => {
             };
         },
         totalAmount: number,
-        paymentMethod: string) => {
+        paymentMethod: string| null) => {
         try {
             const res = await axiosInstance.post("/event/booking", {
                 eventId,
@@ -120,6 +126,14 @@ const BookingPage = () => {
     const handlePayment = async (): Promise<void> => {
         try {
             if (!event) return;
+            if (isFreeEvent) {
+                const booking = await handleBooking(event.id as string, tickets, 0, null);
+                if (booking) {
+                    toast.success("Booking confirmed!");
+                    navigate(`/payment/${booking.orderId}`);
+                }
+                return;
+            }
             const booking = await handleBooking(event.id as string, tickets, total, paymentMethod);
             console.log(booking);
             if (paymentMethod === "razorpay") {
@@ -129,7 +143,7 @@ const BookingPage = () => {
                         amount: number;
                         currency: string;
                     };
-                }> = await axiosInstance.post("/payment/razorpay/order", {
+                }> = await axiosInstance.post("/event/payment/razorpay/order", {
                     amount: total,
                     currency: event.currency || "INR",
                 });
@@ -142,7 +156,7 @@ const BookingPage = () => {
                     description: "Ticket Booking",
                     order_id: res.data.order.id,
                     handler: async (response: RazorpayResponse) => {
-                        await axiosInstance.post("/payment/razorpay/verify", {
+                        await axiosInstance.post("/event/payment/razorpay/verify", {
                             ...response,
                             bookingId: booking.id,
                             eventId: event.id,
@@ -162,12 +176,22 @@ const BookingPage = () => {
                 };
 
                 const rzp = new window.Razorpay(options);
+                rzp.on('payment.failed', async () => {
+                    await axiosInstance.post(`/event/failed/booking`, {
+                        bookingId: booking.id,
+                        eventId: event.id,
+                        amount: res.data.order.amount,
+                        currency: res.data.order.currency,
+                        status: 'failed'
+                    });
+                    window.location.href = `/payment/${booking.orderId}`;
+                })
                 rzp.open();
             }
 
             else if (paymentMethod === "stripe") {
                 const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
-                    "/payment/stripe/order",
+                    "/event/payment/stripe/order",
                     {
                         eventId: event.id, tickets, promoCode, amount: total * 100,
                         bookingId: booking.id, currency: event.currency || "INR", orderId: booking.orderId
@@ -186,7 +210,7 @@ const BookingPage = () => {
                     const { sessionId } = event.data;
                     if (sessionId) {
                         try {
-                            const res = await axiosInstance.post("/payment/stripe/verify", { sessionId });
+                            const res = await axiosInstance.post("/event/payment/stripe/verify", { sessionId });
                             if (res.data) {
                                 toast.success(res.data.message);
                                 navigate(`/payment/${res.data.paymentId}`);
@@ -203,7 +227,7 @@ const BookingPage = () => {
 
             else if (paymentMethod === "wallet") {
                 const res = await axiosInstance.post(
-                    "/payment/wallet/pay",
+                    "/event/payment/wallet/pay",
                     { eventId: event.id, currency: event.currency, amount: total, bookingId: booking.id }
                 );
                 if (res.data.paymentId) {
@@ -234,6 +258,8 @@ const BookingPage = () => {
                 const res = await axiosInstance.get(`/event/event/${id}`);
                 if (res.data) {
                     setEvent(res.data.event);
+                    const ticket = res.data.event.tickets[0];
+                    updateTicketQuantity(ticket.id, 1, ticket.price, ticket.name);
                 }
             } catch (error) {
                 setEvent(undefined);
@@ -330,17 +356,22 @@ const BookingPage = () => {
                                         <div className="space-y-3 mb-6">
                                             {event?.tickets?.map((ticket) => {
                                                 const count = tickets[ticket.id as string]?.quantity ?? 0;
+                                                const price = ticket.price || 0;
                                                 return count > 0 ? (
                                                     <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg" key={ticket.id}>
                                                         <div>
                                                             <span className="font-medium text-gray-900">{count} × {ticket.name}</span>
-                                                            <div className="text-sm text-gray-500">{getCurrencySymbol()}{ticket.price} each</div>
+                                                            <div className="text-sm text-gray-500">
+                                                                {price === 0 ? 'Free each' : `${getCurrencySymbol()}${price} each`}
+                                                            </div>
                                                         </div>
-                                                        <span className="font-semibold text-gray-900">{getCurrencySymbol()}{(ticket.price as number * count).toFixed(2)}</span>
+                                                        <span className="font-semibold text-gray-900">
+                                                            {price === 0 ? 'Free' : `${getCurrencySymbol()}${(price as number * count).toFixed(2)}`}
+                                                        </span>
                                                     </div>
                                                 ) : null;
                                             })}
-                                            {subtotal === 0 && (
+                                            {subtotal === 0 && Object.values(tickets).every(t => t.quantity === 0) && (
                                                 <div className="text-center py-6 text-gray-500">
                                                     <svg className="w-12 h-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -356,15 +387,19 @@ const BookingPage = () => {
                                                     <span>Subtotal</span>
                                                     <span>{getCurrencySymbol()}{subtotal.toFixed(2)}</span>
                                                 </div>
-                                                <div className="flex justify-between text-gray-600">
-                                                    <span>Processing Fee</span>
-                                                    <span>{getCurrencySymbol()}{processingFee.toFixed(2)}</span>
-                                                </div>
-                                                {promoApplied && (
-                                                    <div className="flex justify-between text-green-600">
-                                                        <span>Discount</span>
-                                                        <span>-{getCurrencySymbol()}{discount.toFixed(2)}</span>
-                                                    </div>
+                                                {!isFreeEvent && (
+                                                    <>
+                                                        <div className="flex justify-between text-gray-600">
+                                                            <span>Processing Fee</span>
+                                                            <span>{getCurrencySymbol()}{processingFee.toFixed(2)}</span>
+                                                        </div>
+                                                        {promoApplied && (
+                                                            <div className="flex justify-between text-green-600">
+                                                                <span>Discount</span>
+                                                                <span>-{getCurrencySymbol()}{discount.toFixed(2)}</span>
+                                                            </div>
+                                                        )}
+                                                    </>
                                                 )}
                                                 <div className="flex justify-between font-bold text-lg pt-3 border-t border-gray-200">
                                                     <span>Total</span>
@@ -445,27 +480,25 @@ const BookingPage = () => {
                                     </div>
                                 </div>
 
-                                {/* <Elements stripe={stripePromise}> */}
                                 <button
-                                    className={`w-full py-4 rounded-2xl font-bold text-lg transition-all duration-200 transform ${subtotal > 0
+                                    className={`w-full py-4 rounded-2xl font-bold text-lg transition-all duration-200 transform ${Object.entries(tickets).length > 0
                                         ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer'
                                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                         }`}
                                     onClick={handlePayment}
-                                    disabled={subtotal === 0}
+                                    disabled={Object.entries(tickets).length === 0}
                                 >
-                                    {subtotal > 0 ? (
+                                    {Object.entries(tickets).length > 0 ? (
                                         <span className="flex items-center justify-center">
                                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                                             </svg>
-                                            Pay {getCurrencySymbol()}{total.toFixed(2)} Now
+                                            {isFreeEvent ? 'Book now' : `Pay ${getCurrencySymbol()}${total.toFixed(2)} Now`}
                                         </span>
                                     ) : (
                                         'Select tickets to continue'
                                     )}
                                 </button>
-                                {/* </Elements> */}
 
                                 <div className="text-center text-sm text-gray-500 flex items-center justify-center">
                                     <svg className="w-4 h-4 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">

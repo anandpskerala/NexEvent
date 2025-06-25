@@ -1,4 +1,4 @@
-import { IRequest } from "../../shared/types/organizerRequest";
+import { IRequest } from "../../shared/types/IRequest";
 
 export interface IRequestRepository {
     create(item: Partial<IRequest>): Promise<IRequest>;

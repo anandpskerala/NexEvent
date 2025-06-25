@@ -1,5 +1,5 @@
 import type { JSX } from "react";
-import type { User } from "../entities/user"
+import type { User } from "../entities/User"
 
 export interface NavBarProps {
     isLogged: boolean | undefined,

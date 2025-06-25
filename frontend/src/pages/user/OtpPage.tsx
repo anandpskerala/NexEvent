@@ -21,8 +21,7 @@ const OtpPage = () => {
     useEffect(() => {
         const getTimer = async () => {
             try {
-                const response = await axiosInstance.get("/auth/otp");
-                console.log(response.data)
+                const response = await axiosInstance.get("/user/otp");
                 const backendTimeLeft = response.data?.timeLeft ?? 0;
                 setTimeLeft(backendTimeLeft);
             } catch (error) {
@@ -101,7 +100,7 @@ const OtpPage = () => {
 
     const resendCode = async () => {
         try {
-            const response = await axiosInstance.patch("/auth/otp");
+            const response = await axiosInstance.patch("/user/otp");
             if (response.data) {
                 toast.success(response.data.message);
             }

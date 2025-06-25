@@ -1,5 +1,5 @@
 import { FilterQuery, Model } from "mongoose";
-import { AllUsers, IUser } from "../shared/types/user";
+import { AllUsers, IUser } from "../shared/types/IUser";
 import { IUserRepository } from "./interfaces/IUserRepository";
 import userModel from "../models/userModel";
 
@@ -82,5 +82,10 @@ export class UserRepository implements IUserRepository {
 
     async addRole(id: string, role: string): Promise<void> {
         await this.model.updateOne({ _id: id }, { $addToSet: { roles: role } });
+    }
+
+    async getBulkUsers(ids: string[]): Promise<IUser[]> {
+        const docs = (await this.model.find({ _id: { $in: ids } }).select('_id firstName lastName image')).map(doc => doc.toJSON());
+        return docs;
     }
 }

@@ -35,7 +35,7 @@ const ResetPassword = () => {
         e.preventDefault();
         try {
             await validateResetForm(formdata);
-            const response = await axiosInstance.patch("/auth/reset-password", { requestId: id, newPassword: formdata.password });
+            const response = await axiosInstance.patch("/user/auth/reset-password", { requestId: id, newPassword: formdata.password });
             if (response.data) {
                 toast.success(response.data.message);
                 navigate("/login");

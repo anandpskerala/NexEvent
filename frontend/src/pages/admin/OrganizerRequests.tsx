@@ -7,7 +7,7 @@ import { AlertTriangle } from 'lucide-react';
 import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
-import type { Organization } from '../../interfaces/entities/organizer';
+import type { Organization } from '../../interfaces/entities/Organizer';
 import { RegistrationCard } from '../../components/cards/RegistrationCard';
 
 const OrganizerRequests = () => {
@@ -37,8 +37,8 @@ const OrganizerRequests = () => {
             const res = await axiosInstance.get(`/user/requests?page=${pageNumber}&limit=${limit}`);
             if (res.data) {
                 setRegistrations(res.data.requests);
-                setPage(res.data.page);
-                setPages(res.data.pages);
+                setPage(Number(res.data.page));
+                setPages(Number(res.data.pages));
             }
         } catch (error) {
             console.error("Failed to fetch requests", error);

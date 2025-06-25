@@ -1,5 +1,5 @@
 import { Model } from "mongoose";
-import { IForgotRequest } from "../shared/types/forgotRequest";
+import { IForgotRequest } from "../shared/types/IForgotRequest";
 import { IForgotRepository } from "./interfaces/IForgotRepository";
 import forgotModel from "../models/forgotModel";
 
@@ -18,6 +18,11 @@ export class ForgotRepository implements IForgotRepository {
     async findByID(id: string): Promise<IForgotRequest | undefined> {
         const doc = await this.model.findOne({_id: id});
         return doc?.toJSON()
+    }
+
+    async findByRequestId(id: string):  Promise<IForgotRequest | undefined> {
+        const doc = await this.model.findOne({requestId: id});
+        return doc?.toJSON();
     }
 
     async create(item: Partial<IForgotRequest>): Promise<IForgotRequest> {
