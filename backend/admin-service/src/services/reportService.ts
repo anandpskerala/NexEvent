@@ -5,6 +5,7 @@ import { ReportRepository } from "../repositories/ReportRepository";
 import { StatusCode } from "../shared/constants/statusCode";
 import { INotification } from "../shared/types/INotification";
 import { IReport, ReportActions } from "../shared/types/IReport";
+import logger from "../shared/utils/logger";
 
 export class ReportService {
     private producer: KafkaProducer;
@@ -34,7 +35,7 @@ export class ReportService {
                 data: doc
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -55,7 +56,7 @@ export class ReportService {
                 reports: result.items
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -70,6 +71,7 @@ export class ReportService {
                 this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                     userId: report.reportedBy,
                     title: "User report update",
+                    type: "report",
                     message: `Your report has been ${status}`
                 })
             }
@@ -78,7 +80,7 @@ export class ReportService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -94,7 +96,7 @@ export class ReportService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

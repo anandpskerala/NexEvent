@@ -5,6 +5,7 @@ import { RequestRepository } from "../repositories/RequestRepository";
 import { UserRepository } from "../repositories/UserRepository";
 import { IRequest } from "../shared/types/IRequest";
 import { UserReturnType, RequestPaginationType, RequestReturnType } from "../shared/types/ReturnTypes";
+import logger from "../shared/utils/logger";
 
 export class RequestService {
     private cloudinary: CloudinaryService;
@@ -43,7 +44,7 @@ export class RequestService {
                 message: "Request sent"
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -68,7 +69,7 @@ export class RequestService {
                 request: request ? request : undefined
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -103,7 +104,7 @@ export class RequestService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -125,7 +126,7 @@ export class RequestService {
                 pages: Math.ceil(total / limit),
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -162,7 +163,7 @@ export class RequestService {
                 user: user? user: undefined
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

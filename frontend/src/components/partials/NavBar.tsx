@@ -1,16 +1,20 @@
-import { Calendar, Home, LogOut, MessageCircle, User as UserIcon, UserLock } from "lucide-react"
+import { Calendar, Home, LogOut, MapPin, MessageCircle, User as UserIcon, UserLock, Bell, X, Check } from "lucide-react"
 import React, { useState } from "react"
 import { Link, NavLink } from "react-router-dom"
 import type { NavBarProps } from "../../interfaces/props/navBarProps"
 import { logout } from "../../store/actions/auth/logout"
 import { useAppDispatch } from "../../hooks/useAppDispatch"
 import { useNotification } from "../../hooks/useNotification"
-import { NotificationBell } from "../messages/NotificationBell"
-
+import type { Location } from "../../interfaces/props/locationModalProps"
+import { LocationModal } from "../modals/LocationModal"
+import { useUserLocation } from "../../hooks/useUserLocation"
 
 export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest", user, section }) => {
     const [showProfileOptions, setShowProfileOptions] = useState<boolean>(false);
-    const { notifications } = useNotification(user?.id);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState<Location | undefined>();
+    const { setLocation } = useUserLocation();
+    const { notifications, markAllAsRead } = useNotification(user?.id);
     const [showNotifications, setShowNotifications] = useState(false);
 
     const toggleProfileOptions = () => {
@@ -20,12 +24,21 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
     const dispatch = useAppDispatch();
 
     const modalOption = async () => {
-        if (!showNotifications) {
-            setShowNotifications(true);
-        } else {
-            setShowNotifications(false);
-        }
+        setShowNotifications(!showNotifications);
     };
+
+    const handleLocationSelect = (location: Location) => {
+        setSelectedLocation(location);
+        setLocation(location);
+    };
+
+
+    const handleMarkAllRead = () => {
+        markAllAsRead(user?.id as string);
+    };
+
+    const unreadCount = notifications.filter(n => !n.read).length;
+    const recentNotifications = notifications.slice(0, 5);
 
     return (
         <nav className="flex items-center justify-between px-6 py-5 shadow-md fixed w-full bg-white z-30">
@@ -45,25 +58,121 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
 
             {isLogged ? (
                 <div className="flex relative items-center gap-5">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => setIsLocationModalOpen(true)}
+                            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 hover:text-red-600 transition-colors cursor-pointer"
+                        >
+                            <MapPin className="w-4 h-4" />
+                            <span>{selectedLocation?.name || 'Select Location'}</span>
+                        </button>
+                    </div>
+
                     <div className="relative">
-                        <NotificationBell
-                            count={notifications.length}
+                        <button
                             onClick={modalOption}
-                        />
-                        {showNotifications && notifications.length > 0 && (
-                            <div className="absolute top-12 -right-15 w-80 max-h-96 overflow-y-auto bg-white shadow-lg border rounded-xl z-50">
-                                <div className="p-3 border-b font-semibold">Notifications</div>
-                                <ul className="divide-y">
-                                    {notifications.map((n) => (
-                                        <li key={n.id} className="p-3 hover:bg-gray-50">
-                                            <div className="flex items-center justify-between w-full">
-                                                <span className={`font-medium ${n.read ? 'text-gray-500' : 'text-black'}`}>{n.title}</span>
-                                                <span className={`p-1.5 rounded-4xl text-xs ${n.read ?'' :'bg-amber-300'}`}></span>
-                                            </div>
-                                            <div className="text-sm text-gray-500">{n.message}</div>
-                                        </li>
-                                    ))}
-                                </ul>
+                            className="relative p-2 text-gray-600 hover:text-blue-600 transition-colors cursor-pointer"
+                        >
+                            <Bell className="w-6 h-6" />
+                            {unreadCount > 0 && (
+                                <span className="absolute top-0 right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium cursor-pointer">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                </span>
+                            )}
+                        </button>
+
+                        {showNotifications && (
+                            <div className="absolute top-12 -right-4 w-96 max-h-[32rem] bg-white shadow-xl border rounded-2xl z-50 overflow-hidden">
+                                <div className="flex items-center justify-between p-4 border-b bg-gray-50">
+                                    <div className="flex items-center gap-2">
+                                        <Bell className="w-5 h-5 text-gray-600" />
+                                        <h3 className="font-semibold text-gray-800">Notifications</h3>
+                                        {unreadCount > 0 && (
+                                            <span className="bg-blue-100 text-blue-600 text-xs px-2 py-1 rounded-full font-medium">
+                                                {unreadCount} new
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {unreadCount > 0 && (
+                                            <button
+                                                onClick={handleMarkAllRead}
+                                                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 cursor-pointer"
+                                            >
+                                                <Check className="w-3 h-3" />
+                                                Mark all read
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => setShowNotifications(false)}
+                                            className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="max-h-80 overflow-y-auto">
+                                    {recentNotifications.length > 0 ? (
+                                        <div className="divide-y">
+                                            {recentNotifications.map((notification) => (
+                                                <div
+                                                    key={notification.id}
+                                                    className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${!notification.read ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                                                        }`}
+                                                >
+                                                    <div className="flex items-start justify-between gap-3">
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h4 className={`font-medium text-sm ${!notification.read ? 'text-gray-900' : 'text-gray-600'
+                                                                    }`}>
+                                                                    {notification.title}
+                                                                </h4>
+                                                                {!notification.read && (
+                                                                    <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
+                                                                )}
+                                                            </div>
+                                                            <p className="text-xs text-gray-500 mb-2 line-clamp-2">
+                                                                {notification.message}
+                                                            </p>
+                                                            <div className="flex items-center justify-between">
+                                                                <span className="text-xs text-gray-400">
+                                                                    {notification.createdAt ? new Date(notification.createdAt).toLocaleDateString() : 'Today'}
+                                                                </span>
+                                                                {notification.type && (
+                                                                    <span className={`text-xs px-2 py-1 rounded-full ${notification.type === 'event' ? 'bg-green-100 text-green-600' :
+                                                                            notification.type === 'message' ? 'bg-blue-100 text-blue-600' :
+                                                                                'bg-gray-100 text-gray-600'
+                                                                        }`}>
+                                                                        {notification.type}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-8 text-center text-gray-500">
+                                            <Bell className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                                            <p className="font-medium">No notifications yet</p>
+                                            <p className="text-sm">We'll notify you when something happens</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {notifications.length > 5 && (
+                                    <div className="border-t bg-gray-50 p-3">
+                                        <Link
+                                            to="/notifications"
+                                            className="block text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+                                            onClick={() => setShowNotifications(false)}
+                                        >
+                                            View all notifications ({notifications.length})
+                                        </Link>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -128,6 +237,20 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                     <MessageCircle size={18} className="mr-3 group-hover:scale-110 transition-transform" />
                                     <span className="font-medium">Messages</span>
                                 </Link>
+
+                                <Link
+                                    to="/notifications"
+                                    className="flex items-center px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150 group"
+                                    onClick={() => setShowProfileOptions(false)}
+                                >
+                                    <Bell size={18} className="mr-3 group-hover:scale-110 transition-transform" />
+                                    <span className="font-medium">Notifications</span>
+                                    {unreadCount > 0 && (
+                                        <span className="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                                            {unreadCount}
+                                        </span>
+                                    )}
+                                </Link>
                             </div>
 
                             {(user?.roles?.includes("organizer") || user?.roles?.includes("admin")) && (
@@ -183,6 +306,12 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                         </Link>
                     </div>
                 )}
+            <LocationModal
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onLocationSelect={handleLocationSelect}
+                currentLocation={selectedLocation}
+            />
         </nav>
     )
 }

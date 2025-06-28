@@ -3,6 +3,7 @@ import proxy from "express-http-proxy";
 import { config } from '../../config';
 import { Request, Response } from "express";
 import { StatusCode } from '../../shared/constants/statusCode';
+import logger from '../../shared/utils/logger';
 
 export class AdminProxy {
     public static setupProxy() {
@@ -32,7 +33,7 @@ export class AdminProxy {
             },
 
             proxyErrorHandler: (err: unknown, res: Response) => {
-                console.log('Proxy Error : ', err);
+                logger.error('Proxy Error : ', err);
                 res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal proxy error" })
             }
         })

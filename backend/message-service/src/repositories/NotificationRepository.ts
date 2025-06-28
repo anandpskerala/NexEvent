@@ -24,5 +24,18 @@ export class NotificationRepository implements INotificationRepository {
         await this.model.updateMany({userId, read: false}, {$set: {read: true}});
     }
 
-    
+
+    async getAllNotification(userId: string, offset: number, limit: number, isRead: boolean): Promise<{notifications: INotification[], total: number}> {
+        const [docs, total] = await Promise.all([
+            this.model.find({userId, read: isRead}).sort({createdAt: -1}).skip(offset).limit(limit),
+            this.model.countDocuments({userId, read: isRead})
+        ])
+
+        const notifications = docs.map(doc => doc.toJSON());
+
+        return {
+            notifications,
+            total
+        }
+    }
 }

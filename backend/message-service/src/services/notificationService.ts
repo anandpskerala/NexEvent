@@ -1,5 +1,6 @@
 import { NotificationRepository } from "../repositories/NotificationRepository";
 import { StatusCode } from "../shared/constants/statusCode";
+import logger from "../shared/utils/logger";
 
 export class NotificationService {
     constructor(private repo: NotificationRepository) {}
@@ -20,7 +21,7 @@ export class NotificationService {
                 result: unreads
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -36,7 +37,28 @@ export class NotificationService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async getAllNotification(userId: string, page: number, limit: number, isRead: boolean = true) {
+        try {
+            const offset = (page - 1) * limit;
+            const result = await this.repo.getAllNotification(userId, offset, limit, isRead)
+            return {
+                message: "Fetched notifications",
+                status: StatusCode.OK,
+                notifications: result.notifications,
+                total: result.total,
+                page: page,
+                pages: Math.ceil(result.total / limit)
+            }
+        } catch (error) {
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

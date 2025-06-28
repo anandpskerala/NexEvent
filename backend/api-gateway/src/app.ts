@@ -8,6 +8,7 @@ import { UserProxy } from "./middlewares/proxies/userProxy";
 import { AdminProxy } from "./middlewares/proxies/adminProxy";
 import { MessageProxy } from "./middlewares/proxies/messageProxy";
 import { EventProxy } from "./middlewares/proxies/eventProxy";
+import logger from "./shared/utils/logger";
 
 
 export class App {
@@ -34,6 +35,13 @@ export class App {
             standardHeaders: true,
             legacyHeaders: false,
             message: 'Too many requests, please try again later.',
+            handler: (req, res, next, options) => {
+                res.status(options.statusCode).json({
+                    status: 'error',
+                    message: 'Too many requests, please try again later.',
+                    retryAfter: Math.ceil(options.windowMs / 1000) + ' seconds'
+                });
+            }
         });
 
         this.app.use(limiter);
@@ -50,7 +58,7 @@ export class App {
 
     public listen(port: number) {
         this.app.listen(port, () => {
-            console.log(`API gateway running on port ${port}`);
+            logger.info(`API gateway running on port ${port}`);
         })
     }
 }

@@ -9,6 +9,7 @@ import { TOPICS } from "../kafka/topics";
 import redisClient from "../config/redis";
 import { IUser } from "../shared/types/IUser";
 import { INotification } from "../shared/types/INotfication";
+import logger from "../shared/utils/logger";
 
 export class MessageService {
     private producer: KafkaProducer;
@@ -25,6 +26,7 @@ export class MessageService {
             const testNoti: INotification = {
                 userId: message.receiver,
                 title: "New Message",
+                type: "message",
                 message: "New message from a user"
             }
             redisClient.publish(`notifications:${testNoti.userId}`, JSON.stringify(testNoti));
@@ -35,7 +37,7 @@ export class MessageService {
                 chat: message
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -60,7 +62,7 @@ export class MessageService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -103,7 +105,7 @@ export class MessageService {
                 users: usersWithUnread
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -121,7 +123,7 @@ export class MessageService {
                 total: messages.total
             }
         } catch (error) {
-            console.log(error);
+           logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

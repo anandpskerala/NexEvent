@@ -20,7 +20,7 @@ const Home = () => {
   const [nearByEvents, setNearByEvents] = useState<AllEventData[]>([]);
   const [categories, setCatgories] = useState<Category[]>([]);
   const [search, setSearch] = useState<string>("");
-  const { location, loading: locationLoading } = useUserLocation();
+  const { location } = useUserLocation();
 
   const navigate = useNavigate();
 
@@ -59,10 +59,8 @@ const Home = () => {
       }
     };
 
-    if (!locationLoading && location?.lat !== 0 && location?.lng !== 0) {
       fetchRequest();
-    }
-  }, [location, locationLoading]);
+  }, [location]);
 
   return (
     <div className="flex flex-col min-h-screen bg-white">

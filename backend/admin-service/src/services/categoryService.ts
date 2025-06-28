@@ -3,6 +3,7 @@ import { CloudinaryService } from "../shared/utils/cloudinary";
 import { CategoryRepository } from "../repositories/CategoryRepository";
 import { ICategory } from "../shared/types/ICategory";
 import { CategoryPaginationType, CategoryReturnType } from "../shared/types/returnTypes";
+import logger from "../shared/utils/logger";
 
 export class CategoryService {
     private cloudinary: CloudinaryService;
@@ -33,7 +34,7 @@ export class CategoryService {
                 status: StatusCode.CREATED
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -57,7 +58,7 @@ export class CategoryService {
                 category: category ? category : undefined
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -77,7 +78,7 @@ export class CategoryService {
                 categories: result.items
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -106,7 +107,7 @@ export class CategoryService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -131,7 +132,7 @@ export class CategoryService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

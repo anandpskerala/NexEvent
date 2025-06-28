@@ -8,6 +8,7 @@ import { PaymentMethod, PaymentStatus } from "../shared/types/Payments";
 import { StatusCode } from "../shared/constants/statusCode";
 import { BookingRepository } from "../repositories/BookingRepository";
 import { EventRepository } from "../repositories/EventRepository";
+import logger from "../shared/utils/logger";
 
 
 export class PaymentService {
@@ -65,7 +66,7 @@ export class PaymentService {
                 checkoutUrl: order.url
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Failed to initiate payment",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -137,7 +138,7 @@ export class PaymentService {
                 orderId: session.metadata?.orderId
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Failed to initiate payment",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -161,7 +162,7 @@ export class PaymentService {
                 order
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Failed to initiate payment",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -232,7 +233,7 @@ export class PaymentService {
                 }
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Failed to initiate payment",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -305,7 +306,7 @@ export class PaymentService {
                 orderId: booked?.id
             };
         } catch (error) {
-            console.log(error)
+            logger.error(error)
             return {
                 message: "Internal Server Error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -329,7 +330,7 @@ export class PaymentService {
                 wallet
             }
         } catch (error) {
-            console.log(error)
+            logger.error(error)
             return {
                 message: "Internal Server Error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

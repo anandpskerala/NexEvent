@@ -1,5 +1,6 @@
 import { v2 as cloud, UploadApiOptions, UploadApiResponse } from "cloudinary";
 import { config } from "../../config";
+import logger from "./logger";
 
 
 export class CloudinaryService {
@@ -18,7 +19,7 @@ export class CloudinaryService {
             const result = await this.cloud.uploader.upload(filePath, options);
             return result;
         } catch (error) {
-            console.error("Cloudinary upload failed:", error);
+            logger.error("Cloudinary upload failed:", error);
             throw new Error("Failed to upload image");
         }
     }
@@ -30,7 +31,7 @@ export class CloudinaryService {
             const publicId = lastPart.split(".")[0];
             return await this.cloud.uploader.destroy(publicId);
         } catch (error) {
-            console.error("Cloudinary delete failed:", error);
+            logger.error("Cloudinary delete failed:", error);
             throw new Error("Failed to delete image");
         }
     }

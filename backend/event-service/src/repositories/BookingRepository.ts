@@ -70,6 +70,11 @@ export class BookingRepository implements IBookingRepository {
         return doc?.toJSON();
     }
 
+    async findWithUserIdAndEventId(userId: string, eventId: string): Promise<IBooking | undefined> {
+        const doc = await this.model.findOne({userId, eventId});
+        return doc?.toJSON();
+    }
+
     async getRevenueAnalytics(groupBy: GroupBy, organizerId?: string): Promise<RevenueAnalyticsGraphPoint[]> {
         const now = new Date();
 

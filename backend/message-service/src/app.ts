@@ -6,6 +6,7 @@ import { NotificationRepository } from "./repositories/NotificationRepository";
 import { Consumer } from "./kafka/consumer";
 import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
 import mongoose from "mongoose";
+import logger from "./shared/utils/logger";
 
 export class App {
   private app: Application;
@@ -37,12 +38,12 @@ export class App {
 
   private setupShutdownHooks() {
     const shutdown = async (signal: string) => {
-      console.log(`${signal} received. Gracefully shutting down...`);
+      logger.info(`${signal} received. Gracefully shutting down...`);
       try {
         await this.consumer.disconnect();
         await mongoose.disconnect();
       } catch (err) {
-        console.error("Error during shutdown:", err);
+        logger.error("Error during shutdown:", err);
       } finally {
         process.exit(0);
       }
@@ -60,7 +61,7 @@ export class App {
     this.setupShutdownHooks();
 
     this.app.listen(port, () => {
-      console.log(`Message service started on port ${port}`);
+      logger.info(`Message service started on port ${port}`);
     });
   }
 }

@@ -65,8 +65,8 @@ export class EventController {
 
     public getNearByEvents = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
-        const { lat = 0, lng = 0 } = req.query;
-        const result = await this.eventService.getNearbyEvents(userId, lat as number, lng as number);
+        const { lat , lng  } = req.query;
+        const result = await this.eventService.getNearbyEvents(userId, Number(lat), Number(lng));
         res.status(result.status).json({message: result.message, events: result.events});
     }
 

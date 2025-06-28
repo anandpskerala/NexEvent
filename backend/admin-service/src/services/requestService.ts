@@ -6,6 +6,7 @@ import { StatusCode } from "../shared/constants/statusCode";
 import { INotification } from "../shared/types/INotification";
 import { IRequests } from "../shared/types/IRequests";
 import { fetchUsers } from "../shared/utils/getUsers";
+import logger from "../shared/utils/logger";
 
 export class RequestService {
     private producer: KafkaProducer;
@@ -22,7 +23,7 @@ export class RequestService {
                 request
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -39,7 +40,7 @@ export class RequestService {
                 request
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -71,7 +72,7 @@ export class RequestService {
                 requests: enrichedRequests
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -86,6 +87,7 @@ export class RequestService {
                 this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                     userId: request.userId,
                     title: "Feature request update",
+                    type: "request",
                     message: `Your feature request has been ${status}`
                 })
             }
@@ -94,7 +96,7 @@ export class RequestService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -124,7 +126,7 @@ export class RequestService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

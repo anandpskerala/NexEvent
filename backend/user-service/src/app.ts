@@ -2,6 +2,7 @@ import express, { Application } from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db";
 import routes from "./routes";
+import logger from "./shared/utils/logger";
 
 export class App {
     private app: Application;
@@ -24,7 +25,7 @@ export class App {
     public async listen(port: number) {
         await connectDB();
         this.app.listen(port, () => {
-            console.log(`User service started on port ${port}`);
+            logger.info(`User service started on port ${port}`);
         })
     }
 }

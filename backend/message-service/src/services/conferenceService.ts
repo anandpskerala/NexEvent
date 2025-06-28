@@ -1,6 +1,7 @@
 import { AccessToken } from "livekit-server-sdk";
 import { StatusCode } from "../shared/constants/statusCode";
 import { config } from "../config";
+import logger from "../shared/utils/logger";
 
 export class ConferenceService {
     constructor() {
@@ -26,7 +27,7 @@ export class ConferenceService {
                 token : await token.toJwt()
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

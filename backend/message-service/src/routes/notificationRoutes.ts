@@ -10,5 +10,7 @@ const notificationService = new NotificationService(notificationRepo);
 const controller = new NotificationController(notificationService);
 
 router.get("/stream/:id", controller.notificationStream);
+router.get("/all/:id", controller.getAllNotifications);
+router.patch("/markallread/:id", controller.readAllNotifications);
 
 export default router;

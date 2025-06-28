@@ -1,6 +1,7 @@
 import { ReviewRepository } from "../repositories/ReviewRepository";
 import { StatusCode } from "../shared/constants/statusCode";
 import { IReview } from "../shared/types/IReview";
+import logger from "../shared/utils/logger";
 
 export class ReviewService {
     constructor(private reviewRepo: ReviewRepository) { }
@@ -21,7 +22,7 @@ export class ReviewService {
                 status: StatusCode.CREATED
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -43,7 +44,7 @@ export class ReviewService {
                 pages: Math.ceil(res.total / limit)
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

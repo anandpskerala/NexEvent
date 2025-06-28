@@ -25,5 +25,6 @@ router.post("/failed/booking", bookingController.failedBooking);
 router.get("/organizer/booking", protectedRoute, bookingController.getOrganizerBookings);
 router.get("/ticket/download/:id", bookingController.downloadTicket);
 router.get("/coupon/check", bookingController.checkCoupon);
+router.get("/verify/booking/:id", bookingController.verifyBooking);
 
 export default router;

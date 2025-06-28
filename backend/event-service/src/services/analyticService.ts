@@ -1,6 +1,7 @@
 import { BookingRepository } from "../repositories/BookingRepository";
 import { StatusCode } from "../shared/constants/statusCode";
 import { GroupBy } from "../shared/types/RevenueAnalytics";
+import logger from "../shared/utils/logger";
 
 export class AnalyticService {
     constructor(private repo: BookingRepository) {
@@ -16,7 +17,7 @@ export class AnalyticService {
                 analytics: data
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -33,7 +34,7 @@ export class AnalyticService {
                 analytics: data
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

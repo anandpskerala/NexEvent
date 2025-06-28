@@ -9,6 +9,7 @@ import { fetchUsers } from '../shared/utils/getUsers';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { PaymentMethod, PaymentStatus } from '../shared/types/Payments';
 import { WalletRepository } from '../repositories/WalletRepository';
+import logger from '../shared/utils/logger';
 
 export class BookingService {
     constructor(private repo: BookingRepository, private eventRepo: EventRepository, private paymentRepo: PaymentRepository, private walletRepo: WalletRepository) { }
@@ -56,7 +57,7 @@ export class BookingService {
             }
 
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -73,7 +74,7 @@ export class BookingService {
                 booking
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -93,7 +94,7 @@ export class BookingService {
                 pages: Math.ceil(res.total / limit)
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -113,7 +114,7 @@ export class BookingService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -147,7 +148,7 @@ export class BookingService {
                 status: StatusCode.OK
             };
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -180,7 +181,7 @@ export class BookingService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -219,7 +220,7 @@ export class BookingService {
 
             doc.end();
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
                 message: "Internal server error"
             });
@@ -229,7 +230,7 @@ export class BookingService {
     public async getOrganizerBookings(userId: string, search: string, page: number, limit: number) {
         try {
             const skip = (page - 1) * limit;
-            const events = await this.eventRepo.getAllEvents({ userId }, skip, limit);
+            const events = await this.eventRepo.getAllEvents({ userId }, skip, 0);
             const eventIds = events.map(event => event.id);
 
             if (eventIds.length === 0) {
@@ -262,7 +263,30 @@ export class BookingService {
                 pages: Math.ceil(bookings.total / limit)
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
+            return {
+                message: "Internal server error",
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async verifyBooking(userId: string, eventId: string) {
+        try {
+            const result = await this.repo.findWithUserIdAndEventId(userId, eventId);
+            if (!result) {
+                return {
+                    message: "You have to purchase this event",
+                    status: StatusCode.NOT_FOUND
+                }
+            }
+            return {
+                message: "Fetched",
+                status: StatusCode.OK,
+                verified: true
+            };
+        } catch (error) {
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -286,7 +310,7 @@ export class BookingService {
                 status: StatusCode.BAD_REQUEST
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

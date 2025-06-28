@@ -21,6 +21,7 @@ const EventDetailPage = lazy(() => import("../pages/user/EventDetailPage"));
 const ConfirmationPage = lazy(() => import("../pages/user/ConfirmationPage"));
 const TicketsPage = lazy(() => import("../pages/user/TicketsPage"));
 const VideoConferencePage = lazy(() => import("../pages/user/VideoConferencePage"));
+const NotificationsPage = lazy(() => import("../pages/user/NotificationsPage"));
 
 const ProfilePage = lazy(() => import("../pages/profile/ProfilePage"));
 const RequestOrganizer = lazy(() => import("../pages/profile/RequestOrganizer"));
@@ -84,6 +85,7 @@ const AppRoutes = () => {
                     <Route path="/booking/:id" element={<TicketsPage />} />
                     <Route path="/profile/:id" element={<OrganizerProfile />} />
                     <Route path="/meeting/:id" element={<VideoConferencePage />} />
+                    <Route path="/notifications" element={<NotificationsPage />} />
                 </Route>
 
                 <Route element={<OrganizerRoutes user={user} />}>

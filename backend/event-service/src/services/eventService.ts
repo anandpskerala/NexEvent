@@ -5,6 +5,7 @@ import { EventRepository } from "../repositories/EventRepository";
 import { IEvent } from "../shared/types/IEvent";
 import { EventPaginationType, EventReturnType, RawReturnType } from "../shared/types/returnTypes";
 import { ITicket } from "../shared/types/ITicket";
+import logger from "../shared/utils/logger";
 
 export class EventService {
     private cloudinary: CloudinaryService;
@@ -34,7 +35,7 @@ export class EventService {
                 event: newEvent.id
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -65,7 +66,7 @@ export class EventService {
                 status: StatusCode.CREATED
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -95,7 +96,7 @@ export class EventService {
                 event: enrichedEvent
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -167,7 +168,7 @@ export class EventService {
             };
 
         } catch (error) {
-            console.error("Error fetching events:", error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR,
@@ -177,6 +178,13 @@ export class EventService {
 
     public async getNearbyEvents(userId: string, latitude: number, longitude: number) {
         try {
+            if (!latitude || !longitude) {
+                return {
+                    message: "Fetched events",
+                    status: StatusCode.OK,
+                    events: []
+                }
+            }
             const events = await this.eventRepo.getNearByEvents(latitude, longitude);
             const enrichedEvents = await Promise.all(
                 events.map(async (event) => {
@@ -193,7 +201,7 @@ export class EventService {
                 events: enrichedEvents
             }
         } catch (error) {
-            console.error("Error fetching events:", error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR,
@@ -239,7 +247,7 @@ export class EventService {
                 events
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -273,7 +281,7 @@ export class EventService {
                 event: existing.id
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -298,7 +306,7 @@ export class EventService {
                 saved: true
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -315,7 +323,7 @@ export class EventService {
                 saved: true
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -332,7 +340,7 @@ export class EventService {
                 saved: false
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -353,7 +361,7 @@ export class EventService {
                 events: docs.events
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

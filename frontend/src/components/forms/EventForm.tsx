@@ -144,6 +144,7 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
     };
 
     const createEvent = async () => {
+        console.log("Clicked")
         setErrors({});
         setProcessing(true);
         try {
@@ -176,6 +177,7 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
                 });
                 setErrors(errorMap);
             }
+            console.log(error)
         } finally {
             setProcessing(false);
         }

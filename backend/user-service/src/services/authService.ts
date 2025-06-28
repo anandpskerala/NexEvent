@@ -9,6 +9,7 @@ import { Response } from "express";
 import { config } from "../config";
 import { ForgotRepository } from "../repositories/ForgotRepository";
 import { sendOtpMail, sendResetPasswordMail } from "../shared/utils/mailer";
+import logger from "../shared/utils/logger";
 
 export class AuthService {
     public authUtils: AuthUtils;
@@ -77,7 +78,7 @@ export class AuthService {
                 user
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -124,7 +125,7 @@ export class AuthService {
                 user
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -141,7 +142,7 @@ export class AuthService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -173,7 +174,7 @@ export class AuthService {
                 user
             }
         } catch (error) {
-            console.log(error)
+            logger.error(error)
             return {
                 message: "Invalid refresh token",
                 status: StatusCode.FORBIDDEN
@@ -232,7 +233,7 @@ export class AuthService {
             }
 
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -268,7 +269,7 @@ export class AuthService {
                 status: StatusCode.CREATED
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -310,7 +311,7 @@ export class AuthService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -349,7 +350,7 @@ export class AuthService {
                 timeLeft: timeLeft
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -391,7 +392,7 @@ export class AuthService {
                 user: { ...user, isVerified: true }
             }
         } catch (error) {
-            console.error(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -432,7 +433,7 @@ export class AuthService {
                 status: StatusCode.CREATED
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -487,7 +488,7 @@ export class AuthService {
                 message: "Password changed"
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

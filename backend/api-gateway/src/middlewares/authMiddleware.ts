@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
+import logger from "../shared/utils/logger";
 
 
 export class AuthMiddleware {
@@ -37,7 +38,7 @@ export class AuthMiddleware {
             req.headers['x-user-roles'] = decoded.role;
             next();
         } catch (err) {
-            console.log(err)
+            logger.error(err)
             res.status(403).json({ message: 'Invalid or expired token' });
             return;
         }

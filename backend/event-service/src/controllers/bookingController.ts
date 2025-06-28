@@ -84,8 +84,14 @@ export class BookingController {
     public checkCoupon = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { couponCode } = req.query;
-        console.log(couponCode, userId)
         const result = await this.bookingService.checkCouponApplied(couponCode as string, userId);
         res.status(result.status).json({ message: result.message });
+    }
+
+    public verifyBooking =  async (req: Request, res: Response): Promise<void> => {
+        const userId = req.headers['x-user-id'] as string;
+        const { id } = req.params;
+        const result = await this.bookingService.verifyBooking(userId, id);
+        res.status(result.status).json({message: result.message, verified: result.verified});
     }
 }

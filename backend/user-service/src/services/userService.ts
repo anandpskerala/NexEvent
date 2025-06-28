@@ -2,6 +2,7 @@ import { CloudinaryService } from "../shared/utils/cloudinary";
 import { StatusCode } from "../shared/constants/statusCode";
 import { UserRepository } from "../repositories/UserRepository";
 import { UserPaginationType, UserReturnType } from "../shared/types/ReturnTypes";
+import logger from "../shared/utils/logger";
 
 export class UserService {
     private cloudinary: CloudinaryService;
@@ -22,7 +23,7 @@ export class UserService {
                 pages: Math.ceil(result.total / limit)
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -52,7 +53,7 @@ export class UserService {
                 user: user
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -83,7 +84,7 @@ export class UserService {
                 user
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -117,7 +118,7 @@ export class UserService {
                 user: user ? user : undefined
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -154,7 +155,7 @@ export class UserService {
                 user
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -172,7 +173,7 @@ export class UserService {
                 user: user ? user : undefined
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -196,7 +197,7 @@ export class UserService {
                 user
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -220,7 +221,7 @@ export class UserService {
                 users
             }
         } catch (error) {
-            console.error(error)
+            logger.error(error)
             return {
                 message: "Internal Server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR

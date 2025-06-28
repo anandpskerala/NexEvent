@@ -3,6 +3,7 @@ import AppRoutes from './routes/AppRoutes'
 import { useAppDispatch } from './hooks/useAppDispatch';
 import { useEffect } from 'react';
 import { verifyUser } from './store/actions/auth/verifyUser';
+import { UserLocationProvider } from './hooks/useUserLocation';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -12,7 +13,9 @@ function App() {
 
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <UserLocationProvider>
+        <AppRoutes />
+      </UserLocationProvider>
     </BrowserRouter>
   )
 }

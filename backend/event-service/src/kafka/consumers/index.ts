@@ -2,6 +2,7 @@ import { Admin, Consumer } from "kafkajs";
 import kafka from "..";
 import { Handler } from "./handlers";
 import { TOPICS } from "../topics";
+import logger from "../../shared/utils/logger";
 
 export class KafkaConsumer {
     private consumer: Consumer;
@@ -65,7 +66,8 @@ export class KafkaConsumer {
                         break;
 
                     default:
-                        console.warn(`Unhandled topic: ${topic}`);
+                        logger.warn(`Unhandled topic: ${topic}`);
+                        break;
                 }
             }
         });

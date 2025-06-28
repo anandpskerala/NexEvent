@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import config from "../config/config";
 import type { Notification } from "../interfaces/entities/Notification";
 import { fetchAccessToken } from "../utils/fetchRefreshToken";
+import axiosInstance from "../utils/axiosInstance";
 
 export const useNotification = (userId: string | undefined) => {
     const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -48,6 +49,14 @@ export const useNotification = (userId: string | undefined) => {
         eventSourceRef.current = eventSource;
     };
 
+    const markAllAsRead = async (userId: string) => {
+        try {
+            await axiosInstance.patch(`${config.backendUrl}/messages/notifications/markallread/${userId}`)
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     useEffect(() => {
         if (!userId) return;
         connectToSSE();
@@ -60,5 +69,5 @@ export const useNotification = (userId: string | undefined) => {
         };
     }, [userId]);
 
-    return { notifications, setNotifications };
+    return { notifications, setNotifications, markAllAsRead };
 };

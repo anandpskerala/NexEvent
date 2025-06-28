@@ -28,9 +28,22 @@ export class NotificationController {
         });
     }
 
-    public readNotifications = async (req: Request, res: Response): Promise<void> => {
+    public readAllNotifications = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
         const result = await this.notificationService.markAllAsRead(id);
         res.status(result.status).json({message: result.message});
+    }
+
+    public getAllNotifications = async (req: Request, res: Response): Promise<void> => {
+        const { id } = req.params;
+        const { page = 1, limit = 10, isRead = true } = req.query;
+        const result = await this.notificationService.getAllNotification(id, Number(page), Number(limit), isRead as boolean);
+        res.status(result.status).json({
+            message: result.message,
+            notifications: result.notifications,
+            page: result.page,
+            pages: result.pages,
+            total: result.total
+        })
     }
 }

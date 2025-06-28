@@ -10,6 +10,10 @@ const schema = new Schema<INotification>({
         type: String,
         required: true,
     },
+    type: {
+        type: String,
+        required: true
+    },
     message: {
         type: String,
         required: true

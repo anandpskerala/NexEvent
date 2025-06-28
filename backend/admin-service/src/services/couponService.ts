@@ -1,6 +1,7 @@
 import { StatusCode } from "../shared/constants/statusCode";
 import { CouponRepository } from "../repositories/CouponRepository";
 import { ICoupon } from "../shared/types/ICoupon";
+import logger from "../shared/utils/logger";
 
 export class CouponService {
     constructor(private repo: CouponRepository) { }
@@ -21,7 +22,7 @@ export class CouponService {
                 coupon
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -45,7 +46,7 @@ export class CouponService {
                 coupon
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -65,7 +66,7 @@ export class CouponService {
                 coupons: result.items
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -89,7 +90,7 @@ export class CouponService {
                 status: StatusCode.OK
             }
         } catch (error) {
-            console.log(error);
+            logger.error(error);
             return {
                 message: "Internal server error",
                 status: StatusCode.INTERNAL_SERVER_ERROR
@@ -114,7 +115,7 @@ export class CouponService {
                     status: StatusCode.OK
                 }
             } catch (error) {
-                console.log(error);
+                logger.error(error);
                 return {
                     message: "Internal server error",
                     status: StatusCode.INTERNAL_SERVER_ERROR

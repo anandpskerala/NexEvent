@@ -1,5 +1,6 @@
 import type { UserPosition, OrganizerData } from "../entities/Organizer";
 import type { User } from "../entities/User";
+import type { Location } from "./locationModalProps";
 
 export interface ImageUploaderModalProps {
   isOpen: boolean;
@@ -65,8 +66,7 @@ export interface PaginationProps {
 
 export interface UserLocationResult {
   location?: UserPosition;
-  loading: boolean;
-  error: string | null;
+  setLocation: React.Dispatch<React.SetStateAction<Location | undefined>>
 }
 
 export interface UserReportProps {

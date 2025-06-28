@@ -103,7 +103,7 @@ const AdminDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                             <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-l-blue-500">
                                 <div className="flex items-center justify-between">
                                     <div>
@@ -148,20 +148,6 @@ const AdminDashboard = () => {
                                     </div>
                                     <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
                                         <TrendingUp className="w-6 h-6 text-orange-600" />
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white rounded-xl shadow-sm p-6 border-l-4 border-l-red-500">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm font-medium text-gray-600">Growth (7d)</p>
-                                        <p className={`text-2xl font-bold ${metrics.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {metrics.revenueGrowth >= 0 ? '+' : ''}{metrics.revenueGrowth.toFixed(1)}%
-                                        </p>
-                                    </div>
-                                    <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                                        <TrendingUp className={`w-6 h-6 ${metrics.revenueGrowth >= 0 ? 'text-green-600' : 'text-red-600'}`} />
                                     </div>
                                 </div>
                             </div>
