@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
 import { IUser } from "../shared/types/IUser";
-import { UserRepository } from "../repositories/UserRepository";
-import { UserService } from "../services/userService";
+import { UserRepository } from "../repositories/implementation/UserRepository";
+import { UserService } from "../services/implementation/userService";
 import { UserController } from "../controllers/userController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { adminRoute } from "../middlewares/adminRoute";

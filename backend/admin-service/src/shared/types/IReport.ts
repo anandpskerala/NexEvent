@@ -14,4 +14,4 @@ export interface AllIReports {
 }
 
 export type ReportTypes = 'Event Fraud' | 'Abuse' | 'Spam' | 'Harassment' | 'Fake Profile';
-export type ReportActions = 'Pending' | 'Reviewed' | 'Action Taken' | 'Dismissed'
+export type ReportActions = 'Pending' | 'Reviewed' | 'Action Taken' | 'Dismissed';

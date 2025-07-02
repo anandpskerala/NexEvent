@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import type { AxiosResponse } from "axios";
 import axiosInstance from "../utils/axiosInstance";
 import config from "../config/config";

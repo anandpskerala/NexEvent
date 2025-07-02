@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { PaymentRepository } from "../repositories/PaymentRepository";
-import { WalletRepository } from "../repositories/WalletRepository";
-import { BookingRepository } from "../repositories/BookingRepository";
-import { EventRepository } from "../repositories/EventRepository";
-import { PaymentService } from "../services/paymentService";
+import { PaymentRepository } from "../repositories/implementation/PaymentRepository";
+import { WalletRepository } from "../repositories/implementation/WalletRepository";
+import { BookingRepository } from "../repositories/implementation/BookingRepository";
+import { EventRepository } from "../repositories/implementation/EventRepository";
+import { PaymentService } from "../services/implementation/paymentService";
 import { PaymentController } from "../controllers/paymentController";
 
 const router = Router();

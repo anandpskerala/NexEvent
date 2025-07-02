@@ -188,6 +188,29 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                             <p className="mt-1 text-sm text-red-600">{errors.discount}</p>
                         )}
                     </div>
+
+                    {initialData && (
+                        <div>
+                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+                                Status
+                            </label>
+                            <select
+                                id="status"
+                                name="status"
+                                value={formData.status || 'active'}
+                                onChange={handleInputChange}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                <option value="">Select Status</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                            {errors.status && (
+                                <p className="mt-1 text-sm text-red-600">{errors.status}</p>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -281,31 +304,7 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                     </div>
                 </div>
 
-                {initialData && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
-                                Status
-                            </label>
-                            <select
-                                id="status"
-                                name="status"
-                                value={formData.status || ''}
-                                onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            >
-                                <option value="">Select Status</option>
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
-                                <option value="expired">Expired</option>
-                            </select>
-                            {errors.status && (
-                                <p className="mt-1 text-sm text-red-600">{errors.status}</p>
-                            )}
-                        </div>
-                        <div></div>
-                    </div>
-                )}
+
 
                 <div>
                     <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { PaymentService } from "../services/paymentService";
+import { IPaymentService } from "../services/interfaces/IPaymentService";
 
 export class PaymentController {
-    constructor(private paymentService: PaymentService) {}
+    constructor(private paymentService: IPaymentService) {}
 
     public creatOrderRPay = async (req: Request, res: Response): Promise<void> => {
         const { amount, currency } = req.body;

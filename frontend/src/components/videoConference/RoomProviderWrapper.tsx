@@ -7,7 +7,7 @@ import config from '../../config/config';
 import { useNavigate } from 'react-router-dom';
 
 
-export const RoomProviderWrapper = ({ identity, roomName, children }: RoomProviderWrapperProps) => {
+export const RoomProviderWrapper = ({ id, identity, roomName, children }: RoomProviderWrapperProps) => {
     const [room] = useState(() => new Room({ adaptiveStream: true, dynacast: true }));
     const navigate = useNavigate();
 
@@ -22,7 +22,7 @@ export const RoomProviderWrapper = ({ identity, roomName, children }: RoomProvid
         connect();
 
         room.on(RoomEvent.Disconnected, () => {
-            navigate(-1);
+            navigate(`/landing/${id}`);
         });
         return () => {
             mounted = false;

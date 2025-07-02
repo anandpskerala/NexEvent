@@ -1,5 +1,5 @@
 import { IUser } from "../../../shared/types/IUser";
-import { WalletRepository } from "../../../repositories/WalletRepository";
+import { WalletRepository } from "../../../repositories/implementation/WalletRepository";
 
 export class Handler {
     constructor(private repo: WalletRepository) {}

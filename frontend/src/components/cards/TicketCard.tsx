@@ -28,7 +28,7 @@ export const TicketCard: React.FC<ResTicketProps> = ({
                     <span className="w-8 text-center">{tickets || 0}</span>
                     <button
                         className={`border rounded p-1 text-gray-600 disabled:opacity-50 ${tickets >= quantity ? 'cursor-not-allowed' : 'cursor-pointer'}`}
-                        onClick={() => onChange(id, tickets + 1, price, name)}
+                        onClick={() => onChange(id, Math.min(10, tickets + 1), price, name)}
                         disabled={tickets >= quantity}
                     >
                         <Plus size={16} />

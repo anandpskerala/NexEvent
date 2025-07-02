@@ -1,6 +1,7 @@
 import axios from "axios";
 import { config } from "../../config";
 import { IUser } from "../types/IUser";
+import logger from "./logger";
 
 interface FetchUsersResponse {
   users: IUser[];
@@ -20,9 +21,9 @@ export const fetchUsers = async (userIds: string[]): Promise<Record<string, IUse
     }, {});
   } catch (err: unknown) {
     if (err instanceof Error) {
-      console.error("User Service Error:", err.message);
+      logger.error("User Service Error:", err.message);
     } else {
-      console.error("Unknown error while fetching users");
+      logger.error("Unknown error while fetching users");
     }
     return {};
   }

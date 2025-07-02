@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { EventRepository } from "../../repositories/EventRepository";
+import { EventRepository } from "../../repositories/implementation/EventRepository";
 
 const eventRepo = new EventRepository();
 

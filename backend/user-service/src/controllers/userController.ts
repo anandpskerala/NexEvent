@@ -1,13 +1,13 @@
 import { Request, Response } from "express";
-import { UserService } from "../services/userService";
 import { IUser } from "../shared/types/IUser";
 import { StatusCode } from "../shared/constants/statusCode";
 import { TOPICS } from "../kafka/topics";
 import { UserProducer } from "../kafka/producer/userProducer";
+import { IUserService } from "../services/interfaces/IUserService";
 
 
 export class UserController {
-    constructor(public userService: UserService, private producer: UserProducer<IUser>) {}
+    constructor(public userService: IUserService, private producer: UserProducer<IUser>) {}
 
     public getUser = async (req: Request, res: Response): Promise<void> => {
         const id = req.params.id;

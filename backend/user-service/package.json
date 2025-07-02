@@ -34,9 +34,12 @@
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.6.1",
     "cookie-parser": "^1.4.7",
+    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "mongoose": "^8.15.1",
-    "nodemailer": "^7.0.3"
+    "nodemailer": "^7.0.3",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0"
   }
 }

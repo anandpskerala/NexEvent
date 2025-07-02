@@ -4,6 +4,7 @@ import { App } from "./app";
 import { config } from "./config";
 import { Consumer } from "./kafka/consumer";
 import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
+import logger from "./shared/utils/logger";
 
 export class GatewayServer {
     private readonly httpServer: HTTPServer;
@@ -28,16 +29,16 @@ export class GatewayServer {
 
     private setupSocketHandlers(): void {
         this.io.on("connection", (socket) => {
-            console.log("Socket.IO: Client connected", socket.id);
+            logger.info("Socket.IO: Client connected", socket.id);
 
             socket.on("join", (userId: string) => {
                 socket.join(userId);
-                console.log(`User ${userId} joined their room`);
+                logger.info(`User ${userId} joined their room`);
             });
 
 
             socket.on("disconnect", () => {
-                console.log("Socket.IO: Client disconnected", socket.id);
+                logger.info("Socket.IO: Client disconnected", socket.id);
             });
         });
     }
@@ -46,13 +47,13 @@ export class GatewayServer {
         await this.consumer.connect();
         await this.consumer.listen().catch(console.error);
         process.on("SIGINT", async () => {
-            console.log("SIGINT received, disconnecting producer...");
+            logger.info("SIGINT received, disconnecting producer...");
             await this.consumer.disconnect();
             process.exit(0);
         });
 
         process.on("SIGTERM", async () => {
-            console.log("SIGTERM received, disconnecting producer...");
+            logger.info("SIGTERM received, disconnecting producer...");
             await this.consumer.disconnect();
             process.exit(0);
         });
@@ -63,7 +64,7 @@ export class GatewayServer {
         await this.setupKafkaConsumers();
 
         this.httpServer.listen(port, () => {
-            console.log(`API Gateway service running on port ${port}`);
+            logger.info(`API Gateway service running on port ${port}`);
         });
     }
 }

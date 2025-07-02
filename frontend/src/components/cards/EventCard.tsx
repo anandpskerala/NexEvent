@@ -9,7 +9,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <div className="bg-white rounded-lg shadow-md h-full overflow-hidden relative w-full md:max-w-sm mx-auto">
 
             <div className="absolute top-2 right-2">
-                <Heart className="text-white fill-white/50 hover:fill-red-500 cursor-pointer" />
+                <Heart className={`${event.isSaved ? 'fill-red-500': 'fill-white/50'} text-white hover:fill-red-500 cursor-pointer`} />
             </div>
 
             <div className="h-26 bg-gray-200 flex items-center justify-center">

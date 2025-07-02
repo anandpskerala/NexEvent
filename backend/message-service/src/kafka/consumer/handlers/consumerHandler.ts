@@ -1,5 +1,5 @@
 import redisClient from "../../../config/redis";
-import { NotificationRepository } from "../../../repositories/NotificationRepository";
+import { NotificationRepository } from "../../../repositories/implementation/NotificationRepository";
 import { INotification } from "../../../shared/types/INotfication";
 
 export class ConsumerHandler {

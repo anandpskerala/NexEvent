@@ -101,8 +101,8 @@ const SavedEvents = () => {
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col gap-2">
-                                                        <Link to={`/event/${event.eventId.id}`} className="text-blue-600 border border-blue-600 rounded-md px-4 py-1 text-sm hover:bg-blue-50">
-                                                            View Details
+                                                        <Link to={`/event/bookings/${event.eventId.id}`} className="text-blue-600 border border-blue-600 rounded-md px-4 py-1 text-sm hover:bg-blue-50">
+                                                            Book now
                                                         </Link>
                                                         <button
                                                             className="border border-red-600 px-4 py-1 text-sm text-red-500 rounded-md cursor-pointer"

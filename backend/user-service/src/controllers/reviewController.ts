@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { ReviewService } from "../services/reviewService";
 import { Types } from "mongoose";
+import { IReviewService } from "../services/interfaces/IReviewService";
 
 export class ReviewController {
-    constructor(private reviewService: ReviewService) {}
+    constructor(private reviewService: IReviewService) {}
 
     public addReview = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;

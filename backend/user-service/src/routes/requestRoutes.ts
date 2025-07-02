@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { UserRepository } from "../repositories/UserRepository";
-import { RequestRepository } from "../repositories/RequestRepository";
-import { RequestService } from "../services/requestService";
+import { UserRepository } from "../repositories/implementation/UserRepository";
+import { RequestRepository } from "../repositories/implementation/RequestRepository";
+import { RequestService } from "../services/implementation/requestService";
 import { RequestController } from "../controllers/requestController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { adminRoute } from "../middlewares/adminRoute";

@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const NoChatSelected = () => {
   return (
     <div className="flex flex-1 flex-col items-center justify-center h-[640px] bg-gradient-to-br from-slate-50 to-gray-100">

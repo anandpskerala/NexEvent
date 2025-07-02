@@ -1,9 +1,10 @@
 import express, { Application } from "express";
 import connectDB from "./config/connectDB";
 import routes from "./routes";
-import { WalletRepository } from "./repositories/WalletRepository";
+import { WalletRepository } from "./repositories/implementation/WalletRepository";
 import { KafkaConsumer } from "./kafka/consumers";
 import { Handler } from "./kafka/consumers/handlers";
+import logger from "./shared/utils/logger";
 
 export class App {
     private app: Application;
@@ -33,13 +34,13 @@ export class App {
         await this.consumer.connect();
         await this.consumer.listen();
         process.on("SIGINT", async () => {
-            console.log("SIGINT received, disconnecting consumer...");
+            logger.info("SIGINT received, disconnecting consumer...");
             await this.consumer.disconnect();
             process.exit(0);
         });
 
         process.on("SIGTERM", async () => {
-            console.log("SIGTERM received, disconnecting consumer...");
+            logger.info("SIGTERM received, disconnecting consumer...");
             await this.consumer.disconnect();
             process.exit(0);
         });
@@ -50,7 +51,7 @@ export class App {
         connectDB();
         await this.setupKafka();
         this.app.listen(port, () => {
-            console.log(`Event service started on port ${port}`);
+            logger.info(`Event service started on port ${port}`);
         })
     }
 }

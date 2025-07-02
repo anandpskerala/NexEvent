@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { ConferenceService } from "../services/conferenceService";
+import { ConferenceService } from "../services/implementation/conferenceService";
 
 export class ConferenceController {
     constructor(private conferenceService: ConferenceService) {}
