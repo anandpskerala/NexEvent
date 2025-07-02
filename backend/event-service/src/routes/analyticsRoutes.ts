@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { BookingRepository } from "../repositories/BookingRepository";
-import { AnalyticService } from "../services/analyticService";
+import { BookingRepository } from "../repositories/implementation/BookingRepository";
+import { AnalyticService } from "../services/implementation/analyticService";
 import { AnalyticsController } from "../controllers/analyticsController";
 
 const router = Router();

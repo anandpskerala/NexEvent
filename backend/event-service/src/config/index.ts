@@ -24,5 +24,6 @@ export const config = {
         razorpayID: process.env.RAZORPAY_KEY_ID,
         razorpaySecret: process.env.RAZORPAY_KEY_SECRET,
         stripeSecret: process.env.STRIPE_SECRET_KEY
-    }
+    },
+    maxTicketLimit: 3,
 }

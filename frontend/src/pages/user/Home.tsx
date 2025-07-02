@@ -36,7 +36,7 @@ const Home = () => {
 
       try {
         const [eventRes, nearbyEvent, categoryRes] = await Promise.all([
-          axiosInstance.get("/event/all?limit=5"),
+          axiosInstance.get("/event/all?limit=4"),
           axiosInstance.get(`/event/nearbyevents?lat=${location?.lat}&lng=${location?.lng}`),
           axiosInstance.get("/admin/category/?limit=5"),
         ]);

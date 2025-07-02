@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { CouponRepository } from "../../repositories/CouponRepository";
+import { CouponRepository } from "../../repositories/implementation/CouponRepository";
 
 const couponRepo = new CouponRepository();
 

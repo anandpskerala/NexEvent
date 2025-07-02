@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { BookingService } from "../services/bookingService";
 import { IBooking } from "../shared/types/IBooking";
+import { IBookingService } from "../services/interfaces/IBookingService";
 
 export class BookingController {
-    constructor(private bookingService: BookingService) { }
+    constructor(private bookingService: IBookingService) { }
 
     public create = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;

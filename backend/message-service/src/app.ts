@@ -2,7 +2,7 @@ import express, { Application } from "express";
 import router from "./routes";
 import connectDB from "./config/db";
 import { connectRedis } from "./config/redis";
-import { NotificationRepository } from "./repositories/NotificationRepository";
+import { NotificationRepository } from "./repositories/implementation/NotificationRepository";
 import { Consumer } from "./kafka/consumer";
 import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
 import mongoose from "mongoose";

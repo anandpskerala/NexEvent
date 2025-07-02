@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { IEvent } from "../shared/types/IEvent";
-import { EventService } from "../services/eventService";
+import { IEventService } from "../services/interfaces/IEventService";
 
 export class EventController {
-    constructor(private eventService: EventService) {}
+    constructor(private eventService: IEventService) {}
 
     public createEvent = async (req: Request, res: Response): Promise<void> => {
         const { title, description, eventType, category, image, tags, location, eventFormat, startDate, endDate, startTime, endTime, userId } = req.body;

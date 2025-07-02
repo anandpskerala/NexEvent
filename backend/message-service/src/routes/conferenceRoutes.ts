@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ConferenceService } from "../services/conferenceService";
+import { ConferenceService } from "../services/implementation/conferenceService";
 import { ConferenceController } from "../controllers/conferenceController";
 
 const router = Router();

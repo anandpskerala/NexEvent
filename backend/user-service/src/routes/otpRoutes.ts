@@ -1,10 +1,10 @@
 import { Router } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
 import { IUser } from "../shared/types/IUser";
-import { UserRepository } from "../repositories/UserRepository";
-import { OtpRepository } from "../repositories/OtpRepository";
-import { ForgotRepository } from "../repositories/ForgotRepository";
-import { AuthService } from "../services/authService";
+import { UserRepository } from "../repositories/implementation/UserRepository";
+import { OtpRepository } from "../repositories/implementation/OtpRepository";
+import { ForgotRepository } from "../repositories/implementation/ForgotRepository";
+import { AuthService } from "../services/implementation/authService";
 import { OTPController } from "../controllers/otpController";
 
 const router = Router();

@@ -1,7 +1,7 @@
 import express, { Application } from "express";
 import connectDB from "./config/connectDB";
 import routes from "./routes";
-import { WalletRepository } from "./repositories/WalletRepository";
+import { WalletRepository } from "./repositories/implementation/WalletRepository";
 import { KafkaConsumer } from "./kafka/consumers";
 import { Handler } from "./kafka/consumers/handlers";
 import logger from "./shared/utils/logger";

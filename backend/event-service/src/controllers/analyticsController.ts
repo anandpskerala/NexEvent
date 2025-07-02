@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { AnalyticService } from "../services/analyticService";
 import { GroupBy } from "../shared/types/RevenueAnalytics";
+import { IAnalyticService } from "../services/interfaces/IAnalyticService";
 
 export class AnalyticsController {
-    constructor(private analyticService: AnalyticService) {
+    constructor(private analyticService: IAnalyticService) {
 
     }
 

@@ -192,7 +192,6 @@ const MyTickets = () => {
             const fetchRequest = async (pageNumber = 1) => {
                 const res = await axiosInstance.get(`/event/bookings/${user?.id}?page=${pageNumber}&limit=10`)
                 if (res.data) {
-                    console.log(res.data.bookings)
                     setEvents(res.data.bookings);
                     setPage(Number(res.data.page));
                     setPages(Number(res.data.pages));

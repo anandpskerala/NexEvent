@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { NotificationRepository } from "../repositories/NotificationRepository";
-import { NotificationService } from "../services/notificationService";
+import { NotificationRepository } from "../repositories/implementation/NotificationRepository";
+import { NotificationService } from "../services/implementation/notificationService";
 import { NotificationController } from "../controllers/notificationController";
 
 const router = Router();

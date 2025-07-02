@@ -9,6 +9,7 @@ export interface IEventRepository {
     findByID(id: string): Promise<IEvent | undefined>
     createTicket(id: string, currency: string, entryType: string, showQuantity: boolean, refunds: boolean, tickets: ITicket[]): Promise<void>;
     getEvent(id: string): Promise<IEvent | undefined>;
+    updateEvent(id: string, event: Partial<IEvent>): Promise<void>;
     getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]>;
     getNearByEvents(latitude: number, longitude: number, maxDistanceInKm?: number): Promise<IEvent[]>;
     countDocs(query: FilterQuery<IEvent>): Promise<number>;

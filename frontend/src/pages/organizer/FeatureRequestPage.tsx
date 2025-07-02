@@ -10,6 +10,7 @@ import type { FeatureFormErrors } from '../../interfaces/entities/ErrorState';
 import { validateForm, validationSchema } from '../../interfaces/validators/featureFormValidator';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'sonner';
+import { AxiosError } from 'axios';
 
 const FeatureRequestPage: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -86,6 +87,9 @@ const FeatureRequestPage: React.FC = () => {
             }
         } catch (error) {
             console.error('Submission error:', error);
+            if (error instanceof AxiosError) {
+                toast.error(error.response?.data.message);
+            }
         } finally {
             setIsSubmitting(false);
         }

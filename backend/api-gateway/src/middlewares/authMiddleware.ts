@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../config";
 import logger from "../shared/utils/logger";
+import { HttpResponse } from "../shared/constants/httpResponse";
 
 
 export class AuthMiddleware {
@@ -28,7 +29,7 @@ export class AuthMiddleware {
         const token = req.cookies?.accessToken 
 
         if (!token) {
-            res.status(401).json({ message: 'Not authenticated' });
+            res.status(401).json({ message: HttpResponse.NOT_AUTHENTICATED });
             return;
         }
 
@@ -39,7 +40,7 @@ export class AuthMiddleware {
             next();
         } catch (err) {
             logger.error(err)
-            res.status(403).json({ message: 'Invalid or expired token' });
+            res.status(403).json({ message: HttpResponse.INVALID_TOKEN });
             return;
         }
     };

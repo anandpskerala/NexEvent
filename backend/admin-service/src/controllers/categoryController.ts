@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { CategoryService } from "../services/categoryService";
 import { ICategory } from "../shared/types/ICategory";
+import { ICategoryService } from "../services/interfaces/ICategoryService";
 
 export class CategoryController {
-    constructor(private categoryService: CategoryService) {}
+    constructor(private categoryService: ICategoryService) {}
 
     public createCategory = async (req: Request, res: Response): Promise<void> => {
         const { name, description, image } = req.body;

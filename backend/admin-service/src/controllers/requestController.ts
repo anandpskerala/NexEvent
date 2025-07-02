@@ -1,20 +1,13 @@
 import { Request, Response } from "express";
-import { RequestService } from "../services/requestService";
-import { StatusCode } from "../shared/constants/statusCode";
+import { IRequestService } from "../services/interfaces/IRequestService";
 
 
 export class RequestController {
-    constructor(private requestService: RequestService) {}
+    constructor(private requestService: IRequestService) {}
 
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { featureTitle, category, priority, description, useCase, additionalInfo} = req.body;
-
-        if (!userId || !featureTitle || featureTitle.trim() === "", !category || !priority || !description || description.trim() === "" || 
-            !useCase || useCase.trim() === "") {
-                res.status(StatusCode.BAD_REQUEST).json({message: "Fill all the required fields"});
-                return;
-        }
 
         const data = {
             userId,
@@ -39,7 +32,7 @@ export class RequestController {
         const { page = 1, limit = 10 } = req.query;
         const result = await this.requestService.getAllRequest(Number(page), Number(limit));
         res.status(result.status).json({
-            message: result.message, 
+            message: result.message,
             total: result.total,
             page: result.page,
             pages: result.pages,

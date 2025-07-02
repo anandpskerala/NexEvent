@@ -47,7 +47,7 @@ const VideoConferencePage = () => {
 
     if (verified && user)
         return (
-            <RoomProviderWrapper identity={`${user.firstName} ${user.lastName}`} roomName={id as string}>
+            <RoomProviderWrapper id={id as string} identity={`${user.firstName} ${user.lastName}`} roomName={id as string}>
                 <VideoConference />
             </RoomProviderWrapper>
         );

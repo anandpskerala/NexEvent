@@ -259,7 +259,7 @@ const BookingPage = () => {
                 if (res.data) {
                     setEvent(res.data.event);
                     const ticket = res.data.event.tickets[0];
-                    updateTicketQuantity(ticket.id, 1, ticket.price, ticket.name);
+                    updateTicketQuantity(ticket.id, 1, isNaN(ticket.price) ? 0: ticket.price, ticket.name);
                 }
             } catch (error) {
                 setEvent(undefined);

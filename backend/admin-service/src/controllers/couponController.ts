@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { CouponService } from "../services/couponService";
+import { ICouponService } from "../services/interfaces/ICouponService";
 
 
 export class CouponController {
-    constructor(private couponService: CouponService) { }
+    constructor(private couponService: ICouponService) { }
 
     public createCoupon = async (req: Request, res: Response): Promise<void> => {
         const { couponCode, couponName, description, discount, startDate, endDate, minAmount, maxAmount } = req.body;

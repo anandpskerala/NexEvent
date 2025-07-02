@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { ReviewController } from "../controllers/reviewController";
-import { ReviewService } from "../services/reviewService";
-import { ReviewRepository } from "../repositories/ReviewRepository";
+import { ReviewService } from "../services/implementation/reviewService";
+import { ReviewRepository } from "../repositories/implementation/ReviewRepository";
 
 const router = Router();
 

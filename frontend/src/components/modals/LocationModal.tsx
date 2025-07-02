@@ -130,6 +130,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                                         country: result.components.country
                                     }
                                 };
+                                localStorage.setItem('user_location', JSON.stringify(location));
                                 onLocationSelect(location);
                                 onClose();
                             }

@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
-import { RequestService } from "../services/requestService";
+import { IRequestService } from "../services/interfaces/IRequestService";
 
 export class RequestController {
-    constructor(private request: RequestService) {};
+    constructor(private request: IRequestService) {};
 
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.params.id;

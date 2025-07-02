@@ -1,6 +1,8 @@
 import express, { Application } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
 import rateLimit from 'express-rate-limit';
 import { AuthMiddleware } from "./middlewares/authMiddleware";
 import { config } from "./config";
@@ -9,6 +11,8 @@ import { AdminProxy } from "./middlewares/proxies/adminProxy";
 import { MessageProxy } from "./middlewares/proxies/messageProxy";
 import { EventProxy } from "./middlewares/proxies/eventProxy";
 import logger from "./shared/utils/logger";
+import { errorHandler } from "./middlewares/errorHandler";
+import { requestLogger } from "./middlewares/requestLogger";
 
 
 export class App {
@@ -21,6 +25,8 @@ export class App {
     }
 
     private setupMiddleware() {
+        this.app.use(helmet());
+        this.app.use(compression());
         this.app.use(express.json());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(cookieParser());
@@ -28,6 +34,7 @@ export class App {
             origin: config.app.frontend,
             credentials: true
         }));
+        this.app.use(requestLogger);
 
         const limiter = rateLimit({
             windowMs: 15 * 60 * 1000,
@@ -46,7 +53,8 @@ export class App {
 
         this.app.use(limiter);
         const authMiddleware = new AuthMiddleware();
-        this.app.use(authMiddleware.authenticate)
+        this.app.use(authMiddleware.authenticate);
+        this.app.use(errorHandler);
     }
 
     private setupProxy() {
