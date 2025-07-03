@@ -1,7 +1,7 @@
 import { IBookingRepository } from "../../repositories/interfaces/IBookingRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { AnalyticsReturnType, AnalyticsTopSellingType } from "../../shared/types/returnTypes";
+import { AnalyticsReturnType, AnalyticsTopSellingType } from "../../shared/types/ReturnType";
 import { GroupBy } from "../../shared/types/RevenueAnalytics";
 import logger from "../../shared/utils/logger";
 import { IAnalyticService } from "../interfaces/IAnalyticService";

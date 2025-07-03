@@ -2,7 +2,7 @@ import { FilterQuery, SortOrder, Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IEvent } from "../../shared/types/IEvent";
-import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType } from "../../shared/types/returnTypes";
+import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType } from "../../shared/types/ReturnType";
 import { ITicket } from "../../shared/types/ITicket";
 import logger from "../../shared/utils/logger";
 import { IEventRepository } from "../../repositories/interfaces/IEventRepository";

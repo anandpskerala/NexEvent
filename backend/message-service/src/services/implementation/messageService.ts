@@ -10,7 +10,7 @@ import { IUser } from "../../shared/types/IUser";
 import { INotification } from "../../shared/types/INotfication";
 import logger from "../../shared/utils/logger";
 import { IChatRepository } from "../../repositories/interfaces/IChatRepository";
-import { MessagePaginationType, MessageReturnType, UserReturnType } from "../../shared/types/ReturnTypes";
+import { MessagePaginationType, MessageReturnType, UserReturnType } from "../../shared/types/ReturnType";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 
 export class MessageService {

@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { IBooking } from "../../shared/types/IBooking";
-import { BookingReturnType, BookingPaginationType, BookingVerifyType } from "../../shared/types/returnTypes";
+import { BookingReturnType, BookingPaginationType, BookingVerifyType } from "../../shared/types/ReturnType";
 
 export interface IBookingService {
     createBooking(data: IBooking): Promise<BookingReturnType>;

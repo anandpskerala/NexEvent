@@ -1,4 +1,4 @@
-import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnTypes";
+import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnType";
 
 export interface IUserService {
     getAllUsers(search: string, page: number, limit: number, role?: string, status?: string, myID?: string): Promise<UserPaginationType>;

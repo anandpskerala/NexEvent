@@ -1,5 +1,5 @@
 import { IReport, ReportActions } from "../../shared/types/IReport";
-import { ReportPaginationType, ReportReturnType } from "../../shared/types/returnTypes";
+import { ReportPaginationType, ReportReturnType } from "../../shared/types/ReturnType";
 
 export interface IReportService {
     createRequest(data: IReport): Promise<ReportReturnType>;

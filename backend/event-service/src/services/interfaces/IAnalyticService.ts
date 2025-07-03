@@ -1,4 +1,4 @@
-import { AnalyticsReturnType, AnalyticsTopSellingType } from "../../shared/types/returnTypes";
+import { AnalyticsReturnType, AnalyticsTopSellingType } from "../../shared/types/ReturnType";
 import { GroupBy } from "../../shared/types/RevenueAnalytics";
 
 export interface IAnalyticService {

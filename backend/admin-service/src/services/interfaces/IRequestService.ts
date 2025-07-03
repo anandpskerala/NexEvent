@@ -1,5 +1,5 @@
 import { IRequests } from "../../shared/types/IRequests";
-import { RequestPaginationType, RequestReturnType } from "../../shared/types/returnTypes";
+import { RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
 
 export interface IRequestService {
     createRequest(data: IRequests): Promise<RequestReturnType>;

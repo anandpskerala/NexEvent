@@ -1,7 +1,7 @@
 import { INotificationRepository } from "../../repositories/interfaces/INotificationRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { UnreadPaginationType, UnreadReturnType } from "../../shared/types/ReturnTypes";
+import { UnreadPaginationType, UnreadReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 
 export class NotificationService {
