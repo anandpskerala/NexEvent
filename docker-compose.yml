@@ -22,6 +22,7 @@ services:
 
   user-service:
     build: ./backend/user-service
+    image: anandpskerala/user-service:latest
     env_file:
       - ./backend/user-service/.env
     environment:
@@ -32,25 +33,27 @@ services:
       - kafka
     networks:
       - app-network
-    restart: on-failure
-  
+    restart: unless-stopped
+
   admin-service:
     build: ./backend/admin-service
+    image: anandpskerala/admin-service:latest
     env_file:
       - ./backend/admin-service/.env
     environment:
       - KAFKA_BROKER=kafka:9092
       - USER_SERVICE=http://user-service:5001
-    depends_on:
-      - kafka
     ports:
       - "5002:5002"
+    depends_on:
+      - kafka
     networks:
       - app-network
-    restart: on-failure
-  
+    restart: unless-stopped
+
   event-service:
     build: ./backend/event-service
+    image: anandpskerala/event-service:latest
     env_file:
       - ./backend/event-service/.env
     environment:
@@ -61,10 +64,11 @@ services:
       - kafka
     networks:
       - app-network
-    restart: on-failure
-  
+    restart: unless-stopped
+
   message-service:
     build: ./backend/message-service
+    image: anandpskerala/message-service:latest
     env_file:
       - ./backend/message-service/.env
     environment:
@@ -76,13 +80,12 @@ services:
       - kafka
     networks:
       - app-network
-    restart: on-failure
-  
+    restart: unless-stopped
+
   api-gateway:
     build:
       context: ./backend/api-gateway
-    ports:
-      - "5000:5000"
+    image: anandpskerala/api-gateway:latest
     env_file:
       - ./backend/api-gateway/.env
     environment:
@@ -92,6 +95,8 @@ services:
       - EVENT_SERVICE=http://event-service:5003
       - MESSAGE_SERVICE=http://message-service:5004
       - KAFKA_BROKER=kafka:9092
+    ports:
+      - "5000:5000"
     depends_on:
       - kafka
       - user-service
@@ -100,21 +105,25 @@ services:
       - message-service
     networks:
       - app-network
-  
+    restart: unless-stopped
+
+
   frontend:
     build:
       context: ./frontend
       args:
         VITE_BACKEND_URL: "http://localhost:5000/api"
         VITE_SOCKET_URL: "http://localhost:5000"
-    ports:
-      - "80:80"
+    image: anandpskerala/frontend:latest
     env_file:
       - ./frontend/.env
+    ports:
+      - "80:80"
     depends_on:
       - api-gateway
     networks:
       - app-network
+    restart: unless-stopped
 
 networks:
   app-network:
