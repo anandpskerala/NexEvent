@@ -9,7 +9,7 @@ import { IEventRepository } from "../../repositories/interfaces/IEventRepository
 import { IPaymentRepository } from "../../repositories/interfaces/IPaymentRepository";
 import { IBookingRepository } from "../../repositories/interfaces/IBookingRepository";
 import { IWalletRepository } from "../../repositories/interfaces/IWalletRepository";
-import { PaymentReturnType, RPayReturnType, StripeReturnType, WalletReturnType } from "../../shared/types/returnTypes";
+import { PaymentReturnType, RPayReturnType, StripeReturnType, WalletReturnType } from "../../shared/types/ReturnType";
 import { IPaymentService } from "../interfaces/IPaymentService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 

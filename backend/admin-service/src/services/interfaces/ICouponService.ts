@@ -1,5 +1,5 @@
 import { ICoupon } from "../../shared/types/ICoupon";
-import { CouponPaginationType, CouponReturnType } from "../../shared/types/returnTypes";
+import { CouponPaginationType, CouponReturnType } from "../../shared/types/ReturnType";
 
 export interface ICouponService {
     createCoupon(data: ICoupon): Promise<CouponReturnType>;

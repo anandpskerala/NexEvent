@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IRequest } from "../../shared/types/IRequest";
-import { UserReturnType, RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnTypes";
+import { UserReturnType, RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { IRequestRepository } from "../../repositories/interfaces/IRequestRepository";

@@ -1,7 +1,7 @@
 import { StatusCode } from "../../shared/constants/statusCode";
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { ICategory } from "../../shared/types/ICategory";
-import { CategoryPaginationType, CategoryReturnType } from "../../shared/types/returnTypes";
+import { CategoryPaginationType, CategoryReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { ICategoryRepository } from "../../repositories/interfaces/ICategoryRepository";
 import { ICategoryService } from "../interfaces/ICategoryService";

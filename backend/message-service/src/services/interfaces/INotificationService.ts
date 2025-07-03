@@ -1,4 +1,4 @@
-import { UnreadReturnType, UnreadPaginationType } from "../../shared/types/ReturnTypes";
+import { UnreadReturnType, UnreadPaginationType } from "../../shared/types/ReturnType";
 
 export interface INotificationService {
     getUnreads(userId: string): Promise<UnreadReturnType>;

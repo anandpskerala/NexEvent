@@ -2,7 +2,7 @@ import { StatusCode } from "../../shared/constants/statusCode";
 import { ICoupon } from "../../shared/types/ICoupon";
 import logger from "../../shared/utils/logger";
 import { ICouponRepository } from "../../repositories/interfaces/ICouponRepository";
-import { CouponPaginationType, CouponReturnType } from "../../shared/types/returnTypes";
+import { CouponPaginationType, CouponReturnType } from "../../shared/types/ReturnType";
 import { ICouponService } from "../interfaces/ICouponService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 

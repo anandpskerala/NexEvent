@@ -10,7 +10,7 @@ import { IBookingRepository } from '../../repositories/interfaces/IBookingReposi
 import { IEventRepository } from '../../repositories/interfaces/IEventRepository';
 import { IPaymentRepository } from '../../repositories/interfaces/IPaymentRepository';
 import { IWalletRepository } from '../../repositories/interfaces/IWalletRepository';
-import { BookingPaginationType, BookingReturnType, BookingVerifyType } from '../../shared/types/returnTypes';
+import { BookingPaginationType, BookingReturnType, BookingVerifyType } from '../../shared/types/ReturnType';
 import { config } from '../../config';
 import { HttpResponse } from '../../shared/constants/httpResponse';
 

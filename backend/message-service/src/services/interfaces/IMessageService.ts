@@ -1,5 +1,5 @@
 import { Message } from "../../shared/types/Message";
-import { MessageReturnType, UserReturnType, MessagePaginationType } from "../../shared/types/ReturnTypes";
+import { MessageReturnType, UserReturnType, MessagePaginationType } from "../../shared/types/ReturnType";
 
 export interface IMessageService {
     sendMessage(data: Message): Promise<MessageReturnType>;

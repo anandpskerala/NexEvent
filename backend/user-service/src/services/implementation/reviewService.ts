@@ -2,7 +2,7 @@ import { ReviewRepository } from "../../repositories/implementation/ReviewReposi
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { IReview } from "../../shared/types/IReview";
-import { ReviewPaginationType, ReviewType } from "../../shared/types/ReturnTypes";
+import { ReviewPaginationType, ReviewType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IReviewService } from "../interfaces/IReviewService";
 

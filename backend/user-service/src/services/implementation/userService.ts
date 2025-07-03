@@ -1,7 +1,7 @@
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { UserRepository } from "../../repositories/implementation/UserRepository";
-import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnTypes";
+import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IUserService } from "../interfaces/IUserService";
 import { HttpResponse } from "../../shared/constants/httpResponse";

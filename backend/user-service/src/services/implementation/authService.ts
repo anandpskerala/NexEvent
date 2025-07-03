@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { AuthUtils } from "../../shared/utils/authUtils";
-import { OtpReturnType, UserReturnType } from "../../shared/types/ReturnTypes";
+import { OtpReturnType, UserReturnType } from "../../shared/types/ReturnType";
 import { Response } from "express";
 import { config } from "../../config";
 import { sendOtpMail, sendResetPasswordMail } from "../../shared/utils/mailer";

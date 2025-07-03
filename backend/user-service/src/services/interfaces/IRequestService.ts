@@ -1,5 +1,5 @@
 import { IRequest } from "../../shared/types/IRequest";
-import { RequestReturnType, RequestPaginationType, UserReturnType } from "../../shared/types/ReturnTypes";
+import { RequestReturnType, RequestPaginationType, UserReturnType } from "../../shared/types/ReturnType";
 
 export interface IRequestService {
     createRequest(data: Partial<IRequest>): Promise<RequestReturnType>;

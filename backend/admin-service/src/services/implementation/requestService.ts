@@ -6,7 +6,7 @@ import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { INotification } from "../../shared/types/INotification";
 import { IRequests } from "../../shared/types/IRequests";
-import { RequestPaginationType, RequestReturnType } from "../../shared/types/returnTypes";
+import { RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
 import { fetchUsers } from "../../shared/utils/getUsers";
 import logger from "../../shared/utils/logger";
 

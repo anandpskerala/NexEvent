@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { UserReturnType, OtpReturnType } from "../../shared/types/ReturnTypes";
+import { UserReturnType, OtpReturnType } from "../../shared/types/ReturnType";
 
 export interface IAuthService {
     loginUser(email: string, password: string, res: Response): Promise<UserReturnType>;

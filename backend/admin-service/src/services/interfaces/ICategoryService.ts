@@ -1,5 +1,5 @@
 import { ICategory } from "../../shared/types/ICategory";
-import { CategoryPaginationType, CategoryReturnType } from "../../shared/types/returnTypes";
+import { CategoryPaginationType, CategoryReturnType } from "../../shared/types/ReturnType";
 
 export interface ICategoryService {
     createCategory(name: string, description: string, image: string): Promise<CategoryReturnType>;

@@ -6,7 +6,7 @@ import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { INotification } from "../../shared/types/INotification";
 import { IReport, ReportActions } from "../../shared/types/IReport";
-import { ReportPaginationType, ReportReturnType } from "../../shared/types/returnTypes";
+import { ReportPaginationType, ReportReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IReportService } from "../interfaces/IReportService";
 

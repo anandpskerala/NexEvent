@@ -1,6 +1,6 @@
 import { IEvent } from "../../shared/types/IEvent";
 import { ITicket } from "../../shared/types/ITicket";
-import { EventReturnType, RawReturnType, EventPaginationType, EventsReturnType, SavedEventReturnType, SavedEventPaginationType } from "../../shared/types/returnTypes";
+import { EventReturnType, RawReturnType, EventPaginationType, EventsReturnType, SavedEventReturnType, SavedEventPaginationType } from "../../shared/types/ReturnType";
 
 export interface IEventService {
     createEvent(event: IEvent): Promise<EventReturnType>;

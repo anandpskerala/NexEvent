@@ -1,4 +1,4 @@
-import { StripeReturnType, PaymentReturnType, RPayReturnType, WalletReturnType } from "../../shared/types/returnTypes";
+import { StripeReturnType, PaymentReturnType, RPayReturnType, WalletReturnType } from "../../shared/types/ReturnType";
 
 export interface IPaymentService {
     createStripeOrder(
