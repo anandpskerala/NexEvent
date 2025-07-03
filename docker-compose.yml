@@ -2,6 +2,7 @@ services:
   kafka:
     image: bitnami/kafka:latest
     container_name: kafka
+    hostname: kafka
     ports:
       - "9092:9092"
     environment:
