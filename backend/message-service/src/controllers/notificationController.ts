@@ -16,6 +16,8 @@ export class NotificationController {
             res.setHeader("Content-Type", "text/event-stream");
             res.setHeader("Cache-Control", "no-cache");
             res.setHeader("Connection", "keep-alive");
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader("Access-Control-Allow-Credentials", "true");
             res.flushHeaders();
             const unread = await this.notificationService.getUnreads(id);
             res.write(`event: init\ndata: ${JSON.stringify(unread.result)}\n\n`);

@@ -69,7 +69,7 @@ services:
 
   message-service:
     build: ./backend/message-service
-    image: anandpskerala/message-service:latest
+    image: anandpskerala/message-service:v1.0.2
     env_file:
       - ./backend/message-service/.env
     environment:
@@ -113,9 +113,23 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_BACKEND_URL: "http://localhost:5000/api"
-        VITE_SOCKET_URL: "http://localhost:5000"
-    image: anandpskerala/frontend:latest
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
+        VITE_SOCKET_URL: ${VITE_SOCKET_URL}
+        VITE_FIREBASE_KEY: ${VITE_FIREBASE_KEY}
+        VITE_FIREBASE_DOMAIN: ${VITE_FIREBASE_DOMAIN}
+        VITE_FIREBASE_PROJECT_ID: ${VITE_FIREBASE_PROJECT_ID}
+        VITE_FIREBASE_STORAGE: ${VITE_FIREBASE_STORAGE}
+        VITE_FIREBASE_SENDER_ID: ${VITE_FIREBASE_SENDER_ID}
+        VITE_FIREBASE_APP_ID: ${VITE_FIREBASE_APP_ID}
+        VITE_FIREBASE_MEASUREMENT_ID: ${VITE_FIREBASE_MEASUREMENT_ID}
+        VITE_CLOUD_NAME: ${VITE_CLOUD_NAME}
+        VITE_CLOUD_PRESET: ${VITE_CLOUD_PRESET}
+        VITE_MAP_API_KEY: ${VITE_MAP_API_KEY}
+        VITE_OPENCAGE_API_KEY: ${VITE_OPENCAGE_API_KEY}
+        VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
+        VITE_STRIPE_KEY: ${VITE_STRIPE_KEY}
+        VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
+    image: anandpskerala/frontend:v1.0.7
     env_file:
       - ./frontend/.env
     ports:

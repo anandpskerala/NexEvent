@@ -52,10 +52,9 @@ const authSlice = createSlice({
                 state.user = null;
                 toast.error(action.payload as string);
             })
-            .addCase(logout.fulfilled, (state, action) => {
+            .addCase(logout.fulfilled, (state) => {
                 state.isLoading = false;
                 state.user = null;
-                toast.success(action.payload.message);
             })
             .addCase(logout.rejected, (state) => {
                 state.isLoading = false;

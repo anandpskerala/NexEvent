@@ -71,9 +71,7 @@ const FeatureRequestPage: React.FC = () => {
 
     const handleSubmit = async () => {
         const isValid = await validateForm(formData, setErrors);
-        console.log(isValid)
         if (!isValid) {
-            console.log("Not valid")
             return;
         }
 
