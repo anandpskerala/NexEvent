@@ -226,7 +226,6 @@ export class BookingRepository implements IBookingRepository {
     }
 
     async countBooking(userId: string, eventId: string): Promise<number> {
-        console.log(userId, eventId);
         const doc = await this.model.countDocuments({userId, eventId});
         return doc;
     }

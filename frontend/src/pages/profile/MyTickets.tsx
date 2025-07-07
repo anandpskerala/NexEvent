@@ -77,7 +77,6 @@ const MyTickets = () => {
     const handlePayment = async (booking: Booking): Promise<void> => {
         try {
             if (!booking) return;
-            console.log(booking);
             if (booking.paymentMethod === "razorpay") {
                 const res: AxiosResponse<{
                     order: {

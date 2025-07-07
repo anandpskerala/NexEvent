@@ -45,7 +45,6 @@ const ConfirmationPage = () => {
     const handlePayment = async (): Promise<void> => {
         try {
             if (!booking) return;
-            console.log(booking);
             if (booking.paymentMethod === "razorpay") {
                 const res: AxiosResponse<{
                     order: {
@@ -126,7 +125,7 @@ const ConfirmationPage = () => {
                                 navigate(`/payment/${res.data.paymentId}`);
                             }
                         } catch (err) {
-                            console.log(err)
+                            console.error(err)
                             toast.error("Stripe verification failed");
                         }
                     }

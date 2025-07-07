@@ -176,7 +176,6 @@ const BrowsePage = () => {
         };
 
         fetchRequest();
-        console.log(payload)
     }, [debouncedSearch, payload, sortBy, page]);
 
     return (

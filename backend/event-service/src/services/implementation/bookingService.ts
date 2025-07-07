@@ -25,7 +25,6 @@ export class BookingService {
     public async createBooking(data: IBooking): Promise<BookingReturnType> {
         try {
             const count = await this.repo.countBooking(data.userId, typeof data.eventId === 'string' ? data.eventId: data.eventId.id as string);
-            console.log(count)
             if (count > config.maxTicketLimit) {
                 return {
                     message: HttpResponse.MAX_TICKET_LIMIT,

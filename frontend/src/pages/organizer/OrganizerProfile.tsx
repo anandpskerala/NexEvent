@@ -58,7 +58,6 @@ const OrganizerProfile = () => {
         return null;
     }
     const { organizer } = userData;
-    console.log(typeof organizer)
     if (loading) return <LazyLoadingScreen />;
 
     return (

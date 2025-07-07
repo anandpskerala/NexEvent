@@ -40,7 +40,6 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
                 if (res.data) {
                     setCategory(res.data.category)
                 }
-                console.log(res)
             } catch (error) {
                 console.error(error)
             }

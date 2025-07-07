@@ -24,11 +24,9 @@ const EditCategory = () => {
         try {
             const fetchRequest = async () => {
                 const res = await axiosInstance.get(`/admin/category/${id}`);
-                console.log(res.data)
                 if (res.data) {
                     setCategory(res.data.category);
                 }
-                console.log(res)
             }
             fetchRequest();
         } catch (error) {

@@ -55,7 +55,6 @@ const RequestOrganizer = () => {
         try {
             const fetchRequest = async () => {
                 const res = await axiosInstance.get(`/user/request/${user?.id}`)
-                console.log(res.data)
                 if (res.data) {
                     setRequest(res.data.request);
                 }
