@@ -23,7 +23,7 @@ services:
 
   user-service:
     build: ./backend/user-service
-    image: anandpskerala/user-service:latest
+    image: anandpskerala/user-service:v1.0.2
     env_file:
       - ./backend/user-service/.env
     environment:
@@ -38,7 +38,7 @@ services:
 
   admin-service:
     build: ./backend/admin-service
-    image: anandpskerala/admin-service:latest
+    image: anandpskerala/admin-service:v1.0.2
     env_file:
       - ./backend/admin-service/.env
     environment:
@@ -54,7 +54,7 @@ services:
 
   event-service:
     build: ./backend/event-service
-    image: anandpskerala/event-service:latest
+    image: anandpskerala/event-service:v1.0.2
     env_file:
       - ./backend/event-service/.env
     environment:
@@ -69,7 +69,7 @@ services:
 
   message-service:
     build: ./backend/message-service
-    image: anandpskerala/message-service:v1.0.2
+    image: anandpskerala/message-service:v1.0.3
     env_file:
       - ./backend/message-service/.env
     environment:
@@ -129,7 +129,8 @@ services:
         VITE_RAZORPAY_KEY_ID: ${VITE_RAZORPAY_KEY_ID}
         VITE_STRIPE_KEY: ${VITE_STRIPE_KEY}
         VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
-    image: anandpskerala/frontend:v1.0.7
+
+    image: anandpskerala/frontend:v1.0.9
     env_file:
       - ./frontend/.env
     ports:

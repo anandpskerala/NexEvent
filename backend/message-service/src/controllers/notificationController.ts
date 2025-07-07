@@ -1,35 +1,34 @@
 import { Request, Response } from "express";
-import redisClient from "../config/redis";
 import { INotificationService } from "../services/interfaces/INotificationService";
 import { HttpResponse } from "../shared/constants/httpResponse";
+import logger from "../shared/utils/logger";
+import { addClient, broadcastInit, removeClient } from "../shared/utils/sseManager";
 
 export class NotificationController {
     constructor(private notificationService: INotificationService) { }
 
     public notificationStream = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-
         try {
-            const subClient = redisClient.duplicate();
-            await subClient.connect();
+            if (!id) {
+                res.status(400).json({ message: "User ID is required" });
+                return;
+            }
 
             res.setHeader("Content-Type", "text/event-stream");
             res.setHeader("Cache-Control", "no-cache");
             res.setHeader("Connection", "keep-alive");
-            res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader("Access-Control-Allow-Credentials", "true");
+            res.setHeader("Access-Control-Allow-Origin", "*");
             res.flushHeaders();
+
+            addClient(id, res);
+
             const unread = await this.notificationService.getUnreads(id);
-            res.write(`event: init\ndata: ${JSON.stringify(unread.result)}\n\n`);
+            broadcastInit(id, unread.result);
 
-            await subClient.subscribe(`notifications:${id}`, (message) => {
-                res.write(`data: ${message}\n\n`);
-            });
-
-            req.on('close', async () => {
-                console.log(`SSE connection closed by client: ${id}`);
-                await subClient.unsubscribe(`notifications:${id}`);
-                await subClient.quit();
+            req.on("close", () => {
+                logger.info(`SSE disconnected for user: ${id}`);
+                removeClient(id);
             });
 
         } catch (error) {

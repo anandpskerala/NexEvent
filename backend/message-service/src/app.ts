@@ -7,6 +7,7 @@ import { Consumer } from "./kafka/consumer";
 import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
 import mongoose from "mongoose";
 import logger from "./shared/utils/logger";
+import { initRedisSubscriber } from "./shared/utils/redisSubscriber";
 
 export class App {
   private app: Application;
@@ -56,6 +57,7 @@ export class App {
   public async listen(port: number) {
     await connectDB();
     await connectRedis();
+    await initRedisSubscriber();
     await this.setupKafka();
 
     this.setupShutdownHooks();
