@@ -23,6 +23,8 @@ spec:
           env:
             - name: KAFKA_BROKER
               value: kafka.default.svc.cluster.local:9092
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
           resources:
             requests:
               cpu: "100m"

@@ -22,7 +22,7 @@ const Login = () => {
 
     const [errors, setErrors] = useState<Partial<LoginErrorState>>({});
     const dispatch = useAppDispatch();
-    const { user } = useSelector((state: RootState) => state.auth);
+    const { user, isLoading } = useSelector((state: RootState) => state.auth);
     const handleForm = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormdata({ ...formdata, [e.target.name]: e.target.value });
     };
@@ -231,10 +231,11 @@ const Login = () => {
                                 </div>
 
                                 <button
+                                    disabled={isLoading}
                                     type="submit"
-                                    className="w-full py-2 px-4 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 cursor-pointer"
+                                    className={`w-full py-2 px-4 ${isLoading ? 'bg-blue-700 text-white': 'bg-blue-600 text-white'} font-medium rounded-md hover:bg-blue-700 cursor-pointer`}
                                 >
-                                    Login
+                                    {isLoading ? 'Logging in ...': 'Login'}
                                 </button>
                             </form>
 

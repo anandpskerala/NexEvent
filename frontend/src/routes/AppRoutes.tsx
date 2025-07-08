@@ -55,6 +55,7 @@ const FeatureRequestAdmin = lazy(() => import("../pages/admin/FeatureRequestAdmi
 const UserReportsPage = lazy(() => import("../pages/admin/UserReportsPage"));
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const AdminAnalytics = lazy(() => import("../pages/admin/AdminAnalytics"));
+const Error404 = lazy(() => import("../pages/errors/Error404"));
 
 const AppRoutes = () => {
     const { user } = useAppSelector((state: RootState) => state.auth);
@@ -117,6 +118,8 @@ const AppRoutes = () => {
                     <Route path="/admin/dashboard" element={<AdminDashboard />} />
                     <Route path="/admin/analytics" element={<AdminAnalytics />} />
                 </Route>
+
+                <Route path="*" element={<Error404 />} />
             </Routes>
         </Suspense>
     );

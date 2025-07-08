@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: admin-service
-          image: anandpskerala/admin-service:v1.0.2
+          image: anandpskerala/admin-service:v1.0.3
           ports:
             - containerPort: 5002
           envFrom:
@@ -25,6 +25,8 @@ spec:
               value: kafka.default.svc.cluster.local:9092
             - name: USER_SERVICE
               value: http://user-service.default.svc.cluster.local:5001
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
           resources:
             requests:
               cpu: "100m"

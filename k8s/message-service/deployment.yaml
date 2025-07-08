@@ -24,7 +24,9 @@ spec:
             - name: KAFKA_BROKER
               value: kafka.default.svc.cluster.local:9092
             - name: USER_SERVICE
-              value: http://user-service:5001
+              value: http://user-service.default.svc.cluster.local:5001
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
           resources:
             requests:
               cpu: "100m"

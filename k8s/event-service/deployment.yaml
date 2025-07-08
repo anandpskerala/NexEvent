@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: event-service
-          image: anandpskerala/event-service:v1.0.2
+          image: anandpskerala/event-service:v1.0.3
           ports:
             - containerPort: 5003
           envFrom:
@@ -23,6 +23,10 @@ spec:
           env:
             - name: KAFKA_BROKER
               value: kafka.default.svc.cluster.local:9092
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
+            - name: USER_SERVICE
+              value: http://user-service.default.svc.cluster.local:5001
           resources:
             requests:
               cpu: "100m"

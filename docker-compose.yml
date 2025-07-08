@@ -38,7 +38,7 @@ services:
 
   admin-service:
     build: ./backend/admin-service
-    image: anandpskerala/admin-service:v1.0.2
+    image: anandpskerala/admin-service:v1.0.3
     env_file:
       - ./backend/admin-service/.env
     environment:
@@ -54,7 +54,7 @@ services:
 
   event-service:
     build: ./backend/event-service
-    image: anandpskerala/event-service:v1.0.2
+    image: anandpskerala/event-service:v1.0.3
     env_file:
       - ./backend/event-service/.env
     environment:
@@ -130,7 +130,7 @@ services:
         VITE_STRIPE_KEY: ${VITE_STRIPE_KEY}
         VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
 
-    image: anandpskerala/frontend:v1.0.9
+    image: anandpskerala/frontend:v1.1.0
     env_file:
       - ./frontend/.env
     ports:

@@ -1,11 +1,16 @@
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import config from "../config/config";
+import axiosInstance from "./axiosInstance";
 
 export const uploadToCloudinary = async (file: File) => {
     try {
+        const { data } = await axiosInstance.post("/admin/upload/signature");
         const formData = new FormData();
         formData.append("file", file);
+        formData.append("api_key", data.apiKey);
+        formData.append("timestamp", data.timestamp);
+        formData.append("signature", data.signature);
         formData.append("upload_preset", config.cloudinary.cloudPreset);
 
         const cloudName = config.cloudinary.cloudName;
