@@ -5,11 +5,10 @@ import { UserSidebar } from '../../components/partials/UserSidebar';
 import { OrganizerRequestForm } from '../../components/forms/OrganizerRequestForm'
 import { OrganizerRequestDetails } from '../../components/cards/OrganizerRequestDetails';
 import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
-import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import type { OrganizerData } from '../../interfaces/entities/Organizer';
 import { Footer } from '../../components/partials/Footer';
+import { getOrganizerRequest, reApplyRequestForOrganizer } from '../../services/profileService';
 
 
 const RequestOrganizer = () => {
@@ -27,17 +26,11 @@ const RequestOrganizer = () => {
     });
 
     const handleReApply = async () => {
-        try {
-            const res = await axiosInstance.delete(`/user/request/${request?.id}`);
-            if (res.data) {
-                setRequest(undefined);
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-            console.error(error)
+
+        const res = await reApplyRequestForOrganizer(request?.id as string);
+        if (res) {
+            setRequest(undefined);
+            toast.success(res.message);
         }
     };
 
@@ -52,17 +45,13 @@ const RequestOrganizer = () => {
     };
 
     useEffect(() => {
-        try {
-            const fetchRequest = async () => {
-                const res = await axiosInstance.get(`/user/request/${user?.id}`)
-                if (res.data) {
-                    setRequest(res.data.request);
-                }
+        const fetchRequest = async () => {
+            const res = await getOrganizerRequest(user?.id as string);
+            if (res) {
+                setRequest(res.request);
             }
-            fetchRequest();
-        } catch (error) {
-            console.error(error)
         }
+        fetchRequest();
     }, [user?.id])
     return (
         <div className="flex flex-col min-h-screen bg-gray-50">

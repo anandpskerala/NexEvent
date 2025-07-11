@@ -4,9 +4,9 @@ import type { RootState } from '../../store';
 import { OrganizerSideBar } from '../../components/partials/OrganizerSidebar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { TicketForm } from '../../components/forms/TicketForm';
+import { getEventDetails } from '../../services/eventService';
 
 
 const EditTicket = () => {
@@ -24,13 +24,10 @@ const EditTicket = () => {
         setLoading(true);
         const fetchRequest = async () => {
             try {
-                const res = await axiosInstance.get(`/event/event/${id}`)
-                if (res.data) {
-                    setEvent(res.data.event);
+                const res = await getEventDetails(id as string);
+                if (res) {
+                    setEvent(res.event);
                 }
-                console.log(res)
-            } catch (error) {
-                console.error(error)
             } finally {
                 setLoading(false);
             }

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-service
+  template:
+    metadata:
+      labels:
+        app: event-service
+    spec:
+      containers:
+        - name: event-service
+          image: anandpskerala/event-service:v1.0.4
+          ports:
+            - containerPort: 5003
+          envFrom:
+            - secretRef:
+                name: event-env
+          env:
+            - name: KAFKA_BROKER
+              value: kafka.default.svc.cluster.local:9092
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
+            - name: USER_SERVICE
+              value: http://user-service.default.svc.cluster.local:5001
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-service
+spec:
+  selector:
+    app: event-service
+  ports:
+    - port: 5003
+      targetPort: 5003

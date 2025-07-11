@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { NavBar } from '../../components/partials/NavBar';
 import { Calendar, CalendarX, ChevronDown, Grid, List, Search, X, SlidersHorizontal, MapPin, Clock, Tag, ArrowUpDown } from 'lucide-react';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventCard } from '../../components/cards/EventCard';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { EventGrid } from '../../components/cards/EventGrid';
@@ -13,6 +12,8 @@ import type { Category } from '../../interfaces/entities/Category';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import type { BrowsePayloadData } from '../../interfaces/entities/Payload';
 import { useSearchParams } from 'react-router-dom';
+import { getCategories } from '../../services/categoryService';
+import { getEventList } from '../../services/eventService';
 
 const eventTypeData = [
     { name: "All Types", value: "" },
@@ -146,9 +147,9 @@ const BrowsePage = () => {
     useEffect(() => {
         const fetchCatgories = async () => {
             try {
-                const res = await axiosInstance.get("/admin/category");
-                if (res.data) {
-                    setCatgories(res.data.categories);
+                const res = await getCategories("", 1);
+                if (res) {
+                    setCatgories(res.categories);
                 }
             } catch (error) {
                 console.error(error);
@@ -162,14 +163,12 @@ const BrowsePage = () => {
         const fetchRequest = async () => {
             setLoading(true);
             try {
-                const eventRes = await axiosInstance.get(`/event/all?search=${debouncedSearch}&category=${payload.category}&eventType=${payload.eventType}&eventStatus=${payload.eventStatus}&startDate=${payload.startDate}&endDate=${payload.endDate}&sortBy=${payload.sortBy}&page=${page}&limit=25`);
-                if (eventRes.data) {
-                    setEvents(eventRes.data.events);
-                    setPage(Number(eventRes.data.page));
-                    setPages(Number(eventRes.data.pages));
+                const eventRes = await getEventList(debouncedSearch, page, "", 25, payload.category, payload.eventType, payload.eventStatus, payload.startDate, payload.endDate, payload.sortBy);
+                if (eventRes) {
+                    setEvents(eventRes.events);
+                    setPage(Number(eventRes.page));
+                    setPages(Number(eventRes.pages));
                 }
-            } catch (error) {
-                console.error(error);
             } finally {
                 setLoading(false);
             }
@@ -336,13 +335,13 @@ const BrowsePage = () => {
                         {viewMode === "card" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
                                 {events.map((event: AllEventData) => (
-                                    <EventCard key={event.id} event={event} />
+                                    <EventCard key={event.id} event={event} setEvents={setEvents} user={user} />
                                 ))}
                             </div>
                         ) : (
                             <div className="space-y-4">
                                 {events.map((event: AllEventData) => (
-                                    <EventGrid key={event.id} event={event} />
+                                    <EventGrid key={event.id} event={event} setEvents={setEvents} />
                                 ))}
                             </div>
                         )}

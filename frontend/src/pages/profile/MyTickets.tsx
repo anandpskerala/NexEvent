@@ -54,7 +54,7 @@ const MyTickets = () => {
     const handleCancel = async () => {
         setLoading(true);
         try {
-            const res = await axiosInstance.patch(`/event/booking/${selected?.id}`);
+            const res = await axiosInstance.patch(`/bookings/booking/${selected?.id}`);
             if (res.data) {
                 setEvents((prev) =>
                     prev.map((booking) =>
@@ -84,7 +84,7 @@ const MyTickets = () => {
                         amount: number;
                         currency: string;
                     };
-                }> = await axiosInstance.post("/event/payment/razorpay/order", {
+                }> = await axiosInstance.post("/bookings/payment/razorpay/order", {
                     amount: booking.totalAmount,
                     currency: booking.eventId.currency || "INR",
                 });
@@ -97,7 +97,7 @@ const MyTickets = () => {
                     description: "Ticket Booking",
                     order_id: res.data.order.id,
                     handler: async (response: RazorpayResponse) => {
-                        await axiosInstance.post("/event/payment/razorpay/verify", {
+                        await axiosInstance.post("/bookings/payment/razorpay/verify", {
                             ...response,
                             bookingId: booking.id,
                             eventId: booking.eventId.id,
@@ -118,7 +118,7 @@ const MyTickets = () => {
 
                 const rzp = new window.Razorpay(options);
                 rzp.on('payment.failed', async () => {
-                    await axiosInstance.post(`/event/failed/booking`, {
+                    await axiosInstance.post(`/bookings/failed/booking`, {
                         bookingId: booking.id,
                         eventId: booking.eventId.id,
                         amount: res.data.order.amount,
@@ -132,7 +132,7 @@ const MyTickets = () => {
 
             else if (booking.paymentMethod === "stripe") {
                 const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
-                    "/event/payment/stripe/order",
+                    "/bookings/payment/stripe/order",
                     {
                         eventId: booking.eventId.id, tickets: booking.tickets, promoCode: booking.couponCode, amount: booking.totalAmount * 100,
                         bookingId: booking.id, currency: booking.eventId.currency || "INR", orderId: booking.orderId
@@ -151,7 +151,7 @@ const MyTickets = () => {
                     const { sessionId } = event.data;
                     if (sessionId) {
                         try {
-                            const res = await axiosInstance.post("/event/payment/stripe/verify", { sessionId });
+                            const res = await axiosInstance.post("/bookings/payment/stripe/verify", { sessionId });
                             if (res.data) {
                                 toast.success(res.data.message);
                                 navigate(`/payment/${res.data.paymentId}`);
@@ -168,7 +168,7 @@ const MyTickets = () => {
 
             else if (booking.paymentMethod === "wallet") {
                 const res = await axiosInstance.post(
-                    "/event/payment/wallet/pay",
+                    "/bookings/payment/wallet/pay",
                     { eventId: booking.eventId.id, currency: booking.eventId.currency, amount: booking.totalAmount, bookingId: booking.id }
                 );
                 if (res.data.paymentId) {
@@ -189,7 +189,7 @@ const MyTickets = () => {
         setLoading(true);
         try {
             const fetchRequest = async (pageNumber = 1) => {
-                const res = await axiosInstance.get(`/event/bookings/${user?.id}?page=${pageNumber}&limit=10`)
+                const res = await axiosInstance.get(`/bookings/bookings/${user?.id}?page=${pageNumber}&limit=10`)
                 if (res.data) {
                     setEvents(res.data.bookings);
                     setPage(Number(res.data.page));

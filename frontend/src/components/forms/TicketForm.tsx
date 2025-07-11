@@ -2,13 +2,12 @@ import { ChevronDown, Plus } from 'lucide-react';
 import React, { useState } from 'react'
 import * as yup from 'yup';
 import { v4 as uuidv4 } from 'uuid';
-import axiosInstance from '../../utils/axiosInstance';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
 import type { TicketFormProps, TicketProps } from '../../interfaces/props/formProps';
 import type { Ticket } from '../../interfaces/entities/FormState';
 import type { TicketErrorState } from '../../interfaces/entities/ErrorState';
+import { manageTickets } from '../../services/eventService';
 
 const ticketSchema = yup.object().shape({
     name: yup.string()
@@ -224,22 +223,12 @@ export const TicketForm: React.FC<TicketFormProps> = ({ initialData, isEdit = fa
         setLoading(true);
         try {
             await eventTicketSchema.validate({ ...event, tickets }, { abortEarly: false, context: { type: event.entryType } });
-            let method = axiosInstance.post;
-            let url = "/event/ticket"
-            if (isEdit) {
-                method = axiosInstance.patch;
-                url = `/event/ticket/${id}`;
-            }
-            const res = await method(url, { ...event, id, tickets })
-            if (res.data) {
-                toast.success(res.data.message);
+            const res = await manageTickets(id as string, { ...event, id: id as string, tickets }, isEdit);
+            if (res) {
+                toast.success(res.message);
                 navigate("/organizer/events");
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
-                console.error(error.response?.data.message);
-            }
-
             if (error instanceof yup.ValidationError) {
                 const errorMap: TicketErrorState = {};
                 error.inner.forEach(e => {

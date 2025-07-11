@@ -33,7 +33,13 @@ export interface EventFormProps {
 }
 
 export interface EventCardProps {
-    event: AllEventData
+    event: AllEventData;
+    setEvents: React.Dispatch<React.SetStateAction<AllEventData[]>>;
+    user?: User | null;
+}
+
+export interface OrgEventCardProps {
+    event: AllEventData;
 }
 
 export interface CategoryCardProps {

@@ -4,10 +4,8 @@ import type { CouponFormProps } from '../../interfaces/props/formProps'
 import type { ICoupon } from '../../interfaces/entities/Coupons';
 import type { CouponErrorState } from '../../interfaces/entities/ErrorState';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
-import { toast } from 'sonner';
-import { AxiosError } from 'axios';
 import { validateCoupon } from '../../interfaces/validators/couponValidator';
+import { createCoupon, editCoupon } from '../../services/couponService';
 
 export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) => {
     const [formData, setFormData] = useState<Partial<ICoupon>>({
@@ -62,16 +60,11 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
             };
 
             const endpoint = isEdit
-                ? `/admin/coupon/${initialData?.id}`
-                : '/admin/coupon';
+                ? editCoupon(initialData?.id as string, payload)
+                : createCoupon(payload);
 
-            const method = isEdit ? axiosInstance.patch : axiosInstance.post;
-
-            const res = await method(endpoint, payload);
-            if (res.data) {
-                toast.success(res.data.message);
-                navigate('/admin/coupons');
-            }
+            await endpoint;
+            navigate('/admin/coupons');
         } catch (error) {
             if (error instanceof Yup.ValidationError) {
                 const errorMap: CouponErrorState = {};
@@ -79,10 +72,6 @@ export const CouponForm: React.FC<CouponFormProps> = ({ initialData, isEdit }) =
                     if (e.path) errorMap[e.path] = e.message;
                 });
                 setErrors(errorMap);
-            }
-
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
             }
             console.error(error);
         } finally {

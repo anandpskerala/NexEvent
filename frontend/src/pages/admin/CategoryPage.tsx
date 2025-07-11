@@ -6,12 +6,10 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { Link } from 'react-router-dom';
 import { Edit, Plus, Search, Trash } from 'lucide-react';
 import { getRandomBgColor } from '../../utils/randomColor';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
 import type { Category } from '../../interfaces/entities/Category';
 import { useDebounce } from '../../hooks/useDebounce';
+import { deleteCategoryService, getCategories } from '../../services/categoryService';
 
 
 const CategoryPage = () => {
@@ -39,14 +37,7 @@ const CategoryPage = () => {
     const deleteCategory = async () => {
         if (!categoryToDelete) return;
         try {
-            const res = await axiosInstance.delete(`/admin/category/${categoryToDelete}`);
-            if (res.data) {
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
+            await deleteCategoryService(categoryToDelete);
         } finally {
             setCategoryToDelete(null);
         }
@@ -54,15 +45,11 @@ const CategoryPage = () => {
 
     useEffect(() => {
         const fetchRequest = async (pageNumber = 1) => {
-            try {
-                const res = await axiosInstance.get(`/admin/category?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
-                if (res.data) {
-                    setCategories(res.data.categories);
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages));
-                }
-            } catch (error) {
-                console.error("Failed to fetch categories", error);
+            const res = await getCategories(debouncedSearch, pageNumber, 10);
+            if (res) {
+                setCategories(res.categories);
+                setPage(Number(res.page));
+                setPages(Number(res.pages));
             }
         };
 

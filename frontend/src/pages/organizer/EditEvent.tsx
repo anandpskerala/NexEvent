@@ -3,12 +3,12 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { OrganizerSideBar } from '../../components/partials/OrganizerSidebar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
-import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { EventForm } from '../../components/forms/EventForm';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import type { User } from '../../interfaces/entities/User';
+import { getEventDetails } from '../../services/eventService';
 
 const EditEvent = () => {
     const { id } = useParams();
@@ -25,13 +25,10 @@ const EditEvent = () => {
         setLoading(true);
         const fetchRequest = async () => {
             try {
-                const res = await axiosInstance.get(`/event/event/${id}`)
-                if (res.data) {
-                    setEvent(res.data.event);
+                const res = await getEventDetails(id as string);
+                if (res) {
+                    setEvent(res.event);
                 }
-                console.log(res)
-            } catch (error) {
-                console.error(error)
             } finally {
                 setLoading(false);
             }

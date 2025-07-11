@@ -6,14 +6,13 @@ import type { RootState } from '../../store'
 import { UserSidebar } from '../../components/partials/UserSidebar'
 import { Link } from 'react-router-dom'
 import { useAppDispatch } from '../../hooks/useAppDispatch'
-import axiosInstance from '../../utils/axiosInstance'
 import { toast } from 'sonner'
-import { AxiosError } from 'axios'
 import type { PasswordFormState, ProfileFromState } from '../../interfaces/entities/FormState'
 import { updateProfile } from '../../store/actions/profile/updateProfile'
 import type { PasswordErrorState } from '../../interfaces/entities/ErrorState'
 import { validatePassword } from '../../interfaces/validators/passwordValidator'
 import { Footer } from '../../components/partials/Footer'
+import { changePassword } from '../../services/profileService'
 
 
 const ProfilePage = () => {
@@ -55,9 +54,9 @@ const ProfilePage = () => {
         setErrors({});
         try {
             await validatePassword(passwordData);
-            const response = await axiosInstance.patch("/user/auth/change-password", passwordData);
-            if (response.data) {
-                toast.success(response.data.message);
+            const response = await changePassword(passwordData);
+            if (response) {
+                toast.success(response.message);
                 setPasswordData({
                     currentPassword: "",
                     newPassword: "",
@@ -65,10 +64,6 @@ const ProfilePage = () => {
                 })
             }
         } catch (error) {
-            if (error instanceof AxiosError && error.response) {
-                toast.error(error.response.data.message);
-            }
-
             if (error instanceof Yup.ValidationError) {
                 const errorMap: PasswordErrorState = {};
                 error.inner.forEach(e => {

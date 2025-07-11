@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux';
 import { NavBar } from '../../components/partials/NavBar';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
+import { getEventDetails } from '../../services/eventService';
 
 
 const MeetingLandingPage: React.FC = () => {
@@ -96,13 +97,9 @@ const MeetingLandingPage: React.FC = () => {
 
     useEffect(() => {
         const fetchEvent = async (id: string) => {
-            try {
-                const res = await axiosInstance.get(`/event/event/${id}`);
-                if (res.data) {
-                    setEvent(res.data.event);
-                }
-            } catch (error) {
-                console.error(error);
+            const res = await getEventDetails(id);
+            if (res) {
+                setEvent(res.event);
             }
         }
 

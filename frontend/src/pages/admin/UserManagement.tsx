@@ -4,7 +4,6 @@ import { Edit, Search, Trash } from "lucide-react";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
 import type { RootState } from "../../store";
-import axiosInstance from "../../utils/axiosInstance";
 import Pagination from "../../components/partials/Pagination";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
@@ -13,6 +12,7 @@ import { FormSkeleton } from "../../components/skeletons/FormSkeleton";
 import type { User } from "../../interfaces/entities/User";
 import { validateUser } from "../../interfaces/validators/usermanagevalidator";
 import { useDebounce } from "../../hooks/useDebounce";
+import { deleteUserDetails, getUsers, updateUserDetails } from "../../services/profileService";
 
 const UserModal = lazy(() => import("../../components/modals/UserModal"));
 const DeleteConfirmationModal = lazy(() => import("../../components/modals/DeleteConfirmationModal"));
@@ -27,17 +27,12 @@ const useUserManagement = () => {
         async (pageNumber = 1, query = "", status = "", role = "") => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(
-                    `/user/users?query=${query}&page=${pageNumber}&limit=10&status=${status}&role=${role}`
-                );
-                if (res.data) {
-                    setUsers(res.data.users);
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages));
+                const res = await getUsers(query, pageNumber, status, role);
+                if (res) {
+                    setUsers(res.users);
+                    setPage(Number(res.page));
+                    setPages(Number(res.pages));
                 }
-            } catch (error) {
-                toast.error("Failed to fetch users. Please try again.");
-                console.error("Failed to fetch users", error);
             } finally {
                 setLoading(false);
             }
@@ -162,9 +157,9 @@ const UserManagement = () => {
     const updateUser = async (user: User) => {
         try {
             await validateUser(user);
-            const res = await axiosInstance.patch(`/user/${user.id}`, user);
-            if (res.data) {
-                toast.success(res.data.message);
+            const res = await updateUserDetails(user);
+            if (res) {
+                toast.success(res.message);
                 setSelectedUser(null);
                 setIsModalOpen(false);
                 fetchRequests(page, debouncedSearch, debouncedFilter.status, debouncedFilter.role);
@@ -182,21 +177,13 @@ const UserManagement = () => {
 
     const handleDelete = async () => {
         if (!selectedUser) return;
-        try {
-            const res = await axiosInstance.delete(`/user/${selectedUser.id}`);
-            if (res.data) {
-                toast.success(res.data.message);
+            const res = await deleteUserDetails(selectedUser.id);
+            if (res) {
+                toast.success(res.message);
                 setSelectedUser(null);
                 setConfirmModalOpen(false);
                 fetchRequests(page, debouncedSearch, debouncedFilter.status, debouncedFilter.role);
             }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message || "Failed to delete user.");
-            } else {
-                toast.error("An unexpected error occurred.");
-            }
-        }
     };
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

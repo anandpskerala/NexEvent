@@ -5,12 +5,12 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { Footer } from '../../components/partials/Footer';
 import { PasswordInput } from '../../components/partials/PasswordInput'
-import axiosInstance from '../../utils/axiosInstance';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import type { ResetFormState } from '../../interfaces/entities/FormState';
 import type { ResetErrorState } from '../../interfaces/entities/ErrorState';
 import { validateResetForm } from '../../interfaces/validators/resetValidator';
+import { resetPassword } from '../../services/profileService';
 
 
 const ResetPassword = () => {
@@ -35,9 +35,9 @@ const ResetPassword = () => {
         e.preventDefault();
         try {
             await validateResetForm(formdata);
-            const response = await axiosInstance.patch("/user/auth/reset-password", { requestId: id, newPassword: formdata.password });
-            if (response.data) {
-                toast.success(response.data.message);
+            const response = await resetPassword(id as string, formdata.password) ;
+            if (response) {
+                toast.success(response.message);
                 navigate("/login");
             }
         } catch (error) {

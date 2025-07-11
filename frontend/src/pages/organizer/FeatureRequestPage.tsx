@@ -8,9 +8,8 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import type { FeatureRequestFormData } from '../../interfaces/entities/FormState';
 import type { FeatureFormErrors } from '../../interfaces/entities/ErrorState';
 import { validateForm, validationSchema } from '../../interfaces/validators/featureFormValidator';
-import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+import { createFeatureRequest } from '../../services/featureRequestService';
 
 const FeatureRequestPage: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -78,17 +77,12 @@ const FeatureRequestPage: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            const res = await axiosInstance.post(`/admin/request`, formData);
-            if (res.data) {
+            const res = await createFeatureRequest(formData);
+            if (res) {
                 setIsSubmitted(true);
                 toast.success(res.data.message);
             }
-        } catch (error) {
-            console.error('Submission error:', error);
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-        } finally {
+        }  finally {
             setIsSubmitting(false);
         }
     };

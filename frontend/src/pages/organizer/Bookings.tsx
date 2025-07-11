@@ -98,7 +98,7 @@ const Bookings = () => {
 
     const handleCancel = async (id: string) => {
         try {
-            const res = await axiosInstance.patch(`/event/booking/${id}`);
+            const res = await axiosInstance.patch(`/bookings/booking/${id}`);
             setBookings(prev =>
                 prev.map(booking =>
                     booking.id === id ? { ...booking, status: "cancelled" } : booking
@@ -162,7 +162,7 @@ const Bookings = () => {
         const fetchBookings = async (page: number, limit: number) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/organizer/booking?search=${debouncedSearch}&page=${page}&limit=${limit}`);
+                const res = await axiosInstance.get(`/bookings/organizer/booking?search=${debouncedSearch}&page=${page}&limit=${limit}`);
                 if (res.data) {
                     setBookings(res.data.bookings);
                     setGroupedBookings(groupBookingsByEvent(res.data.bookings));

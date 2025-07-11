@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import type { SavedEvent } from '../../interfaces/entities/SavedEvent';
-import axiosInstance from '../../utils/axiosInstance';
 import { Footer } from '../../components/partials/Footer';
 import Pagination from '../../components/partials/Pagination';
 import { Link } from 'react-router-dom';
@@ -11,6 +10,7 @@ import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton
 import { NavBar } from '../../components/partials/NavBar';
 import { UserSidebar } from '../../components/partials/UserSidebar';
 import { formatDate } from '../../utils/stringUtils';
+import { getSavedEvents, removeSaveEvent } from '../../services/eventService';
 
 const SavedEvents = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -21,7 +21,7 @@ const SavedEvents = () => {
 
     const removeSaved = async (id: string) => {
         try {
-            await axiosInstance.delete(`/event/saved/${id}`);
+            await removeSaveEvent(id);
             setEvent((prevEvents: SavedEvent[]) => prevEvents.filter(event => event.eventId.id !== id));
         } catch (error) {
             console.error(error);
@@ -32,14 +32,12 @@ const SavedEvents = () => {
         const fetchRequest = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/all-saved?page=${page}&limit=10}`);
-                if (res.data) {
-                    setEvent(res.data.events);
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages));
+                const res = await getSavedEvents(page, 10);
+                if (res) {
+                    setEvent(res.events);
+                    setPage(Number(res.page));
+                    setPages(Number(res.pages));
                 }
-            } catch (error) {
-                console.error(error);
             } finally {
                 setLoading(false);
             }

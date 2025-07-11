@@ -11,6 +11,8 @@ import type { Category } from "../../interfaces/entities/Category";
 import type { AllEventData } from "../../interfaces/entities/FormState";
 import { Link, useNavigate } from "react-router-dom";
 import { useUserLocation } from "../../hooks/useUserLocation";
+import { getCategories } from "../../services/categoryService";
+import { getEventList } from "../../services/eventService";
 
 
 const Home = () => {
@@ -36,21 +38,21 @@ const Home = () => {
 
       try {
         const [eventRes, nearbyEvent, categoryRes] = await Promise.all([
-          axiosInstance.get("/event/all?limit=4"),
+          getEventList("", 1, "", 4),
           axiosInstance.get(`/event/nearbyevents?lat=${location?.lat}&lng=${location?.lng}`),
-          axiosInstance.get("/admin/category/?limit=5"),
+          getCategories("", 1, 5),
         ]);
 
-        if (eventRes.data) {
-          setEvents(eventRes.data.events);
+        if (eventRes) {
+          setEvents(eventRes.events);
         }
 
         if (nearbyEvent.data) {
           setNearByEvents(nearbyEvent.data.events);
         }
 
-        if (categoryRes.data) {
-          setCatgories(categoryRes.data.categories);
+        if (categoryRes) {
+          setCatgories(categoryRes.categories);
         }
       } catch (error) {
         console.error("Error fetching events or categories:", error);
@@ -126,7 +128,7 @@ const Home = () => {
                 {events.map((event, index) => (
                   !["ended", "cancelled"].includes(event.status as string) && (
                     <div key={index} className="group cursor-pointer">
-                      <EventCard event={event} />
+                      <EventCard event={event} setEvents={setEvents} user={user}/>
                     </div>
                   )
                 ))}
@@ -156,7 +158,7 @@ const Home = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {nearByEvents.map((event, index) => (
                     <div key={index} className="group cursor-pointer">
-                      <EventCard event={event} />
+                      <EventCard event={event} setEvents={setNearByEvents} user={user} />
                     </div>
                   ))}
                 </div>

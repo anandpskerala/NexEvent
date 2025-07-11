@@ -21,7 +21,7 @@ const VideoConferencePage = () => {
     useEffect(() => {
         const verifyBooking = async () => {
             try {
-                const res = await axiosInstance.get(`/event/verify/booking/${id}`);
+                const res = await axiosInstance.get(`/bookings/verify/booking/${id}`);
                 if (res.data?.verified) {
                     setVerified(true);
                 } else {

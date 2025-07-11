@@ -4,9 +4,9 @@ import type { RootState } from '../../store';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { CategoryForm } from '../../components/forms/CategoryForm';
-import axiosInstance from '../../utils/axiosInstance';
 import { useParams } from 'react-router-dom';
 import type { Category } from '../../interfaces/entities/Category';
+import { getCategoryDetails } from '../../services/categoryService';
 
 
 const EditCategory = () => {
@@ -23,9 +23,9 @@ const EditCategory = () => {
     useEffect(() => {
         try {
             const fetchRequest = async () => {
-                const res = await axiosInstance.get(`/admin/category/${id}`);
-                if (res.data) {
-                    setCategory(res.data.category);
+                const res = await getCategoryDetails(id as string)
+                if (res) {
+                    setCategory(res.category);
                 }
             }
             fetchRequest();

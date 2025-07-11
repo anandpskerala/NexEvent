@@ -2,14 +2,12 @@ import { Folder, Upload, X } from 'lucide-react';
 import React, { useRef, useState } from 'react'
 import * as Yup from 'yup'
 import { uploadToCloudinary } from '../../utils/cloudinary';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
-import axiosInstance from '../../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import type { CategoryFormProps } from '../../interfaces/props/formProps';
 import type { CategoryFormData } from '../../interfaces/entities/FormState';
 import type { CategoryErrorState } from '../../interfaces/entities/ErrorState';
 import { validateCategory } from '../../interfaces/validators/categoryValidator';
+import { createCategory, editCategory } from '../../services/categoryService';
 
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, isEditMode = false }) => {
@@ -93,16 +91,11 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, isEditM
       };
 
       const endpoint = isEditMode
-        ? `/admin/category/${initialData?.id}`
-        : '/admin/category';
+        ? editCategory(initialData?.id as string, payload)
+        : createCategory(payload);
 
-      const method = isEditMode ? axiosInstance.patch : axiosInstance.post;
-
-      const res = await method(endpoint, payload);
-      if (res.data) {
-        toast.success(res.data.message);
-        navigate(-1);
-      }
+      await endpoint;
+      navigate(-1);
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const errorMap: CategoryErrorState = {};
@@ -112,9 +105,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, isEditM
         setErrors(errorMap);
       }
 
-      if (error instanceof AxiosError) {
-        toast.error(error.response?.data.message);
-      }
       console.error(error);
     } finally {
       setLoading(false);
@@ -223,7 +213,7 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, isEditM
               </div>
             )}
             <input
-            ref={fileRef}
+              ref={fileRef}
               type="file"
               id="icon-upload"
               onChange={handleFileInput}
@@ -247,10 +237,10 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({ initialData, isEditM
           <button
             type="button"
             onClick={handleSubmit}
-            className={`px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 flex items-center ${isloading ? 'cursor-not-allowed bg-indigo-700': 'cursor-pointer bg-indigo-600'}`}
+            className={`px-5 py-2.5 rounded-lg text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 flex items-center ${isloading ? 'cursor-not-allowed bg-indigo-700' : 'cursor-pointer bg-indigo-600'}`}
             disabled={isloading}
           >
-            <span>{isEditMode ? (isloading ? 'Saving': 'Save') : (isloading ? 'Creating': 'Create')} Category {isloading && '...' }</span>
+            <span>{isEditMode ? (isloading ? 'Saving' : 'Save') : (isloading ? 'Creating' : 'Create')} Category {isloading && '...'}</span>
           </button>
         </div>
       </div>

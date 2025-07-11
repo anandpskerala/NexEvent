@@ -4,11 +4,11 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { AlertTriangle } from 'lucide-react';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import type { Organization } from '../../interfaces/entities/Organizer';
 import { RegistrationCard } from '../../components/cards/RegistrationCard';
+import { getRequests } from '../../services/organizerRequest';
 
 const OrganizerRequests = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -33,15 +33,12 @@ const OrganizerRequests = () => {
     const fetchRequests = async (pageNumber = 1) => {
         try {
             setLoading(true);
-            const limit = 10;
-            const res = await axiosInstance.get(`/user/requests?page=${pageNumber}&limit=${limit}`);
+            const res = await getRequests(pageNumber, 10);
             if (res.data) {
-                setRegistrations(res.data.requests);
-                setPage(Number(res.data.page));
-                setPages(Number(res.data.pages));
+                setRegistrations(res.requests);
+                setPage(Number(res.page));
+                setPages(Number(res.pages));
             }
-        } catch (error) {
-            console.error("Failed to fetch requests", error);
         } finally {
             setLoading(false);
         }

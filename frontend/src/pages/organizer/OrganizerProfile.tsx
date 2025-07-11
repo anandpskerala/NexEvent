@@ -6,10 +6,10 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { Footer } from '../../components/partials/Footer';
 import { useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import type { User } from '../../interfaces/entities/User';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { UserReportModal } from '../../components/modals/UserReportModal';
+import { getUserDetails } from '../../services/profileService';
 
 const OrganizerProfile = () => {
     const { id } = useParams();
@@ -40,12 +40,10 @@ const OrganizerProfile = () => {
         const fetchUser = async (id: string) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/user/${id}`);
-                if (res.data) {
-                    setUserData(res.data.user);
+                const res = await getUserDetails(id);
+                if (res) {
+                    setUserData(res.user);
                 }
-            } catch (error) {
-                console.log(error);
             } finally {
                 setLoading(false);
             }

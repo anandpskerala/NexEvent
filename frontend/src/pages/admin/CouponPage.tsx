@@ -2,15 +2,13 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import type { ICoupon } from '../../interfaces/entities/Coupons';
-import axiosInstance from '../../utils/axiosInstance';
-import { toast } from 'sonner';
-import { AxiosError } from 'axios';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { Link } from 'react-router-dom';
 import { Plus, Trash2, ChevronLeft, ChevronRight, Search, Edit } from 'lucide-react';
 import { captialize, formatDate } from '../../utils/stringUtils';
 import { useDebounce } from '../../hooks/useDebounce';
+import { deleteCouponService, getCoupons } from '../../services/couponService';
 
 const CouponPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -41,15 +39,8 @@ const CouponPage = () => {
         if (!couponToDelete) return;
         try {
             setLoading(true);
-            const res = await axiosInstance.delete(`/admin/coupon/${couponToDelete}`);
-            if (res.data) {
-                toast.success(res.data.message);
-                fetchCoupons(page);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
+            await deleteCouponService(couponToDelete);
+            fetchCoupons(page);
         } finally {
             setCouponToDelete(null);
             setShowDeleteModal(false);
@@ -60,15 +51,12 @@ const CouponPage = () => {
     const fetchCoupons = useCallback(async (pageNumber = 1) => {
         try {
             setLoading(true);
-            const res = await axiosInstance.get(`/admin/coupon?search=${debouncedSearch}&page=${pageNumber}&limit=10`);
-            if (res.data) {
-                setCoupons(res.data.coupons);
-                setPage(Number(res.data.page));
-                setPages(Number(res.data.pages));
+            const res = await getCoupons(debouncedSearch, pageNumber, 10);
+            if (res) {
+                setCoupons(res.coupons);
+                setPage(Number(res.page));
+                setPages(Number(res.pages));
             }
-        } catch (error) {
-            console.error(error);
-            toast.error('Failed to fetch coupons');
         } finally {
             setLoading(false);
         }
@@ -289,8 +277,8 @@ const CouponPage = () => {
                                                         <button
                                                             onClick={() => handlePageChange(pageNum)}
                                                             className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${pageNum === page
-                                                                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                                                                ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
+                                                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                                                                 }`}
                                                         >
                                                             {pageNum}

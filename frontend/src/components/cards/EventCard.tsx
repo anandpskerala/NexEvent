@@ -3,13 +3,33 @@ import { Clock, Heart, MapPin } from 'lucide-react'
 import { formatPrice } from '../../utils/stringUtils'
 import { Link } from 'react-router-dom'
 import type { EventCardProps } from '../../interfaces/props/formProps'
+import type { AxiosResponse } from 'axios'
+import { removeSaveEvent, saveEvent } from '../../services/eventService'
 
-export const EventCard: React.FC<EventCardProps> = ({ event }) => {
+export const EventCard: React.FC<EventCardProps> = ({ event, setEvents, user }) => {
+    const updateSaved = async () => {
+        let res: AxiosResponse | null;
+        if (event?.isSaved) {
+            res = await removeSaveEvent(event.id as string);
+        } else {
+            res = await saveEvent(event.id as string, user?.id as string);
+        }
+        if (res) {
+            const saved = res.data.saved as boolean;
+            if (event) {
+                setEvents(prevEvents =>
+                    prevEvents.map(ev =>
+                        ev.id === event.id ? { ...ev, isSaved: saved } : ev
+                    )
+                );
+            }
+        }
+    }
     return (
         <div className="bg-white rounded-lg shadow-md h-full overflow-hidden relative w-full md:max-w-sm mx-auto">
 
-            <div className="absolute top-2 right-2">
-                <Heart className={`${event.isSaved ? 'fill-red-500': 'fill-white/50'} text-white hover:fill-red-500 cursor-pointer`} />
+            <div className="absolute top-2 right-2" onClick={() => updateSaved()}>
+                <Heart className={`${event.isSaved ? 'fill-red-500' : 'fill-white/50'} text-white hover:fill-red-500 cursor-pointer`} />
             </div>
 
             <div className="h-26 bg-gray-200 flex items-center justify-center">

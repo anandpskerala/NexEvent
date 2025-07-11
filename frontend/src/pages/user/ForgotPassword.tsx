@@ -4,9 +4,7 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '../../store'
 import { Footer } from '../../components/partials/Footer'
 import { Link } from 'react-router-dom'
-import axiosInstance from '../../utils/axiosInstance'
-import { toast } from 'sonner'
-import { AxiosError } from 'axios'
+import { forgotPassword } from '../../services/profileService'
 
 
 const ForgotPassword = () => {
@@ -14,17 +12,8 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState<string>("");
 
     const handleForm = async (e: React.FormEvent<HTMLFormElement>) => {
-        try {
-            e.preventDefault();
-            const res = await axiosInstance.post("/user/auth/forgot-password", {email})
-            if (res.data) {
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data?.message || "Something went wrong")
-            }
-        }
+        e.preventDefault();
+        await forgotPassword(email);
     };
 
     return (

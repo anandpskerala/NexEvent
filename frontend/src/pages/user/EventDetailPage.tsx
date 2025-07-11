@@ -15,6 +15,7 @@ import config from '../../config/config';
 import { ReviewCard } from '../../components/cards/ReviewCard';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import type { User } from '../../interfaces/entities/User';
+import { getEventDetails, removeSaveEvent, saveEvent } from '../../services/eventService';
 
 
 const EventDetailPage = () => {
@@ -24,7 +25,6 @@ const EventDetailPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [event, setEvent] = useState<AllEventData>();
     const [organizer, setOrganizer] = useState<OrganizerData>();
-    // const [isSaved, setSaved] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const mapCenter = useMemo(() => {
@@ -39,7 +39,7 @@ const EventDetailPage = () => {
     const isEventNotActive = useMemo(() => {
         const now = new Date();
         const eventDate = new Date(event?.startDate as string);
-        if (event?.availableTickets === 0 || now > eventDate || event?.status === "cancelled" || event?.status === "ended") {
+        if (Number(event?.availableTickets) <= 0 || now > eventDate || event?.status === "cancelled" || event?.status === "ended") {
             return true;
         }
         return false;
@@ -52,15 +52,13 @@ const EventDetailPage = () => {
 
     const updateSaved = async () => {
         try {
-            let res: AxiosResponse;
+            let res: AxiosResponse | null;
             if (event?.isSaved) {
-                res = await axiosInstance.delete(`/event/saved/${event?.id}`);
+                res = await removeSaveEvent(event.id as string);
             } else {
-                res = await axiosInstance.post(`/event/saved/${user?.id}`, { eventId: event?.id })
+                res = await saveEvent(event?.id as string, user?.id as string);
             }
-            if (res.data) {
-                //#todo remove
-                // setSaved(res.data.saved);
+            if (res) {
                 const saved = res.data.saved as boolean;
                 if (event) {
                     setEvent({
@@ -80,10 +78,10 @@ const EventDetailPage = () => {
 
             try {
                 const [eventRes] = await Promise.all([
-                    axiosInstance.get(`/event/event/${id}`),
+                    getEventDetails(id as string),
                 ]);
 
-                const eventData = eventRes.data?.event;
+                const eventData = eventRes.event;
                 setEvent(eventData);
 
                 if (eventData?.userId) {

@@ -46,7 +46,7 @@ const TicketsPage = () => {
 
     const handleDownloadAllTickets = async (bookingId: string) => {
         try {
-            const res = await axiosInstance.get(`/event/ticket/download/${bookingId}`, {
+            const res = await axiosInstance.get(`/bookings/ticket/download/${bookingId}`, {
                 responseType: 'blob',
             });
 
@@ -74,7 +74,7 @@ const TicketsPage = () => {
         const fetchRequest = async (id: string) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/booking/${id}`);
+                const res = await axiosInstance.get(`/bookings/booking/${id}`);
                 if (res.data) {
                     setBooking(res.data.booking);
                 }
