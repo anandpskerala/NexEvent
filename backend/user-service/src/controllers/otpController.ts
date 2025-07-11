@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../shared/types/IUser";
 import { StatusCode } from "../shared/constants/statusCode";
 import { TOPICS } from "../kafka/topics";
 import { IAuthService } from "../services/interfaces/IAuthService";
+import { UserDTO } from "../shared/dtos/userDTO";
 
 export class OTPController {
-    constructor(private authService: IAuthService, private producer: UserProducer<IUser>) { }
+    constructor(private authService: IAuthService, private producer: UserProducer<UserDTO>) { }
 
     public getOtpTimer = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];

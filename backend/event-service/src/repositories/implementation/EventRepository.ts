@@ -5,6 +5,7 @@ import { ISavedEvents } from "../../shared/types/ISavedEvents";
 import eventModel from "../../models/eventModel";
 import savedEventsModel from "../../models/savedEventsModel";
 import { ITicket } from "../../shared/types/ITicket";
+import { deleteCache, getCache, setCache } from "../../shared/utils/cache";
 
 export class EventRepository implements IEventRepository {
     private model: Model<IEvent>;
@@ -17,6 +18,7 @@ export class EventRepository implements IEventRepository {
 
     async createEvent(event: IEvent): Promise<IEvent> {
         const doc = await this.model.create(event);
+        await deleteCache(`events:all`);
         return doc.toJSON();
     }
 
@@ -26,12 +28,21 @@ export class EventRepository implements IEventRepository {
     }
 
     async findByID(id: string): Promise<IEvent | undefined> {
+        const cacheKey = `events:${id}`;
+        const cachedEvent = await getCache<IEvent>(cacheKey);
+        if (cachedEvent) {
+            return cachedEvent;
+        }
         const doc = await this.model.findOne({ _id: id });
+        if (doc) {
+            await setCache<IEvent>(cacheKey, doc.toJSON(), 3600);
+        }
         return doc?.toJSON();
     }
 
     async createTicket(id: string, currency: string, entryType: string, showQuantity: boolean, refunds: boolean, tickets: ITicket[]): Promise<void> {
         await this.model.updateOne({ _id: id }, { $set: { currency, entryType, showQuantity, refunds, tickets } });
+        await deleteCache(`events:${id}`);
     }
 
     async getEvent(id: string): Promise<IEvent | undefined> {
@@ -56,7 +67,13 @@ export class EventRepository implements IEventRepository {
     }
 
     async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]> {
-        const docs = (await this.model.find(query).sort(sortFilter ? sortFilter: {createdAt: -1}).skip(skip).limit(limit)).map(doc => doc.toJSON());
+        const cacheKey = `:${JSON.stringify({ query, skip, limit, sortFilter })}`;
+        const cachedEvent = await getCache<IEvent[]>(cacheKey);
+        if (cachedEvent) {     
+            return cachedEvent;
+        }
+        const docs = (await this.model.find(query).sort(sortFilter ? sortFilter : { createdAt: -1 }).skip(skip).limit(limit)).map(doc => doc.toJSON());
+        await setCache<IEvent[]>(cacheKey, docs, 3600);
         return docs;
     }
 
@@ -85,6 +102,7 @@ export class EventRepository implements IEventRepository {
 
     async updateEvent(id: string, event: Partial<IEvent>): Promise<void> {
         await this.model.updateOne({ _id: id }, { $set: { ...event } });
+        await deleteCache(`events:${id}`);
     }
 
     async checkStock(eventId: string, ticketId: string, stock: number): Promise<boolean> {
@@ -108,6 +126,7 @@ export class EventRepository implements IEventRepository {
                 $inc: { "tickets.$.quantity": -quantity }
             }
         );
+        await deleteCache(`events:${eventId}`);
     }
 
     async getSavedEvent(eventId: string, userId: string): Promise<ISavedEvents | undefined> {

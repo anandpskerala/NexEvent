@@ -2,7 +2,7 @@ import { FilterQuery, SortOrder, Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IEvent } from "../../shared/types/IEvent";
-import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType } from "../../shared/types/ReturnType";
+import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType, StockReturnType } from "../../shared/types/ReturnType";
 import { ITicket } from "../../shared/types/ITicket";
 import logger from "../../shared/utils/logger";
 import { IEventRepository } from "../../repositories/interfaces/IEventRepository";
@@ -360,6 +360,42 @@ export class EventService {
                 page,
                 pages: Math.ceil(docs.total / limit),
                 events: docs.events
+            }
+        } catch (error) {
+            logger.error(error);
+            return {
+                message: HttpResponse.INTERNAL_SERVER_ERROR,
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async getStock(eventId: string, tickets: { ticketId: string, quantity: number }[]): Promise<StockReturnType> {
+        try {
+            let outOfStock = true;
+            if (tickets && eventId) {
+                tickets.forEach(async (ticketData) => {
+                    const check = await this.eventRepo.checkStock(eventId.toString(), ticketData.ticketId, ticketData.quantity);
+                    if (!check) {
+                        outOfStock = false;
+                        return {
+                            message: HttpResponse.NO_STOCKS,
+                            status: StatusCode.OK,
+                            stock: outOfStock
+                        }
+                    }
+                })
+            } else {
+                return {
+                    message: HttpResponse.MISSING_FIELDS,
+                    status: StatusCode.BAD_REQUEST,
+                    stock: outOfStock
+                }
+            }
+            return {
+                message: HttpResponse.STOCKS_AVAILABLE,
+                status: StatusCode.OK,
+                stock: outOfStock
             }
         } catch (error) {
             logger.error(error);

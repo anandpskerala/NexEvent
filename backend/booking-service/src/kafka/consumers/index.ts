@@ -3,13 +3,14 @@ import kafka from "..";
 import { Handler } from "./handlers";
 import { TOPICS } from "../topics";
 import logger from "../../shared/utils/logger";
+import { sendToDLQ } from "./dlqProducer";
 
 export class KafkaConsumer {
     private consumer: Consumer;
     private admin: Admin;
 
     constructor(private handler: Handler) {
-        this.consumer = kafka.consumer({ groupId: 'event-service-group' });
+        this.consumer = kafka.consumer({ groupId: 'booking-service-group' });
         this.admin = kafka.admin();
     }
 
@@ -36,6 +37,16 @@ export class KafkaConsumer {
                     topic: TOPICS.USER_DELETED,
                     numPartitions: 1,
                     replicationFactor: 1,
+                },
+                {
+                    topic: TOPICS.USER_CREATED_DLQ,
+                    numPartitions: 1,
+                    replicationFactor: 1
+                },
+                {
+                    topic: TOPICS.USER_DELETED_DLQ,
+                    numPartitions: 1,
+                    replicationFactor: 1
                 }
             ],
         });
@@ -50,24 +61,32 @@ export class KafkaConsumer {
 
 
         await this.consumer.run({
+            autoCommit: true,
             eachMessage: async ({ topic, message }) => {
                 const value = message.value?.toString();
                 if (!value) return;
 
                 const parsed = JSON.parse(value);
 
-                switch (topic) {
-                    case TOPICS.USER_CREATED:
-                        await this.handler.handleNewUser(parsed);
-                        break;
-                        
-                    case TOPICS.USER_DELETED:
-                        await this.handler.handleDelete(parsed);
-                        break;
+                try {
+                    switch (topic) {
+                        case TOPICS.USER_CREATED:
+                            await this.handler.handleNewUser(parsed);
+                            break;
 
-                    default:
-                        logger.warn(`Unhandled topic: ${topic}`);
-                        break;
+                        case TOPICS.USER_DELETED:
+                            await this.handler.handleDelete(parsed);
+                            break;
+
+                        default:
+                            logger.warn(`Unhandled topic: ${topic}`);
+                            break;
+                    }
+                } catch (error) {
+                    logger.error(`Error processing message from topic ${topic}:`, error);
+                    const dlqTopic = topic + ".dlq";
+                    const err =  error instanceof Error ? error.message : String(error);
+                    await sendToDLQ(dlqTopic, parsed, err);
                 }
             }
         });

@@ -1,6 +1,6 @@
-import { FilterQuery } from "mongoose";
+import mongoose, { FilterQuery, SortOrder } from "mongoose";
 import { IBooking } from "../../shared/types/IBooking";
-import { GroupBy, RevenueAnalyticsGraphPoint, TopSelling } from "../../shared/types/RevenueAnalytics";
+import { IEvent } from "../../shared/types/IEvent";
 
 export interface IBookingRepository {
     findBooking(id: string): Promise<IBooking | undefined>;
@@ -10,11 +10,14 @@ export interface IBookingRepository {
     findBookingsByEventID(eventId: string): Promise<IBooking[]>;
     checkForPromoCode(couponCode: string, userId: string): Promise<boolean>;
     findByID(id: string): Promise<IBooking | undefined>;
-    create(item: IBooking): Promise<IBooking>;
+    create(item: Partial<IBooking>, session?: mongoose.ClientSession): Promise<IBooking>;
     update(id: string, item: Partial<IBooking>): Promise<void>;
     delete(id: string): Promise<void>;
-    getRevenueAnalytics(groupBy: GroupBy, organizerId?: string): Promise<RevenueAnalyticsGraphPoint[]>;
-    getTopBookings(groupBy: GroupBy, limit: number, organizerId?: string): Promise<TopSelling[]>;
     findWithUserIdAndEventId(userId: string, eventId: string): Promise<IBooking | undefined>;
     countBooking(userId: string, eventId: string): Promise<number>;
+    findByEventID(id: string): Promise<IEvent | undefined>;
+    updateTickets(eventId: string, ticketId: string, quantity: number, session?: mongoose.ClientSession): Promise<void>;
+    updateEvent(id: string, event: Partial<IEvent>): Promise<void>;
+    getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]>;
+    checkStock(eventId: string, ticketId: string, stock: number): Promise<boolean>
 }

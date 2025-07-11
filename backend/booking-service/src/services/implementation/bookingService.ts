@@ -1,82 +1,85 @@
 import PDFDocument from 'pdfkit';
 import QRCode from 'qrcode';
-import { StatusCode } from '../../shared/constants/statusCode';
-import { IBooking } from '../../shared/types/IBooking';
-import { Response } from 'express';
-import { fetchUsers } from '../../shared/utils/getUsers';
-import { PaymentMethod, PaymentStatus } from '../../shared/types/Payments';
-import logger from '../../shared/utils/logger';
-import { IBookingRepository } from '../../repositories/interfaces/IBookingRepository';
-import { IEventRepository } from '../../repositories/interfaces/IEventRepository';
-import { IPaymentRepository } from '../../repositories/interfaces/IPaymentRepository';
-import { IWalletRepository } from '../../repositories/interfaces/IWalletRepository';
-import { BookingPaginationType, BookingReturnType, BookingVerifyType } from '../../shared/types/ReturnType';
-import { config } from '../../config';
-import { HttpResponse } from '../../shared/constants/httpResponse';
+import { Response } from "express";
+import { IBooking } from "../../shared/types/IBooking";
+import { BookingReturnType, BookingPaginationType, BookingVerifyType } from "../../shared/types/ReturnType";
+import { IBookingService } from "../interfaces/IBookingService";
+import { IBookingRepository } from "../../repositories/interfaces/IBookingRepository";
+import { IPaymentRepository } from "../../repositories/interfaces/IPaymentRepository";
+import { IWalletRepository } from "../../repositories/interfaces/IWalletRepository";
+import logger from "../../shared/utils/logger";
+import { HttpResponse } from "../../shared/constants/httpResponse";
+import { StatusCode } from "../../shared/constants/statusCode";
+import { config } from "../../config";
+import { PaymentMethod, PaymentStatus } from "../../shared/types/Payments";
+import { fetchUsers } from "../../shared/utils/getUsers";
+import mongoose from 'mongoose';
 
-export class BookingService {
+export class BookingService implements IBookingService {
     constructor(
-        private repo: IBookingRepository, 
-        private eventRepo: IEventRepository, 
-        private paymentRepo: IPaymentRepository, 
+        private repo: IBookingRepository,
+        private paymentRepo: IPaymentRepository,
         private walletRepo: IWalletRepository
     ) { }
 
+
     public async createBooking(data: IBooking): Promise<BookingReturnType> {
+        const session = await mongoose.startSession();
         try {
-            const count = await this.repo.countBooking(data.userId, typeof data.eventId === 'string' ? data.eventId: data.eventId.id as string);
+            session.startTransaction();
+
+            const eventId = typeof data.eventId === 'string' ? data.eventId : data.eventId.id as string;
+
+            const count = await this.repo.countBooking(data.userId, eventId);
             if (count > config.maxTicketLimit) {
+                await session.abortTransaction();
                 return {
                     message: HttpResponse.MAX_TICKET_LIMIT,
                     status: StatusCode.BAD_REQUEST
-                }
+                };
             }
-            let outOfStock = false;
-            if (data?.tickets && data?.eventId && data?.tickets) {
-                data.tickets.forEach(async (ticketData) => {
-                    const check = await this.eventRepo.checkStock(data.eventId.toString(), ticketData.ticketId, ticketData.quantity);
-                    if (!check) {
-                        outOfStock = true;
-                    }
-                })
-            } else {
-                return {
-                    message: HttpResponse.MISSING_FIELDS,
-                    status: StatusCode.BAD_REQUEST
+
+            for (const ticketData of data.tickets) {
+                const isAvailable = await this.repo.checkStock(eventId, ticketData.ticketId, ticketData.quantity);
+                if (!isAvailable) {
+                    await session.abortTransaction();
+                    return {
+                        message: HttpResponse.OUT_OF_STOCK,
+                        status: StatusCode.BAD_REQUEST
+                    };
                 }
             }
 
-            if (outOfStock) {
-                return {
-                    message: HttpResponse.OUT_OF_STOCK,
-                    status: StatusCode.BAD_REQUEST
+            const event = await this.repo.findByEventID(eventId);
+            if (event?.tickets) {
+                for (const bookedTicket of data.tickets) {
+                    await this.repo.updateTickets(eventId, bookedTicket.ticketId, -bookedTicket.quantity, session);
                 }
             }
 
             if (!data.paymentMethod) {
                 data.paymentMethod = "wallet";
                 data.status = "paid";
-
-                const event = await this.eventRepo.findByID(typeof data.eventId == "string" ? String(data.eventId): String(data.eventId.id));
-                if (event?.tickets) {
-                    for (const bookedTicket of data.tickets) {
-                        await this.eventRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
-                    }
-                }
             }
-            const booking = await this.repo.create(data);
+
+            const booking = await this.repo.create(data, session);
+
+            await session.commitTransaction();
             return {
                 message: HttpResponse.BOOKING_INITIATED,
                 status: StatusCode.CREATED,
                 booking
-            }
+            };
 
         } catch (error) {
             logger.error(error);
+            await session.abortTransaction();
             return {
                 message: HttpResponse.INTERNAL_SERVER_ERROR,
                 status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+            };
+        } finally {
+            session.endSession();
         }
     }
 
@@ -121,7 +124,7 @@ export class BookingService {
         try {
             await this.repo.cancelBooking(bookingId);
             const doc = await this.paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
-            if (!doc?.amount &&  Number(doc?.amount) > 0) {
+            if (!doc?.amount && Number(doc?.amount) > 0) {
                 await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
             }
             return {
@@ -140,7 +143,7 @@ export class BookingService {
     public async cancelAllBookings(eventId: string): Promise<BookingReturnType> {
         try {
             const bookings = await this.repo.findBookingsByEventID(eventId);
-            await this.eventRepo.updateEvent(eventId, {status: "cancelled"})
+            await this.repo.updateEvent(eventId, { status: "cancelled" })
             if (!bookings || bookings.length === 0) {
                 return {
                     message: HttpResponse.ALL_CANCELLED,
@@ -246,7 +249,7 @@ export class BookingService {
     public async getOrganizerBookings(userId: string, search: string, page: number, limit: number): Promise<BookingPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const events = await this.eventRepo.getAllEvents({ userId }, skip, 0);
+            const events = await this.repo.getAllEvents({ userId }, skip, 0);
             const eventIds = events.map(event => event.id);
 
             if (eventIds.length === 0) {

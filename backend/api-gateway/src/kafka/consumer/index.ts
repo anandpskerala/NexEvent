@@ -42,6 +42,7 @@ export class Consumer {
         await this.consumer.subscribe({ topic: TOPICS.NEW_MESSAGE, fromBeginning: false });
 
         await this.consumer.run({
+            autoCommit: true,
             eachMessage: async ({ topic, message }) => {
                 const value = message.value?.toString();
                 if (!value) return;

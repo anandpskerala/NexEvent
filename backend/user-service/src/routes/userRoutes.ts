@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../shared/types/IUser";
 import { UserRepository } from "../repositories/implementation/UserRepository";
 import { UserService } from "../services/implementation/userService";
 import { UserController } from "../controllers/userController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { adminRoute } from "../middlewares/adminRoute";
+import { UserDTO } from "../shared/dtos/userDTO";
 
 const router = Router();
 
-const producer = new UserProducer<IUser>();
+const producer = new UserProducer<UserDTO>();
 const userRepo = new UserRepository();
 const userService = new UserService(userRepo);
 const userController = new UserController(userService, producer);

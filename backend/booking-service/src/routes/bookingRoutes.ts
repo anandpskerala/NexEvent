@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { BookingRepository } from "../repositories/implementation/BookingRepository";
-import { EventRepository } from "../repositories/implementation/EventRepository";
 import { PaymentRepository } from "../repositories/implementation/PaymentRepository";
 import { WalletRepository } from "../repositories/implementation/WalletRepository";
 import { BookingService } from "../services/implementation/bookingService";
@@ -12,10 +11,9 @@ import { bookingSchema, failedBookingSchema } from "../shared/validators/booking
 const router = Router();
 
 const bookingRepo = new BookingRepository();
-const eventRepo = new EventRepository();
 const paymentRepo = new PaymentRepository();
 const walletRepo = new WalletRepository();
-const bookingService = new BookingService(bookingRepo, eventRepo, paymentRepo, walletRepo);
+const bookingService = new BookingService(bookingRepo, paymentRepo, walletRepo);
 const bookingController = new BookingController(bookingService);
 
 router.post("/booking", validate(bookingSchema), bookingController.create);

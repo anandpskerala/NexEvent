@@ -5,6 +5,7 @@ import { UserPaginationType, UserReturnType, UsersReturnType } from "../../share
 import logger from "../../shared/utils/logger";
 import { IUserService } from "../interfaces/IUserService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { toUserDTO, toUsersDTO } from "../../shared/mappers/userMapper";
 
 export class UserService implements IUserService {
     private cloudinary: CloudinaryService;
@@ -20,7 +21,7 @@ export class UserService implements IUserService {
                 message: HttpResponse.USER_FETCHED,
                 status: StatusCode.OK,
                 total: result.total,
-                users: result.users,
+                users: toUsersDTO(result.users),
                 page,
                 pages: Math.ceil(result.total / limit)
             }
@@ -52,7 +53,7 @@ export class UserService implements IUserService {
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.USER_FETCHED,
-                user: user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error);
@@ -83,7 +84,7 @@ export class UserService implements IUserService {
             return {
                 message: "",
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error)
@@ -117,7 +118,7 @@ export class UserService implements IUserService {
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.PROFILE_UPDATED,
-                user: user ? user : undefined
+                user: user ? toUserDTO(user) : undefined
             }
         } catch (error) {
             logger.error(error)
@@ -154,7 +155,7 @@ export class UserService implements IUserService {
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.PROFILE_IMG_UPDATED,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error)
@@ -172,7 +173,7 @@ export class UserService implements IUserService {
             return {
                 message: HttpResponse.USER_UPDATED,
                 status: StatusCode.OK,
-                user: user ? user : undefined
+                user: user ? toUserDTO(user) : undefined
             }
         } catch (error) {
             logger.error(error)
@@ -196,7 +197,7 @@ export class UserService implements IUserService {
             return {
                 message: HttpResponse.USER_DELETED,
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error)

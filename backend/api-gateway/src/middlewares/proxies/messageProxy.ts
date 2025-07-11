@@ -34,6 +34,7 @@ export class MessageProxy {
 
             proxyErrorHandler: (err: unknown, res: Response) => {
                 logger.error('Proxy Error : ', err);
+                console.log(err)
                 res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal proxy error" })
             }
         })

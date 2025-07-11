@@ -13,6 +13,7 @@ import { EventProxy } from "./middlewares/proxies/eventProxy";
 import logger from "./shared/utils/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requestLogger } from "./middlewares/requestLogger";
+import { BookingProxy } from "./middlewares/proxies/bookingProxy";
 
 
 export class App {
@@ -62,6 +63,7 @@ export class App {
         this.app.use('/api/admin', AdminProxy.setupProxy());
         this.app.use('/api/event', EventProxy.setupProxy());
         this.app.use('/api/messages', MessageProxy.setupProxy());
+         this.app.use('/api/bookings', BookingProxy.setupProxy());
     }
 
     public listen(port: number) {

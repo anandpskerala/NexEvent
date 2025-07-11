@@ -12,6 +12,7 @@ import { IForgotRepository } from "../../repositories/interfaces/IForgotReposito
 import { IOtpRepository } from "../../repositories/interfaces/IOtpRepository";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { toUserDTO } from "../../shared/mappers/userMapper";
 
 export class AuthService implements IAuthService {
     public authUtils: AuthUtils;
@@ -63,7 +64,7 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.OTP_SENT,
                     status: StatusCode.OK,
-                    user
+                    user: toUserDTO(user)
                 }
             }
 
@@ -71,7 +72,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.LOGIN_SUCCESSFUL,
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error);
@@ -112,7 +113,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.OTP_SENT,
                 status: StatusCode.CREATED,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error);
@@ -169,7 +170,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.TOKEN_REFRESH,
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error)
@@ -205,7 +206,7 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.LOGIN_SUCCESSFUL,
                     status: StatusCode.OK,
-                    user
+                    user: toUserDTO(user)
                 }
             } else {
                 user = await this.userRepo.create({
@@ -220,7 +221,7 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.SIGNUP_SUCESS,
                     status: StatusCode.CREATED,
-                    user
+                    user: toUserDTO(user)
                 }
             }
 
@@ -396,7 +397,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.OTP_VERIFIED,
                 status: StatusCode.OK,
-                user: { ...user, isVerified: true }
+                user: toUserDTO({ ...user, isVerified: true })
             }
         } catch (error) {
             logger.error(error);

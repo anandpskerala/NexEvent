@@ -13,6 +13,7 @@ const eventService = new EventService(eventRepo);
 const eventController = new EventController(eventService);
 
 router.get("/all", eventController.getAllEvents);
+router.post("/stocks", eventController.checkStock);
 router.post("/event", protectedRoute, validate(eventSchema), eventController.createEvent);
 router.get("/events", eventController.getEvents);
 router.get("/nearbyevents", eventController.getNearByEvents);

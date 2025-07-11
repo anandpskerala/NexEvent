@@ -146,4 +146,10 @@ export class EventController {
             events: result.events
         })
     }
+
+    public checkStock = async (req: Request, res: Response): Promise<void> => {
+        const { eventId, tickets } = req.body;
+        const result = await this.eventService.getStock(eventId, tickets);
+        res.status(result.status).json({message: result.message, stock: result.stock});
+    }
 }

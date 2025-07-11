@@ -1,4 +1,5 @@
 import { Types } from "mongoose";
+import { IRequest } from "./IRequest";
 
 export interface IUser {
     id?: string;
@@ -13,7 +14,8 @@ export interface IUser {
     roles: ("user" | "organizer" | "admin")[];
     isBlocked: boolean;
     isVerified: boolean;
-    organizer: Types.ObjectId;
+    organizer: Types.ObjectId | IRequest;
+    createdAt?: string;
 }
 
 export interface AllUsers {

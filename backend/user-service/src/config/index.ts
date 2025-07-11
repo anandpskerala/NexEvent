@@ -9,7 +9,8 @@ export const config = {
         frontendUrl: process.env.FRONTEND_URL || ""
     },
     db: {
-        mongoURI: process.env.MONGO_URI || ""
+        mongoURI: process.env.MONGO_URI || "",
+        redis: process.env.REDIS_URI || ""
     },
     jwt: {
         accessTokenSecret: process.env.ACCESS_TOKEN_SECRET || "",

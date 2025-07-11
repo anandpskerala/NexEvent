@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
 import { StatusCode } from "../shared/constants/statusCode";
 import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../shared/types/IUser";
 import { TOPICS } from "../kafka/topics";
 import { IAuthService } from "../services/interfaces/IAuthService";
+import { UserDTO } from "../shared/dtos/userDTO";
 
 
 
 export class AuthController {
-    constructor(private authService: IAuthService, private producer: UserProducer<IUser>) { }
+    constructor(private authService: IAuthService, private producer: UserProducer<UserDTO>) { }
 
     public loginController = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;

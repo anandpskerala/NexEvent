@@ -1,4 +1,4 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Schema, Types } from "mongoose";
 import { IWallet, IWalletTransaction } from "../shared/types/IWallet";
 
 const transactionSchema = new Schema<IWalletTransaction>({
@@ -22,8 +22,8 @@ const transactionSchema = new Schema<IWalletTransaction>({
 transactionSchema.set('toJSON', {
     virtuals: true,
     versionKey: false,
-    transform: (_, ret) => {
-        ret.id = ret._id;
+    transform: (_doc, ret: Partial<IWalletTransaction> & { _id?: Types.ObjectId }) => {
+        ret.id = ret._id?.toString();
         delete ret._id;
     }
 });
@@ -50,8 +50,8 @@ const schema = new Schema<IWallet>({
 schema.set('toJSON', {
     virtuals: true,
     versionKey: false,
-    transform: (_, ret) => {
-        ret.id = ret._id;
+    transform: (_doc, ret: Partial<IWallet> & { _id?: Types.ObjectId }) => {
+        ret.id = ret._id?.toString();
         delete ret._id;
     }
 });

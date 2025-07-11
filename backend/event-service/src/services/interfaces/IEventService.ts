@@ -1,6 +1,6 @@
 import { IEvent } from "../../shared/types/IEvent";
 import { ITicket } from "../../shared/types/ITicket";
-import { EventReturnType, RawReturnType, EventPaginationType, EventsReturnType, SavedEventReturnType, SavedEventPaginationType } from "../../shared/types/ReturnType";
+import { EventReturnType, RawReturnType, EventPaginationType, EventsReturnType, SavedEventReturnType, SavedEventPaginationType, StockReturnType } from "../../shared/types/ReturnType";
 
 export interface IEventService {
     createEvent(event: IEvent): Promise<EventReturnType>;
@@ -14,5 +14,5 @@ export interface IEventService {
     isSavedEvent(userId: string, eventId: string): Promise<SavedEventReturnType>;
     removeSavedEvent(id: string, userId: string): Promise<SavedEventReturnType>;
     getAllSaved(userId: string, page: number, limit: number): Promise<SavedEventPaginationType>;
-    
+    getStock(eventId: string, tickets: { ticketId: string, quantity: number }[]): Promise<StockReturnType>   
 }

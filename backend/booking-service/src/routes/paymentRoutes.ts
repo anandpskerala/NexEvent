@@ -2,7 +2,6 @@ import { Router } from "express";
 import { PaymentRepository } from "../repositories/implementation/PaymentRepository";
 import { WalletRepository } from "../repositories/implementation/WalletRepository";
 import { BookingRepository } from "../repositories/implementation/BookingRepository";
-import { EventRepository } from "../repositories/implementation/EventRepository";
 import { PaymentService } from "../services/implementation/paymentService";
 import { PaymentController } from "../controllers/paymentController";
 
@@ -11,9 +10,8 @@ const router = Router();
 const paymentRepo = new PaymentRepository();
 const walletRepo = new WalletRepository();
 const bookingRepo = new BookingRepository();
-const eventRepo = new EventRepository();
 
-const paymentService = new PaymentService(paymentRepo, walletRepo, bookingRepo, eventRepo);
+const paymentService = new PaymentService(paymentRepo, walletRepo, bookingRepo);
 const paymentController = new PaymentController(paymentService);
 
 router.post('/payment/razorpay/order', paymentController.creatOrderRPay);

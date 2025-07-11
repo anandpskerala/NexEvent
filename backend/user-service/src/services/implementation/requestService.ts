@@ -8,6 +8,7 @@ import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { IRequestRepository } from "../../repositories/interfaces/IRequestRepository";
 import { IRequestService } from "../interfaces/IRequestService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { toUserDTO } from "../../shared/mappers/userMapper";
 
 export class RequestService implements IRequestService {
     private cloudinary: CloudinaryService;
@@ -162,7 +163,7 @@ export class RequestService implements IRequestService {
             return {
                 message: `Request ${action}`,
                 status: StatusCode.OK,
-                user: user? user: undefined
+                user: user? toUserDTO(user): undefined
             }
         } catch (error) {
             logger.error(error);

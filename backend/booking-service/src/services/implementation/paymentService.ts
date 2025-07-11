@@ -5,13 +5,13 @@ import { config } from "../../config";
 import { PaymentMethod, PaymentStatus } from "../../shared/types/Payments";
 import { StatusCode } from "../../shared/constants/statusCode";
 import logger from "../../shared/utils/logger";
-import { IEventRepository } from "../../repositories/interfaces/IEventRepository";
 import { IPaymentRepository } from "../../repositories/interfaces/IPaymentRepository";
 import { IBookingRepository } from "../../repositories/interfaces/IBookingRepository";
 import { IWalletRepository } from "../../repositories/interfaces/IWalletRepository";
 import { PaymentReturnType, RPayReturnType, StripeReturnType, WalletReturnType } from "../../shared/types/ReturnType";
 import { IPaymentService } from "../interfaces/IPaymentService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import mongoose from "mongoose";
 
 
 export class PaymentService implements IPaymentService {
@@ -21,8 +21,8 @@ export class PaymentService implements IPaymentService {
     constructor(
         private repo: IPaymentRepository, 
         private walletRepo: IWalletRepository, 
-        private bookingRepo: IBookingRepository, 
-        private eventRepo: IEventRepository) {
+        private bookingRepo: IBookingRepository
+    ) {
         this.razorpay = new RPay({
             key_id: config.payment.razorpayID,
             key_secret: config.payment.razorpaySecret
@@ -91,7 +91,9 @@ export class PaymentService implements IPaymentService {
     }
 
     public async verifyStripeOrder(userId: string, sessionId: string): Promise<PaymentReturnType> {
+        const transaction = await mongoose.startSession();
         try {
+            transaction.startTransaction();
             if (!sessionId) {
                 return {
                     message: HttpResponse.MISSING_SESSION_ID,
@@ -108,6 +110,20 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
+            const booking = await this.bookingRepo.findByID(session.metadata?.bookingId as string);
+            if (!booking) {
+                return {
+                    message: HttpResponse.BOOKING_NOT_FOUND,
+                    status: StatusCode.BAD_REQUEST,
+                }
+            }
+            const now = new Date();
+            const expires = new Date(booking?.expiresAt?.toISOString() as string)
+            let paymentStatus: 'pending' | 'paid' | 'failed' | 'cancelled' = 'paid';
+            
+            if (booking?.status === PaymentStatus.PENDING && now > expires) {
+                paymentStatus = 'pending';
+            }
             const booked = await this.repo.upsert(session.metadata?.bookingId as string, {
                 userId: userId,
                 eventId: session.metadata?.eventId,
@@ -123,18 +139,10 @@ export class PaymentService implements IPaymentService {
             await this.bookingRepo.update(booked?.bookingId as string, {
                 paymentId: booked?.id,
                 paymentMethod: booked?.method,
-                status: 'paid'
+                status: paymentStatus
             })
 
-            const booking = await this.bookingRepo.findByID(booked?.bookingId as string);
-            if (!booking) {
-                return {
-                    message: HttpResponse.BOOKING_NOT_FOUND,
-                    status: StatusCode.BAD_REQUEST,
-                }
-            }
-
-            const event = await this.eventRepo.findByID(booking.eventId.toString());
+            const event = await this.bookingRepo.findByEventID(booking.eventId.toString());
             if (!event) {
                 return {
                     message: HttpResponse.EVENT_DOESNT_EXISTS,
@@ -142,11 +150,6 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
-            if (event.tickets) {
-                for (const bookedTicket of booking.tickets) {
-                    await this.eventRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
-                }
-            }
             return {
                 message: HttpResponse.PAYMENT_SUCCESS,
                 status: StatusCode.CREATED,
@@ -155,10 +158,13 @@ export class PaymentService implements IPaymentService {
             }
         } catch (error) {
             logger.error(error);
+            transaction.abortTransaction();
             return {
                 message: HttpResponse.INTERNAL_SERVER_ERROR,
                 status: StatusCode.INTERNAL_SERVER_ERROR
             }
+        } finally {
+            transaction.endSession();
         }
     }
 
@@ -198,7 +204,6 @@ export class PaymentService implements IPaymentService {
         amount: number
     ): Promise<PaymentReturnType> {
         try {
-
             const body = `${razorpay_order_id}|${razorpay_payment_id}`;
             const expectedSignature = crypto
                 .createHmac('sha256', config.payment.razorpaySecret as string)
@@ -232,7 +237,7 @@ export class PaymentService implements IPaymentService {
                     }
                 }
 
-                const event = await this.eventRepo.findByID(booking.eventId.toString());
+                const event = await this.bookingRepo.findByEventID(booking.eventId.toString());
                 if (!event) {
                     return {
                         message: HttpResponse.EVENT_DOESNT_EXISTS,
@@ -242,7 +247,7 @@ export class PaymentService implements IPaymentService {
 
                 if (event.tickets) {
                     for (const bookedTicket of booking.tickets) {
-                        await this.eventRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
+                        await this.bookingRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
                     }
                 }
                 return {
@@ -316,7 +321,7 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
-            const event = await this.eventRepo.findByID(booking.eventId.toString());
+            const event = await this.bookingRepo.findByEventID(booking.eventId.toString());
             if (!event) {
                 return {
                     message: HttpResponse.EVENT_DOESNT_EXISTS,
@@ -326,7 +331,7 @@ export class PaymentService implements IPaymentService {
 
             if (event.tickets) {
                 for (const bookedTicket of booking.tickets) {
-                    await this.eventRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
+                    await this.bookingRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
                 }
             }
 
