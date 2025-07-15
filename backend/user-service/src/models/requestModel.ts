@@ -3,7 +3,7 @@ import { IRequest } from "../shared/types/IRequest";
 
 const schema = new Schema<IRequest>({
     userId: {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: "User",
         required: true,
         unique: true
@@ -35,14 +35,6 @@ const schema = new Schema<IRequest>({
     }
 }, {timestamps: true});
 
-schema.set('toJSON', {
-    virtuals: true,
-    versionKey: false,
-    transform: (_, ret) => {
-        ret.id = ret._id;
-        delete ret._id;
-    }
-});
 
 const requestModel = mongoose.model<IRequest>("OrganizerRequest", schema);
 

@@ -53,7 +53,6 @@ export class ReviewRepository implements IReviewRepository {
         ]);
         const docs = items.map(doc => doc.toJSON());
 
-        console.log(ratingStats)
         const averageRating = ratingStats.length !== 0 ? ratingStats[0].averageRating : 0;
         return {
             reviews: docs,

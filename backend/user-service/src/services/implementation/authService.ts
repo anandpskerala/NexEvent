@@ -50,12 +50,13 @@ export class AuthService implements IAuthService {
                 }
             }
 
+            this.authUtils.setAuthToken(res, user.id as string, user.roles);
             if (!user.isVerified) {
                 const otp = await this.otpRepo.findOtp(user.id as string);
                 if (!otp) {
                     const otpNumber = this.authUtils.generateOtp();
                     await this.otpRepo.create({
-                        userId: new Types.ObjectId(user.id),
+                        userId: user.id,
                         otp: otpNumber,
                     });
 
@@ -68,7 +69,6 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            this.authUtils.setAuthToken(res, user.id as string, user.roles);
             return {
                 message: HttpResponse.LOGIN_SUCCESSFUL,
                 status: StatusCode.OK,
@@ -102,9 +102,11 @@ export class AuthService implements IAuthService {
                 authProvider: "email"
             });
 
+            console.log(user)
+
             const otpNumber = this.authUtils.generateOtp();
             await this.otpRepo.create({
-                userId: new Types.ObjectId(user.id),
+                userId: user.id,
                 otp: otpNumber
             })
 
@@ -322,6 +324,7 @@ export class AuthService implements IAuthService {
             }
 
             const otp = await this.otpRepo.findOtp(userId);
+            console.log(otp);
             if (!otp) {
                 return {
                     message: HttpResponse.NO_OTP_FOUND,
@@ -431,7 +434,7 @@ export class AuthService implements IAuthService {
             }
             const otpNumber = this.authUtils.generateOtp();
             await this.otpRepo.create({
-                userId: new Types.ObjectId(user.id),
+                userId: user.id,
                 otp: otpNumber
             })
 

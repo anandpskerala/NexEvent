@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IRequest } from "../../shared/types/IRequest";
@@ -156,7 +155,7 @@ export class RequestService implements IRequestService {
             await this.requestRepo.updateRequest(userId, action, rejectionReason);
             if (action === "accepted") {
                 await this.userRepo.addRole(userId, "organizer");
-                await this.userRepo.update(userId, {organizer: new Types.ObjectId(request.id)});
+                await this.userRepo.update(userId, {organizerId: request.id});
             }
             const user = await this.userRepo.findByID(userId);
 

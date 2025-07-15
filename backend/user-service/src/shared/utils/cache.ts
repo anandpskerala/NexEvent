@@ -1,8 +1,11 @@
 import redis from "../../config/redisClient";
 
-export const setCache = async <T>(key: string, data: T, ttl = 60) => {
-  await redis.set(key, JSON.stringify(data), 'EX', ttl);
-};
+export const setCache = async <T>(key: string, value: T, expiry = 3600) => {
+  const serialized = JSON.stringify(value, (_, v) =>
+    typeof v === "bigint" ? v.toString() : v
+  );
+  await redis.set(key, serialized, "EX", expiry);
+}
 
 export const getCache = async <T>(key: string): Promise<T | null> => {
   const cached = await redis.get(key);

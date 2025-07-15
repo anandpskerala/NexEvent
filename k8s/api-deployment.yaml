@@ -31,6 +31,8 @@ spec:
               value: http://event-service.default.svc.cluster.local:5003
             - name: MESSAGE_SERVICE
               value: http://message-service.default.svc.cluster.local:5004
+            - name: BOOKING_SERVICE
+              value: http://booking-service.default.svc.cluster.local:5005
             - name: KAFKA_BROKER
               value: kafka.default.svc.cluster.local:9092
           resources:

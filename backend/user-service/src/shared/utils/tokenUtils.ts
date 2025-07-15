@@ -1,5 +1,4 @@
 import jwt, { SignOptions } from "jsonwebtoken";
-import { Types } from "mongoose";
 import { config } from "../../config";
 
 interface JwtPayload {
@@ -7,9 +6,9 @@ interface JwtPayload {
     role?: string[];
 }
 
-const generateAccessToken = (userId: Types.ObjectId, role: string[]): string => {
+const generateAccessToken = (userId: string, role: string[]): string => {
     const payload: JwtPayload = {
-        userId: userId.toHexString(),
+        userId: userId,
         role
     };
 
@@ -20,9 +19,9 @@ const generateAccessToken = (userId: Types.ObjectId, role: string[]): string => 
     return jwt.sign(payload, config.jwt.accessTokenSecret, options);
 };
 
-const generateRefreshToken = (userId: Types.ObjectId): string => {
+const generateRefreshToken = (userId: string): string => {
     const payload: JwtPayload = {
-        userId: userId.toHexString()
+        userId: userId
     };
 
     const options: SignOptions = {
@@ -32,7 +31,7 @@ const generateRefreshToken = (userId: Types.ObjectId): string => {
     return jwt.sign(payload, config.jwt.refreshTokenSecret, options);
 };
 
-export const generateToken = (userId: Types.ObjectId, role: string[]): { accessToken: string, refreshToken: string } => {
+export const generateToken = (userId: string, role: string[]): { accessToken: string, refreshToken: string } => {
     const accessToken = generateAccessToken(userId, role);
     const refreshToken = generateRefreshToken(userId);
     return { accessToken, refreshToken };

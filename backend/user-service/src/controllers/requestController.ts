@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Types } from "mongoose";
 import { IRequestService } from "../services/interfaces/IRequestService";
 
 export class RequestController {
@@ -8,7 +7,7 @@ export class RequestController {
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.params.id;
         const { organization, website, reason, documents } = req.body;
-        const result = await this.request.createRequest({userId: new Types.ObjectId(userId), organization, website, reason, documents});
+        const result = await this.request.createRequest({userId: userId, organization, website, reason, documents});
         res.status(result.status).json({message: result.message});
     }
 

@@ -19,11 +19,10 @@ import {
     DollarSign
 } from 'lucide-react';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
-import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import { useDebounce } from '../../hooks/useDebounce';
+import { cancelBooking, getBookings } from '../../services/bookingService';
 
 interface GroupedBookings {
     eventId: string;
@@ -97,19 +96,13 @@ const Bookings = () => {
     };
 
     const handleCancel = async (id: string) => {
-        try {
-            const res = await axiosInstance.patch(`/bookings/booking/${id}`);
-            setBookings(prev =>
-                prev.map(booking =>
-                    booking.id === id ? { ...booking, status: "cancelled" } : booking
-                )
-            );
-            toast.success(res.data.message || "Booking cancelled");
-        } catch (error) {
-            const err = error as AxiosError<{ message: string }>;
-            const message = err.response?.data?.message || "Something went wrong";
-            toast.error(message);
-        }
+        const res = await cancelBooking(id)
+        setBookings(prev =>
+            prev.map(booking =>
+                booking.id === id ? { ...booking, status: "cancelled" } : booking
+            )
+        );
+        toast.success(res.message || "Booking cancelled");
     };
 
     const groupBookingsByEvent = (bookings: Booking[]): GroupedBookings[] => {
@@ -162,12 +155,12 @@ const Bookings = () => {
         const fetchBookings = async (page: number, limit: number) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/bookings/organizer/booking?search=${debouncedSearch}&page=${page}&limit=${limit}`);
-                if (res.data) {
-                    setBookings(res.data.bookings);
+                const res = await getBookings(debouncedSearch, page, limit);
+                if (res) {
+                    setBookings(res.bookings);
                     setGroupedBookings(groupBookingsByEvent(res.data.bookings));
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages || Math.ceil(res.data.bookings.length / limit)));
+                    setPage(Number(res.page));
+                    setPages(Number(res.pages || Math.ceil(res.bookings.length / limit)));
                 }
             } catch (error) {
                 console.error(error);

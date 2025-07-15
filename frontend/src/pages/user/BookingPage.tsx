@@ -3,15 +3,15 @@ import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { NavBar } from '../../components/partials/NavBar';
-import axiosInstance from '../../utils/axiosInstance';
 import { TicketCard } from '../../components/cards/TicketCard';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import config from '../../config/config';
-import { AxiosError, type AxiosResponse } from 'axios';
 import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
 import { toast } from 'sonner';
 import type { ICoupon } from '../../interfaces/entities/Coupons';
+import { applyCoupon, createStripOrder, failedBookings, getRPayOrder, handleBooking, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
+import { getEventDetails } from '../../services/eventService';
 
 declare global {
     interface Window {
@@ -72,95 +72,40 @@ const BookingPage = () => {
     };
 
     const handlePromoApply = async () => {
-        try {
-            await axiosInstance.get(`/bookings/coupon/check?couponCode=${promoCode}`);
-            const res = await axiosInstance.get(`/admin/coupon/${promoCode}`);
-            if (res.data.coupon && res.data.coupon.status == "Active") {
-                setCouponData(res.data.coupon);
-                setPromoApplied(true);
-            } else {
-                toast.error("Invalid coupon")
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
+        const res = await applyCoupon(promoCode);
+        if (res.coupon && res.coupon.status == "Active") {
+            setCouponData(res.coupon);
+            setPromoApplied(true);
+        } else {
+            toast.error("Invalid coupon")
         }
     };
-
-    const handleBooking = async (
-        eventId: string,
-        tickets: {
-            [ticketId: string]: {
-                quantity: number;
-                price: number;
-                name: string;
-            };
-        },
-        totalAmount: number,
-        paymentMethod: string| null) => {
-        try {
-            const res = await axiosInstance.post("/bookings/booking", {
-                eventId,
-                tickets: Object.entries(tickets).map(([ticketId, ticketData]) => ({
-                    ticketId,
-                    quantity: ticketData.quantity,
-                    price: ticketData.price,
-                    name: ticketData.name
-                })),
-                totalAmount,
-                paymentMethod,
-                couponCode: promoCode
-            });
-            return res.data.booking
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-            return null;
-        }
-    }
 
     const handlePayment = async (): Promise<void> => {
         try {
             if (!event) return;
             if (isFreeEvent) {
-                const booking = await handleBooking(event.id as string, tickets, 0, null);
+                const booking = await handleBooking(event.id as string, tickets, 0, null, promoCode);
                 if (booking) {
                     toast.success("Booking confirmed!");
                     navigate(`/payment/${booking.orderId}`);
                 }
                 return;
             }
-            const booking = await handleBooking(event.id as string, tickets, total, paymentMethod);
+            const booking = await handleBooking(event.id as string, tickets, total, paymentMethod, promoCode);
             if (!booking) return;
             if (paymentMethod === "razorpay") {
-                const res: AxiosResponse<{
-                    order: {
-                        id: string;
-                        amount: number;
-                        currency: string;
-                    };
-                }> = await axiosInstance.post("/bookings/payment/razorpay/order", {
-                    amount: total,
-                    currency: event.currency || "INR",
-                });
+                const res = await getRPayOrder(total, event.currency || "INR");
 
                 const options: RazorpayOptions = {
                     key: config.payment.RPayKey,
-                    amount: res.data.order.amount,
-                    currency: res.data.order.currency,
+                    amount: res.order.amount,
+                    currency: res.order.currency,
                     name: event.title,
                     description: "Ticket Booking",
-                    order_id: res.data.order.id,
+                    order_id: res.order.id,
                     handler: async (response: RazorpayResponse) => {
-                        await axiosInstance.post("/bookings/payment/razorpay/verify", {
-                            ...response,
-                            bookingId: booking.id,
-                            eventId: event.id,
-                            amount: res.data.order.amount,
-                            currency: res.data.order.currency
-                        });
+                        await handleRPayPayment(response, booking.id, event.id as string, res.order);
                         toast.success("Payment successfull");
                         navigate(`/payment/${booking.orderId}`);
                     },
@@ -175,29 +120,17 @@ const BookingPage = () => {
 
                 const rzp = new window.Razorpay(options);
                 rzp.on('payment.failed', async () => {
-                    await axiosInstance.post(`/bookings/failed/booking`, {
-                        bookingId: booking.id,
-                        eventId: event.id,
-                        amount: res.data.order.amount,
-                        currency: res.data.order.currency,
-                        status: 'failed'
-                    });
+                    await failedBookings(booking.id, event.id as string, res.order.amount, res.order.currency)
                     window.location.href = `/payment/${booking.orderId}`;
                 })
                 rzp.open();
             }
 
             else if (paymentMethod === "stripe") {
-                const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
-                    "/bookings/payment/stripe/order",
-                    {
-                        eventId: event.id, tickets, promoCode, amount: total * 100,
-                        bookingId: booking.id, currency: event.currency || "INR", orderId: booking.orderId
-                    }
-                );
+                const res = await createStripOrder(event.id as string, promoCode, total, booking.id, event.currency, booking.orderId, tickets);
 
                 window.open(
-                    res.data.order,
+                    res.order,
                     "_blank",
                     "width=500,height=700"
                 );
@@ -208,10 +141,10 @@ const BookingPage = () => {
                     const { sessionId } = event.data;
                     if (sessionId) {
                         try {
-                            const res = await axiosInstance.post("/bookings/payment/stripe/verify", { sessionId });
-                            if (res.data) {
-                                toast.success(res.data.message);
-                                navigate(`/payment/${res.data.paymentId}`);
+                            const res = await verifyStripe(sessionId);
+                            if (res) {
+                                toast.success(res.message);
+                                navigate(`/payment/${res.paymentId}`);
                             }
                         } catch (err) {
                             console.log(err)
@@ -224,11 +157,8 @@ const BookingPage = () => {
             }
 
             else if (paymentMethod === "wallet") {
-                const res = await axiosInstance.post(
-                    "/bookings/payment/wallet/pay",
-                    { eventId: event.id, currency: event.currency, amount: total, bookingId: booking.id }
-                );
-                if (res.data.paymentId) {
+                const res = await payByWallet(event, total, booking.id);
+                if (res.paymentId) {
                     toast.success("Payment successful via Wallet!");
                     navigate(`/payment/${booking.orderId}`)
                 } else {
@@ -253,11 +183,11 @@ const BookingPage = () => {
         const fetchRequest = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/event/${id}`);
-                if (res.data) {
-                    setEvent(res.data.event);
-                    const ticket = res.data.event.tickets[0];
-                    updateTicketQuantity(ticket.id, 1, isNaN(ticket.price) ? 0: ticket.price, ticket.name);
+                const res = await getEventDetails(id as string);
+                if (res) {
+                    setEvent(res.event);
+                    const ticket = res.event.tickets[0];
+                    updateTicketQuantity(ticket.id, 1, isNaN(ticket.price) ? 0 : ticket.price, ticket.name);
                 }
             } catch (error) {
                 setEvent(undefined);

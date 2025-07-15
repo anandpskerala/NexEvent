@@ -1,12 +1,12 @@
-import { Types } from "mongoose";
-
 export interface IRequest {
-    id: string;
-    userId: Types.ObjectId;
-    organization: string;
-    website: string;
-    reason: string;
-    documents: string;
-    status: string;
-    rejectionReason?: string;
+  id: string;
+  userId: string;
+  organization: string;
+  website?: string | null;
+  reason: string;
+  documents: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  rejectionReason?: string | null;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }

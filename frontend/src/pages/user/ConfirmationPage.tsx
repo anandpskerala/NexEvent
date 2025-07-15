@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import QRcode from "qrcode";
 import axiosInstance from '../../utils/axiosInstance';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AxiosError, type AxiosResponse } from 'axios';
+import { AxiosError } from 'axios';
 import { Calendar, CheckCircle, Clock, Download, Eye, MapPin, QrCode, XCircle } from 'lucide-react';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import type { RootState } from '../../store';
@@ -14,6 +14,8 @@ import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { formatCurrency, formatDate } from '../../utils/stringUtils';
 import config from '../../config/config';
 import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
+import { createRetryStripOrder, downloadTicket, failedBookings, getRPayOrder, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
+import type { AllEventData } from '../../interfaces/entities/FormState';
 
 const ConfirmationPage = () => {
     const { id } = useParams();
@@ -21,59 +23,24 @@ const ConfirmationPage = () => {
     const [booking, setBooking] = useState<Booking | null>();
     const [loading, setLoading] = useState<boolean>(true);
     const [qrcode, setQrCode] = useState<string>("");
-    const navigate = useNavigate();
-
-    const downloadTicket = async (bookingId: string) => {
-        try {
-            const res = await axiosInstance.get(`/bookings/ticket/download/${bookingId}`, {
-                responseType: 'blob',
-            });
-
-            const blob = new Blob([res.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `ticket-${bookingId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Download failed', error);
-        }
-    };
-
+    
     const handlePayment = async (): Promise<void> => {
         try {
             if (!booking) return;
             if (booking.paymentMethod === "razorpay") {
-                const res: AxiosResponse<{
-                    order: {
-                        id: string;
-                        amount: number;
-                        currency: string;
-                    };
-                }> = await axiosInstance.post("/bookings/payment/razorpay/order", {
-                    amount: booking.totalAmount,
-                    currency: booking.eventId.currency || "INR",
-                });
+                const res = await getRPayOrder(booking.totalAmount, booking.eventId.currency || "INR")
 
                 const options: RazorpayOptions = {
                     key: config.payment.RPayKey,
-                    amount: res.data.order.amount,
-                    currency: res.data.order.currency,
+                    amount: res.order.amount,
+                    currency: res.order.currency,
                     name: booking.eventId.title,
                     description: "Ticket Booking",
-                    order_id: res.data.order.id,
+                    order_id: res.order.id,
                     handler: async (response: RazorpayResponse) => {
-                        await axiosInstance.post("/bookings/payment/razorpay/verify", {
-                            ...response,
-                            bookingId: booking.id,
-                            eventId: booking.eventId.id,
-                            amount: res.data.order.amount,
-                            currency: res.data.order.currency
-                        });
+                        await handleRPayPayment(response, booking.id, booking.eventId.id, res.order);
                         toast.success("Payment successfull");
-                        navigate(`/payment/${booking.orderId}`);
+                        window.location.reload();
                     },
                     prefill: {
                         name: user?.firstName || "",
@@ -86,29 +53,16 @@ const ConfirmationPage = () => {
 
                 const rzp = new window.Razorpay(options);
                 rzp.on('payment.failed', async () => {
-                    await axiosInstance.post(`/bookings/failed/booking`, {
-                        bookingId: booking.id,
-                        eventId: booking.eventId.id,
-                        amount: res.data.order.amount,
-                        currency: res.data.order.currency,
-                        status: 'failed'
-                    });
+                    await failedBookings(booking.id, booking.eventId.id, res.order.amount, res.order.currency)
                     window.location.reload();
                 })
                 rzp.open();
             }
 
             else if (booking.paymentMethod === "stripe") {
-                const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
-                    "/bookings/payment/stripe/order",
-                    {
-                        eventId: booking.eventId.id, tickets: booking.tickets, promoCode: booking.couponCode, amount: booking.totalAmount * 100,
-                        bookingId: booking.id, currency: booking.eventId.currency || "INR", orderId: booking.orderId
-                    }
-                );
-
+                const res = await createRetryStripOrder(booking.eventId.id, booking.couponCode as string, booking.totalAmount, booking.id, booking.eventId.currency, booking.orderId, booking.tickets);
                 window.open(
-                    res.data.order,
+                    res.order,
                     "_blank",
                     "width=500,height=700"
                 );
@@ -119,13 +73,13 @@ const ConfirmationPage = () => {
                     const { sessionId } = event.data;
                     if (sessionId) {
                         try {
-                            const res = await axiosInstance.post("/bookings/payment/stripe/verify", { sessionId });
-                            if (res.data) {
-                                toast.success(res.data.message);
-                                navigate(`/payment/${res.data.paymentId}`);
+                            const res = await verifyStripe(sessionId);
+                            if (res) {
+                                toast.success(res.message);
+                                window.location.reload();
                             }
                         } catch (err) {
-                            console.error(err)
+                            console.log(err)
                             toast.error("Stripe verification failed");
                         }
                     }
@@ -135,13 +89,11 @@ const ConfirmationPage = () => {
             }
 
             else if (booking.paymentMethod === "wallet") {
-                const res = await axiosInstance.post(
-                    "/bookings/payment/wallet/pay",
-                    { eventId: booking.eventId.id, currency: booking.eventId.currency, amount: booking.totalAmount, bookingId: booking.id }
-                );
-                if (res.data.paymentId) {
+                const event: AllEventData = {...booking.eventId, isSaved: false}
+                const res = await payByWallet(event, booking.totalAmount, booking.id);
+                if (res.paymentId) {
                     toast.success("Payment successful via Wallet!");
-                    navigate(`/payment/${booking.orderId}`)
+                    window.location.reload();
                 } else {
                     toast.error("Insufficient wallet balance.");
                 }
@@ -380,7 +332,7 @@ const ConfirmationPage = () => {
                                         {booking?.status === "failed" && (
                                             <button
                                                 onClick={() => handlePayment()}
-                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
+                                                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors cursor-pointer"
                                             >
                                                 Try Again
                                             </button>

@@ -122,3 +122,13 @@ export const getSavedEvents = async (page: number = 1, limit: number = 10) => {
         return null;
     }
 }
+
+export const getNearbyEvents = async (lat: number, lng: number) => {
+    try {
+        const res = await axiosInstance.get(`/event/nearbyevents?lat=${lat}&lng=${lng}`);
+        return res.data;
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}

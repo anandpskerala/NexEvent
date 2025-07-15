@@ -6,12 +6,12 @@ export interface UserDTO {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber?: number;
-  image?: string;
+  phoneNumber?: number | string | null;
+  image?: string | null;
   authProvider: "google" | "email";
   roles: ("user" | "organizer" | "admin")[];
   isBlocked: boolean;
   isVerified: boolean;
   organizer: Types.ObjectId | OrganizerDTO | null;
-  createdAt: string;
+  createdAt: string | Date;
 }
