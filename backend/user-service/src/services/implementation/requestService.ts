@@ -8,6 +8,7 @@ import { IRequestRepository } from "../../repositories/interfaces/IRequestReposi
 import { IRequestService } from "../interfaces/IRequestService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO } from "../../shared/mappers/userMapper";
+import { toRequestDTO, toRequestsDTO } from "../../shared/mappers/requestMapper";
 
 export class RequestService implements IRequestService {
     private cloudinary: CloudinaryService;
@@ -68,7 +69,7 @@ export class RequestService implements IRequestService {
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.REQUEST_FETCHED,
-                request: request ? request : undefined
+                request: request ? toRequestDTO(request) : undefined
             }
         } catch (error) {
             logger.error(error);
@@ -122,7 +123,7 @@ export class RequestService implements IRequestService {
             return {
                 message: HttpResponse.REQUEST_FETCHED,
                 status: StatusCode.OK,
-                requests: requests,
+                requests: toRequestsDTO(requests),
                 total,
                 page,
                 pages: Math.ceil(total / limit),

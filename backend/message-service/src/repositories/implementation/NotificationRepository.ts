@@ -1,19 +1,18 @@
-import { Model } from "mongoose";
 import notificationModel from "../../models/notificationModel";
 import { INotification } from "../../shared/types/INotfication";
 import { INotificationRepository } from "../interfaces/INotificationRepository";
+import { BaseRepository } from "../BaseRepository";
 
-export class NotificationRepository implements INotificationRepository {
-    private readonly model: Model<INotification>;
+export class NotificationRepository extends BaseRepository<INotification> implements INotificationRepository {
 
     constructor() {
-        this.model = notificationModel;
+        super(notificationModel);
     }
     
-    async create(notification: INotification): Promise<INotification> {
-        const doc = await this.model.create(notification);
-        return doc.toJSON();
-    }
+    // async create(notification: INotification): Promise<INotification> {
+    //     const doc = await this.model.create(notification);
+    //     return doc.toJSON();
+    // }
 
     async getUnreadByUser(userId: string): Promise<INotification[]> {
         const docs = (await this.model.find({ userId, read: false })).map(doc => doc.toJSON());

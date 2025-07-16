@@ -63,10 +63,10 @@ export const RegistrationCard = ({
 
             <div className="p-4">
                 <div className="flex items-center gap-3">
-                    <Avatar initials={registration.userId.firstName[0]} src={registration.userId.image} />
+                    <Avatar initials={registration.user.firstName[0]} src={registration.user.image} />
                     <div>
-                        <h4 className="font-medium text-gray-800">{registration.userId.firstName} {registration.userId.lastName}</h4>
-                        <p className="text-xs text-gray-600">{registration.userId.email}</p>
+                        <h4 className="font-medium text-gray-800">{registration.user.firstName} {registration.user.lastName}</h4>
+                        <p className="text-xs text-gray-600">{registration.user.email}</p>
                         <p className="text-xs text-gray-500">Submitted: {formatDate(registration.createdAt)}</p>
                     </div>
                 </div>
@@ -114,7 +114,7 @@ export const RegistrationCard = ({
                             <Mail size={16} />
                             <span>Message Organizer</span>
                         </button>
-                        <Link to={`/admin/organizer-requests/${registration.userId.id}`} className="border border-gray-300 text-gray-800 cursor-pointer text-sm py-2 px-4 rounded flex-1 hover:bg-gray-50 flex items-center justify-center gap-2">
+                        <Link to={`/admin/organizer-requests/${registration.user.id}`} className="border border-gray-300 text-gray-800 cursor-pointer text-sm py-2 px-4 rounded flex-1 hover:bg-gray-50 flex items-center justify-center gap-2">
                             <Info size={16} />
                             <span>View Details</span>
                         </Link>

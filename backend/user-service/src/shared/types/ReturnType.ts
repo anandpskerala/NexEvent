@@ -1,6 +1,6 @@
 import { StatusCode } from "../constants/statusCode";
+import { RequestDTO } from "../dtos/requestDTO";
 import { UserDTO } from "../dtos/userDTO";
-import { IRequest } from "./IRequest";
 import { IReview } from "./IReview";
 import { IUser } from "./IUser";
 
@@ -34,13 +34,13 @@ export interface UserPaginationType {
 export interface RequestReturnType {
     message: string;
     status: StatusCode;
-    request?: IRequest;
+    request?: RequestDTO;
 }
 
 export interface RequestPaginationType {
     message: string;
     status: StatusCode;
-    requests?: IRequest[];
+    requests?: RequestDTO[];
     total?: number;
     page?: number;
     pages?: number;

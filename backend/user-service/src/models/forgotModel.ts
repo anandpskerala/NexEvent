@@ -4,8 +4,7 @@ import { IForgotRequest } from "../shared/types/IForgotRequest";
 
 const schema = new Schema<IForgotRequest>({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
         required: true,
         unique: true
     },

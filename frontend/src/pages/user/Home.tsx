@@ -304,7 +304,7 @@ const Home = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                   {nearByEvents.map((event, index) => (
                     <div key={index} className="group cursor-pointer">
-                      <div className="transform hover:scale-105 transition-all duration-500 hover:-rotate-1">
+                      <div className="transform hover:scale-105 transition-all duration-500">
                         <EventCard event={event} setEvents={setNearByEvents} user={user} />
                       </div>
                     </div>
@@ -343,7 +343,6 @@ const Home = () => {
         </div>
       )}
 
-      {/* Scroll to Top */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}

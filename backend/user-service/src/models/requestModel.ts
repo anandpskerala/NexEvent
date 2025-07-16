@@ -4,7 +4,6 @@ import { IRequest } from "../shared/types/IRequest";
 const schema = new Schema<IRequest>({
     userId: {
         type: String,
-        ref: "User",
         required: true,
         unique: true
     },

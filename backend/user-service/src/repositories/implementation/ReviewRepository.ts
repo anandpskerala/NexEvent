@@ -1,13 +1,12 @@
-import { Model, Types } from "mongoose";
+import { Types } from "mongoose";
 import { IReviewRepository } from "../interfaces/IReviewRepository";
 import { AllReviews, IReview } from "../../shared/types/IReview";
 import reviewModel from "../../models/reviewModel";
+import { BaseRepository } from "../BaseRepository";
 
-export class ReviewRepository implements IReviewRepository {
-    private model: Model<IReview>;
-
+export class ReviewRepository extends BaseRepository<IReview> implements IReviewRepository {
     constructor() {
-        this.model = reviewModel;
+        super(reviewModel);
     }
 
     async addReview(data: IReview): Promise<IReview> {

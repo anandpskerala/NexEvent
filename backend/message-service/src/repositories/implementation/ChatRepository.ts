@@ -5,13 +5,13 @@ import { Message } from "../../shared/types/Message";
 import { ChatRoom } from "../../shared/types/ChatRoom";
 import messageModel from "../../models/messageModel";
 import chatRoomModel from "../../models/chatRoomModel";
+import { BaseRepository } from "../BaseRepository";
 
-export class ChatRepository implements IChatRepository {
-    private model: Model<Message>;
+export class ChatRepository extends BaseRepository<Message> implements IChatRepository {
     private chatRoom: Model<ChatRoom>;
 
     constructor() {
-        this.model = messageModel;
+        super(messageModel);
         this.chatRoom = chatRoomModel;
     }
 
@@ -78,10 +78,10 @@ export class ChatRepository implements IChatRepository {
         await this.model.updateMany({chatId: chatRoom}, {$set: {isRead: true}});
     }
 
-    async create(data: Partial<Message>): Promise<Message> {
-        const doc = await this.model.create(data);
-        return doc.toJSON();
-    }
+    // async create(data: Partial<Message>): Promise<Message> {
+    //     const doc = await this.model.create(data);
+    //     return doc.toJSON();
+    // }
 
     async getLastMessage(peer1: string, peer2: string): Promise<Message | undefined> {
         const chatRoom = await this.findRoom(peer1, peer2);

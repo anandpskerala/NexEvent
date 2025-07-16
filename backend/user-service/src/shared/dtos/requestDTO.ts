@@ -1,15 +1,14 @@
-import { IUser } from "./IUser";
+import { UserDTO } from "./userDTO";
 
-export interface IRequest {
+export interface RequestDTO {
   id: string;
-  user?: IUser;
-  userId: string;
+  user: UserDTO;
   organization: string;
   website?: string | null;
   reason: string;
   documents: string;
   status: 'pending' | 'accepted' | 'rejected';
   rejectionReason?: string | null;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -10,6 +10,7 @@ export interface User {
     isBlocked: boolean;
     phoneNumber?: string;
     authProvider?: string;
+    organizerId?: string;
     organizer: Organization;
     image?: string;
     unreadCount?: number;

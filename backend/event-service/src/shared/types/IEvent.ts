@@ -5,7 +5,7 @@ export interface IEvent {
     id?: string;
     title: string;
     description: string;
-    userId?: typeof Types.ObjectId;
+    userId?: string;
     image: string;
     category: typeof Types.ObjectId;
     eventType: string;

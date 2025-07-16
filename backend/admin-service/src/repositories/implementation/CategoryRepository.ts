@@ -1,13 +1,12 @@
-import { Model } from "mongoose";
 import categoryModel from "../../models/categoryModel";
 import { ICategory } from "../../shared/types/ICategory";
 import { ICategoryRepository } from "../interfaces/ICategoryRepository";
+import { BaseRepository } from "../BaseRepository";
 
-export class CategoryRepository implements ICategoryRepository {
-    private model: Model<ICategory>;
+export class CategoryRepository extends BaseRepository<ICategory> implements ICategoryRepository {
 
     constructor() {
-        this.model = categoryModel;
+        super(categoryModel);
     }
 
     async createCategory(name: string, description: string, image: string): Promise<ICategory> {

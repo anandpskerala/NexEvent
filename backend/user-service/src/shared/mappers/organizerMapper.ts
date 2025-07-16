@@ -7,4 +7,5 @@ export const toOrganizerDTO = (user: IRequest): OrganizerDTO => ({
   organization: user.organization ?? '',
   website: user.website ?? '',
   status: user.status ?? 'pending',
+  createdAt: user.createdAt ?? '',
 });

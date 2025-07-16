@@ -34,7 +34,7 @@ const OrganizerRequests = () => {
         try {
             setLoading(true);
             const res = await getRequests(pageNumber, 10);
-            if (res.data) {
+            if (res) {
                 setRegistrations(res.requests);
                 setPage(Number(res.page));
                 setPages(Number(res.pages));

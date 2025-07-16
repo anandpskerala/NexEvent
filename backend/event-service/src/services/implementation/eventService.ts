@@ -90,7 +90,7 @@ export class EventService {
                 ...event,
                 isSaved: saved ? true : false
             }
-
+            
             return {
                 message: HttpResponse.FETCHED_EVENT,
                 status: StatusCode.OK,

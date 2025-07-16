@@ -7,7 +7,7 @@ export class RequestController {
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.params.id;
         const { organization, website, reason, documents } = req.body;
-        const result = await this.request.createRequest({userId: userId, organization, website, reason, documents});
+        const result = await this.request.createRequest({userId, organization, website, reason, documents});
         res.status(result.status).json({message: result.message});
     }
 
@@ -25,7 +25,7 @@ export class RequestController {
 
     public getAllRequests = async (req: Request, res: Response): Promise<void> => {
         const { page = 1, limit = 10 } = req.query;
-        const result = await this.request.getAllRequests(page as number, limit as number);
+        const result = await this.request.getAllRequests(Number(page), Number(limit));
         res.status(result.status).json({requests: result.requests, page: result.page, pages: result.pages, total: result.total})
     }
 

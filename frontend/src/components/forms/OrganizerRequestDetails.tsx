@@ -220,7 +220,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                         <div className="flex flex-col">
                             <span className="text-gray-500 text-sm">User ID</span>
                             <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-sm mt-1">
-                                {typeof request.userId != "string" ? request.userId.id : request.userId}
+                                {request.user?.id}
                             </code>
                         </div>
                     </div>
@@ -286,8 +286,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                             </div>
                         </div>
 
-                        {(typeof request.userId !== 'string' &&
-                            request.userId.id === user?.id &&
+                        {(request.user?.id === user?.id &&
                             onReapply) && (
                                 <button
                                     className="ml-7 mt-15 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer flex items-center gap-2"

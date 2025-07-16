@@ -248,11 +248,11 @@ const EventDetailPage = () => {
                                         <h3 className="text-lg font-bold text-gray-900 px-4 py-2">Organizer</h3>
                                         <div className="bg-white p-4 rounded-b-lg flex flex-col items-center">
                                             <div className="w-14 h-14 flex items-center justify-center bg-gray-200 rounded-full text-gray-500 font-bold mb-3">
-                                                {typeof organizer?.userId !== "string" ? organizer?.userId.firstName.slice(0, 2).toUpperCase() : organizer?.organization?.slice(0, 2).toUpperCase()}
+                                                {organizer?.user ? organizer?.user.firstName.slice(0, 2).toUpperCase() : organizer?.organization?.slice(0, 2).toUpperCase()}
                                             </div>
-                                            <Link to={`/profile/${typeof organizer?.userId !== "string" ? organizer?.userId.id : organizer?.userId}`} className="font-medium text-gray-900">{typeof organizer?.userId !== "string" ? organizer?.userId.firstName + " " + organizer?.userId.lastName : organizer.organization}</Link>
+                                            <Link to={`/profile/${organizer?.user ? organizer?.user.id : organizer?.userId}`} className="font-medium text-gray-900">{organizer?.user ? organizer?.user.firstName + " " + organizer?.user.lastName : organizer?.organization}</Link>
                                             <p className="text-sm text-gray-500 mb-4">Event Organizer</p>
-                                            <Link to={`/messages?user=${typeof organizer?.userId !== "string" ? organizer?.userId.id : organizer?.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                            <Link to={`/messages?user=${organizer?.user ? organizer?.user.id : organizer?.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>

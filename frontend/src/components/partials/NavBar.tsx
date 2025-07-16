@@ -395,7 +395,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                     </div>
 
                                     <button
-                                        className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200 mobile-menu border border-gray-200"
+                                        className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition-all duration-200 mobile-menu border border-gray-200 cursor-pointer"
                                         onClick={() => setShowMobileMenu(!showMobileMenu)}
                                     >
                                         <Menu className="w-5 h-5" />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { GeoResult, Location, LocationModalProps } from "../../interfaces/props/locationModalProps";
-import { MapPin, Navigation, Search, Star, X } from "lucide-react";
+import { Check, Loader2, MapPin, Navigation, Search, Star, X } from "lucide-react";
 import config from "../../config/config";
 
 export const LocationModal: React.FC<LocationModalProps> = ({
@@ -13,6 +13,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
     const [locations, setLocations] = useState<Location[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [isDetecting, setIsDetecting] = useState(false);
+    const [showResults, setShowResults] = useState(false);
     const [popularCities, setPopularCities] = useState<Location[]>([
         {
             name: 'Mumbai',
@@ -108,6 +110,8 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             navigator.geolocation.getCurrentPosition(
                 async (position) => {
                     const { latitude, longitude } = position.coords;
+                    setIsDetecting(true);
+                    setError('');
 
                     try {
                         const API_KEY = config.map.gecodeApi;
@@ -137,6 +141,9 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                         }
                     } catch (err) {
                         console.error('Error getting location details:', err);
+                        setError('Unable to get current location. Please search manually.');
+                    } finally {
+                        setIsDetecting(false);
                     }
                 },
                 (error) => {
@@ -178,73 +185,101 @@ export const LocationModal: React.FC<LocationModalProps> = ({
         localStorage.setItem('user_location', JSON.stringify(location));
         onLocationSelect(location);
         setSearchQuery("");
+        setShowResults(false);
+        onClose();
+    };
+
+    const handleClose = () => {
+        setSearchQuery("");
+        setShowResults(false);
+        setError('');
         onClose();
     };
 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg w-full max-w-md max-h-[90vh] overflow-hidden">
-                <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-900">Select Location</h2>
-                    <button
-                        onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
-                    >
-                        <X className="w-5 h-5 text-gray-500" />
-                    </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-white/20 animate-in slide-in-from-bottom-4 duration-300">
+                <div className="relative p-6 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                    <div className="absolute inset-0 bg-black/10"></div>
+                    <div className="relative flex items-center justify-between">
+                        <div>
+                            <h2 className="text-xl font-bold">Choose Location</h2>
+                            <p className="text-blue-100 text-sm mt-1">Find your city or detect automatically</p>
+                        </div>
+                        <button
+                            onClick={handleClose}
+                            className="p-2 hover:bg-white/20 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
-                <div className="p-4 border-b">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <div className="p-6 space-y-4">
+                    <div className="relative group">
+                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-blue-500 transition-colors" />
                         <input
                             type="text"
-                            placeholder="Search for your city"
+                            placeholder="Search for your city..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                            className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder:text-gray-400"
                         />
                     </div>
 
                     <button
                         onClick={detectCurrentLocation}
-                        className="flex items-center gap-2 mt-3 text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                        disabled={isDetecting}
+                        className="flex items-center gap-3 w-full p-4 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl cursor-pointer"
                     >
-                        <Navigation className="w-4 h-4" />
-                        Detect my location
+                        {isDetecting ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <Navigation className="w-5 h-5" />
+                        )}
+                        <span className="font-medium">
+                            {isDetecting ? 'Detecting...' : 'Use Current Location'}
+                        </span>
                     </button>
                 </div>
 
                 <div className="max-h-96 overflow-y-auto">
                     {error && (
-                        <div className="p-4 text-red-600 text-sm bg-red-50">
-                            {error}
+                        <div className="mx-6 mb-4 p-4 bg-red-50 border border-red-200 rounded-xl animate-in slide-in-from-top-2 duration-200">
+                            <p className="text-red-600 text-sm font-medium">{error}</p>
                         </div>
                     )}
 
                     {loading && (
-                        <div className="p-4 text-center text-gray-500">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
-                            <p className="mt-2">Searching locations...</p>
+                        <div className="p-8 text-center animate-in fade-in duration-200">
+                            <Loader2 className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-3" />
+                            <p className="text-gray-500 font-medium">Searching locations...</p>
                         </div>
                     )}
 
-                    {locations.length > 0 && (
-                        <div className="p-4">
-                            <h3 className="font-medium text-gray-900 mb-3">Search Results</h3>
+                    {showResults && locations.length > 0 && (
+                        <div className="px-6 pb-4 animate-in slide-in-from-bottom-4 duration-300">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="w-1 h-4 bg-blue-500 rounded-full"></div>
+                                <h3 className="font-semibold text-gray-900">Search Results</h3>
+                            </div>
                             <div className="space-y-2">
                                 {locations.map((location, index) => (
                                     <button
                                         key={index}
                                         onClick={() => handleLocationSelect(location)}
-                                        className="w-full text-left p-3 hover:bg-gray-50 rounded-lg transition-colors flex items-center gap-3 cursor-pointer"
+                                        className="w-full text-left p-4 hover:bg-gray-50 rounded-xl transition-all duration-200 flex items-center gap-4 group hover:scale-[1.01] active:scale-[0.99] border border-transparent hover:border-gray-200 cursor-pointer"
                                     >
-                                        <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                                        <div>
-                                            <div className="font-medium text-gray-900">{location.name}</div>
-                                            <div className="text-sm text-gray-500">{location.formatted}</div>
+                                        <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                                            <MapPin className="w-4 h-4 text-blue-600" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                {location.name}
+                                            </div>
+                                            <div className="text-sm text-gray-500 mt-1">{location.formatted}</div>
                                         </div>
                                     </button>
                                 ))}
@@ -252,33 +287,41 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                         </div>
                     )}
 
-                    {!searchQuery && (
-                        <div className="p-4">
-                            <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    {!showResults && (
+                        <div className="px-6 pb-6 animate-in slide-in-from-bottom-4 duration-300">
+                            <div className="flex items-center gap-2 mb-4">
                                 <Star className="w-4 h-4 text-yellow-500" />
-                                Popular Cities
-                            </h3>
+                                <h3 className="font-semibold text-gray-900">Popular Cities</h3>
+                            </div>
                             <div className="space-y-2">
                                 {popularCities.map((city, index) => (
                                     <button
                                         key={index}
                                         onClick={() => handleLocationSelect(city)}
-                                        className={`w-full text-left p-3 rounded-lg transition-colors flex items-center gap-3 cursor-pointer ${currentLocation?.name === city.name
-                                            ? 'bg-red-50 border border-red-200'
-                                            : 'hover:bg-gray-50'
+                                        className={`w-full text-left p-4 rounded-xl transition-all duration-200 flex items-center gap-4 group hover:scale-[1.01] active:scale-[0.99] cursor-pointer ${currentLocation?.name === city.name
+                                            ? 'bg-gradient-to-r from-blue-50 to-purple-50 border-2 border-blue-200 shadow-md'
+                                            : 'hover:bg-gray-50 border border-transparent hover:border-gray-200'
                                             }`}
                                     >
-                                        <MapPin className={`w-4 h-4 flex-shrink-0 ${currentLocation?.name === city.name ? 'text-red-600' : 'text-gray-400'
-                                            }`} />
-                                        <div>
-                                            <div className={`font-medium ${currentLocation?.name === city.name ? 'text-red-600' : 'text-gray-900'
+                                        <div className={`p-2 rounded-lg transition-colors ${currentLocation?.name === city.name
+                                            ? 'bg-blue-100'
+                                            : 'bg-gray-100 group-hover:bg-gray-200'
+                                            }`}>
+                                            <MapPin className={`w-4 h-4 ${currentLocation?.name === city.name ? 'text-blue-600' : 'text-gray-600'
+                                                }`} />
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className={`font-semibold transition-colors ${currentLocation?.name === city.name ? 'text-blue-600' : 'text-gray-900 group-hover:text-blue-600'
                                                 }`}>
                                                 {city.name}
                                             </div>
-                                            <div className="text-sm text-gray-500">{city.formatted}</div>
+                                            <div className="text-sm text-gray-500 mt-1">{city.formatted}</div>
                                         </div>
                                         {currentLocation?.name === city.name && (
-                                            <div className="ml-auto text-red-600 text-sm font-medium">Selected</div>
+                                            <div className="flex items-center gap-2 text-blue-600 font-medium text-sm">
+                                                <Check className="w-4 h-4" />
+                                                Selected
+                                            </div>
                                         )}
                                     </button>
                                 ))}

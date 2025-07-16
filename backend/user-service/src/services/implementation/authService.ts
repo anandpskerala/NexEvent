@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { AuthUtils } from "../../shared/utils/authUtils";
@@ -255,7 +254,7 @@ export class AuthService implements IAuthService {
 
             let request = await this.forgotRepo.findByUserId(user.id as string);
             if (!request) {
-                request = await this.forgotRepo.create({ userId: new Types.ObjectId(user.id) });
+                request = await this.forgotRepo.create({ userId: user.id });
                 sendResetPasswordMail(user.email, request.requestId);
             }
 
