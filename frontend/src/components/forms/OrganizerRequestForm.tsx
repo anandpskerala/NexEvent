@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'
 import * as Yup from 'yup'
-import axiosInstance from '../../utils/axiosInstance'
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import { Folder } from 'lucide-react';
@@ -10,6 +9,7 @@ import type { OrganizerFormState } from '../../interfaces/entities/FormState'
 import type { RequestFormProps } from '../../interfaces/props/formProps'
 import type { RequestErrorState } from '../../interfaces/entities/ErrorState'
 import { validateRequestForm } from '../../interfaces/validators/requestFormvalidator';
+import { submitOrganiserRequestForm } from '../../services/organizerRequest';
 
 export const OrganizerRequestForm: React.FC<RequestFormProps> = ({userId}) => {
     const navigate = useNavigate();
@@ -75,9 +75,9 @@ export const OrganizerRequestForm: React.FC<RequestFormProps> = ({userId}) => {
             await validateRequestForm(organizerData);
             if (organizerData.documents) {
                 const image = await uploadToCloudinary(organizerData.documents);
-                const res = await axiosInstance.post(`/user/request/${userId}`, {...organizerData, documents: image});
-            if (res.data) {
-                toast.success(res.data.message);
+                const res = await submitOrganiserRequestForm(userId as string, {...organizerData, documents: image});
+            if (res) {
+                toast.success(res.message);
                 navigate("/account/profile");
             }
             }

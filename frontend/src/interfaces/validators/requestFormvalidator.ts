@@ -7,7 +7,8 @@ const schema = Yup.object().shape({
     website: Yup.string().trim().url("Must be a valid URL").notRequired(),
     reason: Yup.string().trim().required("Reason is required"),
     accepted: Yup.bool().oneOf([true], "You must agree to terms"),
-    documents: Yup.mixed().required("A file is required")
+    documents: Yup.mixed().required("A file is required"),
+    status: Yup.string().notRequired(),
 });
 
 export const validateRequestForm = async (data: OrganizerFormState) => {

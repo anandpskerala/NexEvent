@@ -109,7 +109,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
     const handleConfirm = async (reason?: string) => {
         try {
             const action = modalAction === 'approve' ? 'accepted' : 'rejected';
-            const res = await axiosInstance.patch(`/organizer/request/${request.userId}`, {
+            const res = await axiosInstance.patch(`/user/organizer/request/${request.userId}`, {
                 action,
                 rejectionReason: reason
             });

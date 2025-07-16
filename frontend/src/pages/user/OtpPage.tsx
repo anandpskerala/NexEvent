@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux'
-import axiosInstance from '../../utils/axiosInstance'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '../../hooks/useAppDispatch'
-import { toast } from 'sonner'
-import { AxiosError } from 'axios';
 import type { RootState } from '../../store';
 import { NavBar } from '../../components/partials/NavBar'
 import { Footer } from '../../components/partials/Footer'
 import { verifyOtp } from '../../store/actions/auth/verifyOtp'
+import { getOtpTimer, requestOtp } from '../../services/otpService'
 
 const OtpPage = () => {
     const [code, setCode] = useState(Array(6).fill(''));
@@ -21,8 +19,8 @@ const OtpPage = () => {
     useEffect(() => {
         const getTimer = async () => {
             try {
-                const response = await axiosInstance.get("/user/otp");
-                const backendTimeLeft = response.data?.timeLeft ?? 0;
+                const response = await getOtpTimer();
+                const backendTimeLeft = response.timeLeft ?? 0;
                 setTimeLeft(backendTimeLeft);
             } catch (error) {
                 console.log(error);
@@ -99,16 +97,7 @@ const OtpPage = () => {
     };
 
     const resendCode = async () => {
-        try {
-            const response = await axiosInstance.patch("/user/otp");
-            if (response.data) {
-                toast.success(response.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-        }
+        await requestOtp();
         setTimeLeft(120);
         setCode(['', '', '', '', '', '']);
     };

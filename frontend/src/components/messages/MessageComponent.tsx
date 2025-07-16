@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { User } from '../../interfaces/entities/User';
-import axiosInstance from '../../utils/axiosInstance';
 import type { Message } from '../../interfaces/entities/Message';
 import { formatDateTime, formatLastMessageTime } from '../../utils/stringUtils';
 import { MoreVertical, Search, SendHorizontal, X, ArrowLeft, Menu, Paperclip } from 'lucide-react';
@@ -8,8 +7,8 @@ import { uploadToCloudinary } from '../../utils/cloudinary';
 import { useDebounce } from '../../hooks/useDebounce';
 import { useChatSocket } from '../../hooks/useChatSocket';
 import { v4 as uuidv4 } from 'uuid';
-import type { AxiosResponse } from 'axios';
 import { NoChatSelected } from '../cards/NoChatSelected';
+import { getConversations, getInteractedChats, readMessages, sendChatMessage } from '../../services/messageService';
 
 export const MessageComponent = ({ user, selected }: { user: User; selected: User | null }) => {
   const [chats, setChats] = useState<User[]>([]);
@@ -87,16 +86,11 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
       sentMessageIdsRef.current.add(optimisticId);
       scrollToBottom();
 
-      const response = await axiosInstance.post('/messages/chat', {
-        sender: user.id,
-        receiver: selectedChat.id,
-        content: newMessage || (mediaUrl ? 'Image' : ''),
-        media: mediaUrl,
-      });
+      const response = await sendChatMessage(user.id, selectedChat.id, newMessage || (mediaUrl ? 'Image' : ''), mediaUrl);
 
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.id === optimisticId ? { ...msg, id: response.data.id } : msg
+          msg.id === optimisticId ? { ...msg, id: response.id } : msg
         )
       );
       sentMessageIdsRef.current.delete(optimisticId);
@@ -135,16 +129,11 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
 
   const fetchUsers = async (query = '') => {
     try {
-      let res: AxiosResponse;
 
-      if (debouncedSearch) {
-        res = await axiosInstance.get(`/user/users?query=${query}&myId=${user.id}`);
-      } else {
-        res = await axiosInstance.post(`/messages/interactions`, { userId: user.id });
-      }
+      const res = await getInteractedChats(user.id, query);
 
-      if (res.data) {
-        const users = res.data.users;
+      if (res) {
+        const users = res.users;
 
         const allUsers = [
           ...(selectedChat && !users.some((u: User) => u.id === selectedChat.id) ? [selectedChat] : []),
@@ -175,11 +164,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
       const container = messagesContainerRef.current;
       const previousHeight = container?.scrollHeight || 0;
       const previousScrollTop = container?.scrollTop || 0;
-
-      const res = await axiosInstance.get(
-        `/messages/conversations/${receiverId}?limit=${limit}&offset=${offset}`
-      );
-      const { messages: newMessages, total } = res.data;
+      const { messages: newMessages, total } = await getConversations(receiverId, limit, offset);
 
       setMessages((prev) => (append ? [...newMessages, ...prev] : newMessages));
       setHasMoreMessages(offset + newMessages.length < total);
@@ -192,7 +177,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
       }
 
       if (newMessages.some((msg: Message) => msg.sender === receiverId && !msg.isRead)) {
-        await axiosInstance.patch(`/messages/conversations/${receiverId}`);
+        await readMessages(receiverId);
       }
     } catch (error) {
       console.error('Failed to fetch messages', error);
@@ -203,7 +188,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
 
   const handleRead = async (receiverId: string) => {
     try {
-      await axiosInstance.patch(`/messages/conversations/${receiverId}`);
+      await readMessages(receiverId);
       setChats((prevChats) =>
         prevChats.map((chat) =>
           chat.id === receiverId ? { ...chat, unreadCount: 0 } : chat

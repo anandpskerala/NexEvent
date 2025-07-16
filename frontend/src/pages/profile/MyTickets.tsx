@@ -4,7 +4,6 @@ import { NavBar } from '../../components/partials/NavBar';
 import { UserSidebar } from '../../components/partials/UserSidebar';
 import { Calendar, Clock, MapPin, Tag, } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { Link, useNavigate } from 'react-router-dom';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
@@ -16,7 +15,7 @@ import { toast } from 'sonner';
 import { Footer } from '../../components/partials/Footer';
 import config from '../../config/config';
 import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
-import { cancelBooking, createRetryStripOrder, failedBookings, getRPayOrder, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
+import { cancelBooking, createRetryStripOrder, failedBookings, getRPayOrder, getUserBookings, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 
 const MyTickets = () => {
@@ -156,11 +155,11 @@ const MyTickets = () => {
         setLoading(true);
         try {
             const fetchRequest = async (pageNumber = 1) => {
-                const res = await axiosInstance.get(`/bookings/bookings/${user?.id}?page=${pageNumber}&limit=10`)
-                if (res.data) {
-                    setEvents(res.data.bookings);
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages));
+                const res = await getUserBookings(user?.id as string, pageNumber, 10);
+                if (res) {
+                    setEvents(res.bookings);
+                    setPage(Number(res.page));
+                    setPages(Number(res.pages));
                 }
             }
             fetchRequest(page);

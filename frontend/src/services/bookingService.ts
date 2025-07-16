@@ -194,3 +194,24 @@ export const getBookings = async (search: string, page: number, limit: number = 
     const res = await axiosInstance.get(`/bookings/organizer/booking?search=${search}&page=${page}&limit=${limit}`);
     return res.data;
 }
+
+export const getUserBookings = async (userId: string, page: number, limit: number = 10) => {
+    const res = await axiosInstance.get(`/bookings/bookings/${userId}?page=${page}&limit=${limit}`);
+    return res.data;
+}
+
+
+export const getWalletDetails = async (userId: string) => {
+    const res = await axiosInstance.get(`/event/payment/wallet/${userId}`);
+    return res.data;
+}
+
+export const getBooking = async (id: string) => {
+    const res = await axiosInstance.get(`/bookings/booking/${id}`);
+    return res.data;
+}
+
+export const verifyBookingData = async (id: string) => {
+    const res = await axiosInstance.get(`/bookings/verify/booking/${id}`);
+    return res.data;
+}

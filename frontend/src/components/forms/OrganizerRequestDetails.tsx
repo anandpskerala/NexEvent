@@ -2,8 +2,8 @@ import { AlertCircle, Building, CheckCircle, Clock, FileText, Globe, User as Use
 import React, { useState } from 'react';
 import { AxiosError } from 'axios';
 import { toast } from 'sonner';
-import axiosInstance from '../../utils/axiosInstance';
 import type { ConfirmationModalProps, RequestDetailsProps } from '../../interfaces/props/modalProps';
+import { manageOrganizerRequest } from '../../services/organizerRequest';
 
 
 const ConfirmationModal = ({
@@ -109,12 +109,9 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
     const handleConfirm = async (reason?: string) => {
         try {
             const action = modalAction === 'approve' ? 'accepted' : 'rejected';
-            const res = await axiosInstance.patch(`/user/request/${typeof request.userId != "string" ? request.userId.id : request.userId}`, {
-                action,
-                rejectionReason: reason
-            });
-            if (res.data) {
-                toast.success(res.data.message);
+            const res = await manageOrganizerRequest(request.user ? request.user.id : request.userId as string, action, reason);
+            if (res) {
+                toast.success(res.message);
                 onUpdateStatus(
                     modalAction === 'approve' ? 'accepted' : 'rejected'
                 );
@@ -124,8 +121,9 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                 console.error(error.response?.data.message);
                 toast.error(error.response?.data.message)
             }
+        } finally {
+            setIsModalOpen(false);
         }
-        setIsModalOpen(false);
     };
 
     const formatDate = (dateString: string) => {

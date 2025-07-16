@@ -4,7 +4,6 @@ import { NavBar } from '../../components/partials/NavBar';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { captialize, formatPrice } from '../../utils/stringUtils';
 import { AdvancedMarker, APIProvider, Map } from '@vis.gl/react-google-maps';
@@ -16,6 +15,7 @@ import { ReviewCard } from '../../components/cards/ReviewCard';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import type { User } from '../../interfaces/entities/User';
 import { getEventDetails, removeSaveEvent, saveEvent } from '../../services/eventService';
+import { getRequestDetails } from '../../services/organizerRequest';
 
 
 const EventDetailPage = () => {
@@ -85,8 +85,8 @@ const EventDetailPage = () => {
                 setEvent(eventData);
 
                 if (eventData?.userId) {
-                    const orgRes = await axiosInstance.get(`/user/request/${eventData.userId}`);
-                    setOrganizer(orgRes.data?.request);
+                    const orgRes = await getRequestDetails(eventData.userId);
+                    setOrganizer(orgRes.request);
                 }
 
             } catch (error) {

@@ -4,9 +4,9 @@ import type { RootState } from '../../store';
 import { NavBar } from '../../components/partials/NavBar';
 import type { Notification } from '../../interfaces/entities/Notification';
 import { AlertCircle, Bell, Check, CheckCheck, Heart, Info, MessageCircle, UserPlus, X } from 'lucide-react';
-import axiosInstance from '../../utils/axiosInstance';
 import { formatTimeAgo } from '../../utils/stringUtils';
 import Pagination from '../../components/partials/Pagination';
+import { fetchNotifications } from '../../services/notificationService';
 
 const NotificationsPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -61,16 +61,12 @@ const NotificationsPage = () => {
 
     useEffect(() => {
         const fetchRequest = async () => {
-            try {
-                const res = await axiosInstance.get(`/messages/notifications/all/${user?.id}?page=${page}&limit=10`)
-                if (res.data) {
-                    setNotifications(res.data.notifications);
-                    setPage(res.data.page);
-                    setPages(res.data.pages);
+                const res = await fetchNotifications(user?.id as string, page, 10);
+                if (res) {
+                    setNotifications(res.notifications);
+                    setPage(res.page);
+                    setPages(res.pages);
                 }
-            } catch (error) {
-                console.error(error);
-            }
         }
 
         fetchRequest();

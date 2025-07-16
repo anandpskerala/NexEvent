@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import QRcode from "qrcode";
-import axiosInstance from '../../utils/axiosInstance';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
@@ -14,7 +13,7 @@ import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { formatCurrency, formatDate } from '../../utils/stringUtils';
 import config from '../../config/config';
 import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
-import { createRetryStripOrder, downloadTicket, failedBookings, getRPayOrder, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
+import { createRetryStripOrder, downloadTicket, failedBookings, getBooking, getRPayOrder, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 
 const ConfirmationPage = () => {
@@ -110,10 +109,10 @@ const ConfirmationPage = () => {
         const getBookingDetails = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/bookings/booking/${id}`);
+                const res = await getBooking(id as string);
 
-                if (res.data) {
-                    setBooking(res.data.booking);
+                if (res) {
+                    setBooking(res.booking);
                     const qr = await QRcode.toDataURL(JSON.stringify({ eventId: booking?.eventId.id, booking: booking?.id }));
                     setQrCode(qr);
                 }
