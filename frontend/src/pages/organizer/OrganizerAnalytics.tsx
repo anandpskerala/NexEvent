@@ -30,13 +30,13 @@ const OrganizerAnalytics = () => {
     }, [timeFilter])
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-gray-100">
             <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='analytics' />
             <div className="flex-1 overflow-auto">
                 <div className="p-6">
                     <AdminNavbar title="Analytics" user={user} toggleSidebar={toggleSidebar} />
 
-                    <div className="max-w-7xl mx-auto">
+                    <div className="max-w-full mx-auto">
                         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                             <div className="flex flex-wrap gap-4 items-center">
                                 <div className="flex items-center gap-2">

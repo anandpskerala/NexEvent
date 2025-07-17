@@ -67,7 +67,7 @@ const AdminDashboard = () => {
                 <div className="p-6">
                     <AdminNavbar title="Dashboard" user={user} toggleSidebar={toggleSidebar} />
 
-                    <div className="max-w-7xl mx-auto">
+                    <div className="max-w-full mx-auto">
                         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                             <div className="flex flex-wrap gap-4 items-center">
                                 <div className="flex items-center gap-2">

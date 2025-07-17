@@ -67,7 +67,7 @@ export class EventRepository implements IEventRepository {
     }
 
     async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]> {
-        const cacheKey = `:${JSON.stringify({ query, skip, limit, sortFilter })}`;
+        const cacheKey = `events:${JSON.stringify({ query, skip, limit, sortFilter })}`;
         const cachedEvent = await getCache<IEvent[]>(cacheKey);
         if (cachedEvent) {     
             return cachedEvent;

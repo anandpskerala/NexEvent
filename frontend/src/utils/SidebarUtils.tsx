@@ -4,28 +4,101 @@ import type { SideBarProps } from "../interfaces/props/navBarProps";
 
 export const SidebarItem: React.FC<SideBarProps> = ({ icon, text, href, active = false, collapsed = false }) => {
     return (
-        <Link 
-            to={href} 
-            className={`flex items-center px-4 py-3 ${active ? 'bg-blue-700' : 'hover:bg-blue-200'} ${collapsed ? 'justify-center' : ''} rounded-md`}
-            title={collapsed ? text : undefined}
+        <Link
+            to={href}
+            className={`
+            relative flex items-center px-3 py-2.5 rounded-xl transition-all duration-200
+            ${collapsed ? 'justify-center' : 'justify-start'}
+            ${active
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-900 text-white shadow-lg shadow-blue-500/25 transform scale-105'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:scale-105'
+                }
+            group
+        `}
         >
-            <div className={`${collapsed ? '' : 'mr-3'} ${active ? 'text-white font-bold':'text-gray-500'}`}>{icon}</div>
-            {!collapsed && <div className={`text-sm ${active ? 'text-white font-bold': 'text-gray-600'}`}>{text}</div>}
+            {active && (
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-10 blur-sm"></div>
+            )}
+
+            <div className={`
+            relative z-10 flex items-center transition-all duration-200
+            ${active ? 'text-white' : 'text-gray-600 group-hover:text-gray-900'}
+        `}>
+                <div className="relative">
+                    {icon}
+                    {active && (
+                        <div className="absolute inset-0 rounded-full bg-white/20 blur-sm"></div>
+                    )}
+                </div>
+                {!collapsed && (
+                    <span className="ml-3 font-medium text-sm tracking-wide opacity-0 animate-fadeIn">
+                        {text}
+                    </span>
+                )}
+            </div>
+
+            {active && !collapsed && (
+                <div className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+            )}
         </Link>
     );
 }
 
 export const AdminSidebarItem: React.FC<SideBarProps> = ({ icon, text, href, active = false, collapsed = false }) => {
-    return (
-        <Link 
-            to={href} 
-            className={`flex items-center px-4 py-3 ${active ? 'bg-indigo-900' : 'hover:bg-gray-800'} ${collapsed ? 'justify-center' : ''}`}
-            title={collapsed ? text : undefined}
-        >
-            <div className={`${collapsed ? '' : 'mr-3'} text-gray-400`}>{icon}</div>
-            {!collapsed && <div className="text-sm">{text}</div>}
-        </Link>
-    );
+  return (
+    <Link
+      to={href}
+      className={`
+        group relative flex items-center px-3 py-2.5 rounded-xl
+        transition-all duration-300 ease-in-out
+        ${active 
+          ? 'bg-gradient-to-r from-blue-700 to-blue-500 text-white shadow-lg shadow-blue-500/25 transform scale-[1.02]' 
+          : 'text-slate-300 hover:text-white hover:bg-slate-800/50 hover:shadow-lg hover:shadow-slate-900/20 hover:transform hover:scale-[1.02]'
+        }
+        ${collapsed ? 'justify-center' : ''}
+      `}
+      title={collapsed ? text : undefined}
+    >
+      {active && !collapsed && (
+        <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-6 bg-white rounded-r-full"></div>
+      )}
+      
+      <div className={`
+        flex items-center justify-center
+        ${collapsed ? 'w-6 h-6' : 'w-5 h-5 mr-3'}
+        transition-all duration-300
+        ${active ? 'text-white' : 'text-slate-400 group-hover:text-blue-400'}
+      `}>
+        {icon}
+      </div>
+      
+      {!collapsed && (
+        <div className={`
+          text-sm font-medium transition-all duration-300
+          ${active ? 'text-white' : 'text-slate-300 group-hover:text-blue-400'}
+        `}>
+          {text}
+        </div>
+      )}
+      
+
+      {!active && (
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+      )}
+      
+      {collapsed && (
+        <div className="
+          absolute left-14 px-3 py-1 bg-slate-800 text-white text-sm rounded-md
+          opacity-0 group-hover:opacity-100 transition-opacity duration-300
+          whitespace-nowrap z-50 shadow-lg
+          before:absolute before:left-[-4px] before:top-1/2 before:transform before:-translate-y-1/2
+          before:border-4 before:border-transparent before:border-r-slate-800
+        ">
+          {text}
+        </div>
+      )}
+    </Link>
+  );
 }
 
 export function GridIcon() {

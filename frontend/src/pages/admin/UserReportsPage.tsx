@@ -105,7 +105,7 @@ const UserReportsPage = () => {
                 <div className="p-6">
                     <AdminNavbar title="Reports" user={user} toggleSidebar={toggleSidebar} />
 
-                    <div className="w-full mx-auto p-6">
+                    <div className="w-full mx-auto py-6">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                             <div className="overflow-x-auto rounded-md">
                                 <table className="w-full">

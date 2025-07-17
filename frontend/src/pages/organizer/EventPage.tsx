@@ -68,7 +68,7 @@ const EventPage = () => {
     }, [fetchRequest, page, debouncedSearch]);
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-gray-100">
             <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='events' />
             <div className="flex-1 overflow-auto">
                 <div className="p-6">

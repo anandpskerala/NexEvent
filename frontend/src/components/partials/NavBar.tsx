@@ -350,7 +350,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                                     <div className="border-t border-gray-100 py-2">
                                                         {user?.roles?.includes("organizer") && (
                                                             <Link
-                                                                to="/organizer/events"
+                                                                to="/organizer/dashboard"
                                                                 className="flex items-center px-4 py-2.5 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-all duration-200 group"
                                                                 onClick={() => setShowProfileOptions(false)}
                                                             >
@@ -363,7 +363,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                                         )}
                                                         {user?.roles?.includes("admin") && (
                                                             <Link
-                                                                to="/admin/users"
+                                                                to="/admin/dashboard"
                                                                 className="flex items-center px-4 py-2.5 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 group"
                                                                 onClick={() => setShowProfileOptions(false)}
                                                             >
@@ -410,7 +410,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
                                     </Link>
                                     <Link 
                                         to="/signup" 
-                                        className="px-3 sm:px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md font-medium"
+                                        className="px-3 sm:px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-blue-800 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-md font-medium"
                                     >
                                         Get Started
                                     </Link>
