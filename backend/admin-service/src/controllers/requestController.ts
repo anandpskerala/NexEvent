@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { IRequestService } from "../services/interfaces/IRequestService";
+import { inject, injectable } from "tsyringe";
 
-
+@injectable()
 export class RequestController {
-    constructor(private requestService: IRequestService) {}
+    constructor(@inject("IRequestService") private requestService: IRequestService) {}
 
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;

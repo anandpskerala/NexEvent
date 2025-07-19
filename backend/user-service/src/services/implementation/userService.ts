@@ -1,16 +1,18 @@
 import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { UserRepository } from "../../repositories/implementation/UserRepository";
 import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IUserService } from "../interfaces/IUserService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO, toUsersDTO } from "../../shared/mappers/userMapper";
+import { inject, injectable } from "tsyringe";
+import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 
+@injectable()
 export class UserService implements IUserService {
     private cloudinary: CloudinaryService;
 
-    constructor(private userRepo: UserRepository) {
+    constructor(@inject("IUserRepository") private userRepo: IUserRepository) {
         this.cloudinary = new CloudinaryService();
     }
 

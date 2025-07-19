@@ -30,9 +30,6 @@ model User {
   isVerified   Boolean            @default(false)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
-  otp          Otp?
-  forgot       ForgotRequest?
-  reviews      Review[]
 
   @@map("users")
 }
@@ -53,32 +50,6 @@ model OrganizerRequest {
   @@map("organizer_requests")
 }
 
-
-model ForgotRequest {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String   @unique
-  requestId String   @default(uuid())
-  expiry    DateTime
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("forgot_requests")
-}
-
-model Review {
-  id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  eventId   String
-  rating    Int
-  title     String
-  message   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("reviews")
-}
 
 enum AuthProvider {
   google

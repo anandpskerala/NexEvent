@@ -33,7 +33,9 @@ export class App {
         this.app.use(cookieParser());
         this.app.use(cors({
             origin: config.app.frontend,
-            credentials: true
+            credentials: true,
+            methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+            allowedHeaders: ["Content-Type", "Authorization"],
         }));
         this.app.use(requestLogger);
 
@@ -63,7 +65,7 @@ export class App {
         this.app.use('/api/admin', AdminProxy.setupProxy());
         this.app.use('/api/event', EventProxy.setupProxy());
         this.app.use('/api/messages', MessageProxy.setupProxy());
-         this.app.use('/api/bookings', BookingProxy.setupProxy());
+        this.app.use('/api/bookings', BookingProxy.setupProxy());
     }
 
     public listen(port: number) {

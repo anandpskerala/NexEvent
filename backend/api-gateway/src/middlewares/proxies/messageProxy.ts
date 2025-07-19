@@ -12,8 +12,6 @@ export class MessageProxy {
             proxyReqPathResolver: (req: Request): string => {
                 return req.originalUrl.replace(/^\/api\/messages/, '');
             },
-
-
             proxyReqOptDecorator: (proxyReqOpts: RequestOptions, srcReq: Request): RequestOptions => {
                 if (srcReq.headers['x-user-id']) {
                     proxyReqOpts.headers = {

@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { IMessageService } from "../services/interfaces/IMessageService";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class MessageController {
-    constructor(private message: IMessageService) {};
+    constructor(@inject("IMessageService") private message: IMessageService) {};
 
     public sendMessage = async (req: Request, res: Response): Promise<void> => {
         const { sender, receiver, content, media } = req.body;

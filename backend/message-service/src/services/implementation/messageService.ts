@@ -12,10 +12,14 @@ import logger from "../../shared/utils/logger";
 import { IChatRepository } from "../../repositories/interfaces/IChatRepository";
 import { MessagePaginationType, MessageReturnType, UserReturnType } from "../../shared/types/ReturnType";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { IMessageService } from "../interfaces/IMessageService";
+import { inject, injectable } from "tsyringe";
 
-export class MessageService {
+
+@injectable()
+export class MessageService implements IMessageService {
     private producer: KafkaProducer;
-    constructor(private repo: IChatRepository) {
+    constructor(@inject("IChatRepository") private repo: IChatRepository) {
         this.producer = new KafkaProducer(kafka);
     }
 

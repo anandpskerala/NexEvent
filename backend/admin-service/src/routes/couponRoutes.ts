@@ -1,16 +1,13 @@
 import { Router } from "express";
 import { protectedRoute } from "../middlewares/protectedRoutes";
-import { CouponRepository } from "../repositories/implementation/CouponRepository";
-import { CouponService } from "../services/implementation/couponService";
 import { CouponController } from "../controllers/couponController";
 import { validate } from "../middlewares/validate";
 import { createCoupon } from "../shared/validators/couponSchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const couponRepo = new CouponRepository();
-const couponService = new CouponService(couponRepo);
-const couponController = new CouponController(couponService);
+const couponController = container.resolve(CouponController);
 
 router.post("/", protectedRoute, validate(createCoupon), couponController.createCoupon);
 router.get("/", couponController.getCoupons);

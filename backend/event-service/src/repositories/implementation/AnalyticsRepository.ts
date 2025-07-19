@@ -1,9 +1,11 @@
-import mongoose, { Model, PipelineStage, Types } from "mongoose";
+import { Model, PipelineStage } from "mongoose";
 import { IAnalyticsRepository } from "../interfaces/IAnalyticsRepository";
 import { IBooking } from "../../shared/types/IBooking";
 import bookingModel from "../../models/bookingModel";
 import { GroupBy, RevenueAnalyticsGraphPoint, RevenueAnalyticsResultRaw, TopSelling } from "../../shared/types/RevenueAnalytics";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class AnalyticsRepository implements IAnalyticsRepository {
     private model: Model<IBooking>;
 
@@ -58,7 +60,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
         if (organizerId) {
             pipeline.push({
                 $match: {
-                    "event.userId": new Types.ObjectId(organizerId)
+                    "event.userId": organizerId
                 }
             });
         }
@@ -137,7 +139,7 @@ export class AnalyticsRepository implements IAnalyticsRepository {
         if (organizerId) {
             pipeline.push({
                 $match: {
-                    "event.userId": new mongoose.Types.ObjectId(organizerId)
+                    "event.userId": organizerId
                 }
             });
         }

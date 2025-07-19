@@ -5,9 +5,11 @@ import { ICouponRepository } from "../../repositories/interfaces/ICouponReposito
 import { CouponPaginationType, CouponReturnType } from "../../shared/types/ReturnType";
 import { ICouponService } from "../interfaces/ICouponService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class CouponService implements ICouponService {
-    constructor(private repo: ICouponRepository) { }
+    constructor(@inject("ICouponRepository") private repo: ICouponRepository) { }
 
     public async createCoupon(data: ICoupon): Promise<CouponReturnType> {
         try {

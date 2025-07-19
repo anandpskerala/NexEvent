@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { IPaymentService } from "../services/interfaces/IPaymentService";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class PaymentController {
-    constructor(private paymentService: IPaymentService) {}
+    constructor(@inject("IPaymentService") private paymentService: IPaymentService) {}
 
     public creatOrderRPay = async (req: Request, res: Response): Promise<void> => {
         const { amount, currency } = req.body;

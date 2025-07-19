@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import express, { Application } from "express";
 import router from "./routes";
 import connectDB from "./config/db";
@@ -8,6 +9,7 @@ import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
 import mongoose from "mongoose";
 import logger from "./shared/utils/logger";
 import { initRedisSubscriber } from "./shared/utils/redisSubscriber";
+import "./containers";
 
 export class App {
   private app: Application;

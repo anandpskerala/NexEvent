@@ -1,16 +1,13 @@
 import { Router } from "express";
-import { EventRepository } from "../repositories/implementation/EventRepository";
-import { EventService } from "../services/implementation/eventService";
 import { EventController } from "../controllers/eventController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { validate } from "../middlewares/validate";
 import { createTicketSchema, editEventSchema, editTicketSchema, eventSchema } from "../shared/validators/eventSchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const eventRepo = new EventRepository();
-const eventService = new EventService(eventRepo);
-const eventController = new EventController(eventService);
+const eventController = container.resolve(EventController);
 
 router.get("/all", eventController.getAllEvents);
 router.post("/stocks", eventController.checkStock);

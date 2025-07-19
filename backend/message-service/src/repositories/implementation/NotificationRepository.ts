@@ -2,7 +2,10 @@ import notificationModel from "../../models/notificationModel";
 import { INotification } from "../../shared/types/INotfication";
 import { INotificationRepository } from "../interfaces/INotificationRepository";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+
+@injectable()
 export class NotificationRepository extends BaseRepository<INotification> implements INotificationRepository {
 
     constructor() {

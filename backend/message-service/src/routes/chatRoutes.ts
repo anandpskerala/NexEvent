@@ -1,15 +1,12 @@
 import { Router } from "express";
-import { ChatRepository } from "../repositories/implementation/ChatRepository";
-import { MessageService } from "../services/implementation/messageService";
 import { MessageController } from "../controllers/messageController";
 import { validate } from "../middlewares/validate";
 import { messageSchema } from "../shared/validators/messageSchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const messageRepo = new ChatRepository();
-const logic = new MessageService(messageRepo);
-const controller = new MessageController(logic);
+const controller = container.resolve(MessageController);
 
 router.post("/chat", validate(messageSchema), controller.sendMessage);
 router.post("/interactions", controller.getInteractions);

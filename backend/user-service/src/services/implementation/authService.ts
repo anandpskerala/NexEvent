@@ -12,13 +12,15 @@ import { IOtpRepository } from "../../repositories/interfaces/IOtpRepository";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO } from "../../shared/mappers/userMapper";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class AuthService implements IAuthService {
     public authUtils: AuthUtils;
     constructor(
-        private userRepo: IUserRepository,
-        private otpRepo: IOtpRepository,
-        private forgotRepo: IForgotRepository,
+        @inject("IUserRepository") private userRepo: IUserRepository,
+        @inject("IOtpRepository") private otpRepo: IOtpRepository,
+        @inject("IForgotRepository") private forgotRepo: IForgotRepository,
     ) {
         this.authUtils = new AuthUtils();
     }

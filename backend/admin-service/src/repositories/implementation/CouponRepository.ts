@@ -2,9 +2,10 @@ import { ICoupon } from "../../shared/types/ICoupon";
 import { ICouponRepository } from "../interfaces/ICouponRepository";
 import couponModel from "../../models/couponModel";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class CouponRepository extends BaseRepository<ICoupon> implements ICouponRepository {
-
     constructor() {
         super(couponModel);
     }

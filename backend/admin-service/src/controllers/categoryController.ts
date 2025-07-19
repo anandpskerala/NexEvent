@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { ICategory } from "../shared/types/ICategory";
 import { ICategoryService } from "../services/interfaces/ICategoryService";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class CategoryController {
-    constructor(private categoryService: ICategoryService) {}
+    constructor(@inject("ICategoryService") private categoryService: ICategoryService) {}
 
     public createCategory = async (req: Request, res: Response): Promise<void> => {
         const { name, description, image } = req.body;

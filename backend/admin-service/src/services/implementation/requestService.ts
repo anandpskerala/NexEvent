@@ -1,3 +1,4 @@
+import { inject, injectable } from "tsyringe";
 import kafka from "../../kafka";
 import { KafkaProducer } from "../../kafka/producer";
 import { TOPICS } from "../../kafka/topics";
@@ -10,9 +11,11 @@ import { RequestPaginationType, RequestReturnType } from "../../shared/types/Ret
 import { fetchUsers } from "../../shared/utils/getUsers";
 import logger from "../../shared/utils/logger";
 
+
+@injectable()
 export class RequestService {
     private producer: KafkaProducer;
-    constructor(private repo: IRequestRepository) {
+    constructor(@inject("IRequestRepository") private repo: IRequestRepository) {
         this.producer = new KafkaProducer(kafka);
     }
 

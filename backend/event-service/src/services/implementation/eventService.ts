@@ -7,10 +7,13 @@ import { ITicket } from "../../shared/types/ITicket";
 import logger from "../../shared/utils/logger";
 import { IEventRepository } from "../../repositories/interfaces/IEventRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { inject, injectable } from "tsyringe";
+import { IEventService } from "../interfaces/IEventService";
 
-export class EventService {
+@injectable()
+export class EventService implements IEventService {
     private cloudinary: CloudinaryService;
-    constructor(private eventRepo: IEventRepository) {
+    constructor(@inject("IEventRepository") private eventRepo: IEventRepository) {
         this.cloudinary = new CloudinaryService();
     }
 

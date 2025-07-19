@@ -133,9 +133,9 @@ const FeatureRequestPage: React.FC = () => {
     return (
         <div className="flex h-screen bg-gray-50">
             <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='request a feature' />
-            <div className="flex-1 overflow-auto mt-5">
+            <div className="flex-1 overflow-auto mt-5 px-2">
                 <AdminNavbar title='Request for feature' user={user} toggleSidebar={toggleSidebar} />
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
                     <div className="max-w-4xl mx-auto">
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">

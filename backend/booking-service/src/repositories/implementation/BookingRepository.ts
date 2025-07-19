@@ -5,7 +5,9 @@ import bookingModel from "../../models/bookingModel";
 import { PaymentStatus } from "../../shared/types/Payments";
 import { IEvent } from "../../shared/types/IEvent";
 import eventModel from "../../models/eventModel";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class BookingRepository implements IBookingRepository {
     private model: Model<IBooking>;
     private eventModel = Model<IEvent>;
@@ -79,8 +81,24 @@ export class BookingRepository implements IBookingRepository {
     }
 
     async countBooking(userId: string, eventId: string): Promise<number> {
-        const doc = await this.model.countDocuments({ userId, eventId });
-        return doc;
+        const result = await bookingModel.aggregate([
+            {
+                $match: {
+                    userId: userId,
+                    eventId: new mongoose.Types.ObjectId(eventId),
+                    status: "paid"
+                }
+            },
+            { $unwind: "$tickets" },
+            {
+                $group: {
+                    _id: null,
+                    totalTickets: { $sum: "$tickets.quantity" }
+                }
+            }
+        ]);
+
+        return result[0]?.totalTickets || 0;
     }
 
     async findByEventID(id: string): Promise<IEvent | undefined> {
@@ -125,7 +143,7 @@ export class BookingRepository implements IBookingRepository {
     async getExpiredBookings(timeStamp: Date): Promise<IBooking[]> {
         const bookings = await this.model.find({
             status: "pending",
-            expiresAt: {$lte: timeStamp}
+            expiresAt: { $lte: timeStamp }
         });
         return bookings.map(d => d.toJSON());
     }

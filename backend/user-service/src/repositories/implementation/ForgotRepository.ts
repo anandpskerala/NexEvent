@@ -2,7 +2,9 @@ import { IForgotRequest } from "../../shared/types/IForgotRequest";
 import { IForgotRepository } from "../interfaces/IForgotRepository";
 import forgotModel from "../../models/forgotModel";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class ForgotRepository extends BaseRepository<IForgotRequest> implements IForgotRepository {
 
     constructor() {

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: booking-service
-          image: anandpskerala/booking-service:v1.0.1
+          image: anandpskerala/booking-service:v1.0.3
           ports:
             - containerPort: 5005
           envFrom:

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: message-service
-          image: anandpskerala/message-service:v1.0.5
+          image: anandpskerala/message-service:v1.0.6
           ports:
             - containerPort: 5004
           envFrom:

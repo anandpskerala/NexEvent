@@ -2,7 +2,9 @@ import { Model } from "mongoose";
 import { IPaymentRepository } from "../interfaces/IPaymentRepository";
 import { IPayment } from "../../shared/types/IPayment";
 import paymentModel from "../../models/paymentModel";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class PaymentRepository implements IPaymentRepository {
     private model: Model<IPayment>;
 

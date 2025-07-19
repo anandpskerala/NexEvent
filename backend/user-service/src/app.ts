@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import "./containers";
 import express, { Application } from "express";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db";

@@ -6,10 +6,12 @@ import logger from "../../shared/utils/logger";
 import { ICategoryRepository } from "../../repositories/interfaces/ICategoryRepository";
 import { ICategoryService } from "../interfaces/ICategoryService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class CategoryService implements ICategoryService {
     private cloudinary: CloudinaryService;
-    constructor(private categoryRepo: ICategoryRepository) {
+    constructor(@inject("ICategoryRepository") private categoryRepo: ICategoryRepository) {
         this.cloudinary = new CloudinaryService();
     }
 

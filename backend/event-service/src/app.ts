@@ -1,4 +1,6 @@
 import express, { Application } from "express";
+import "reflect-metadata";
+import "./containers";
 import connectDB from "./config/connectDB";
 import routes from "./routes";
 import logger from "./shared/utils/logger";

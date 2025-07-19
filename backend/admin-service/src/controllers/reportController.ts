@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
 import { IReportService } from "../services/interfaces/IReportService";
+import { inject, injectable } from "tsyringe";
 
+
+@injectable()
 export class ReportController {
-    constructor(private reportService: IReportService) {}
+    constructor(@inject("IReportService") private reportService: IReportService) {}
 
     public createReport = async (req: Request, res: Response): Promise<void> => {
         const {userId, reportType, reportedBy, description, evidence} = req.body;

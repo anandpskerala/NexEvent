@@ -12,16 +12,18 @@ import { PaymentReturnType, RPayReturnType, StripeReturnType, WalletReturnType }
 import { IPaymentService } from "../interfaces/IPaymentService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import mongoose from "mongoose";
+import { inject, injectable } from "tsyringe";
 
 
+@injectable()
 export class PaymentService implements IPaymentService {
     private stripe: Stripe;
     private razorpay: RPay;
 
     constructor(
-        private repo: IPaymentRepository, 
-        private walletRepo: IWalletRepository, 
-        private bookingRepo: IBookingRepository
+        @inject("IPaymentRepository") private repo: IPaymentRepository, 
+        @inject("IWalletRepository") private walletRepo: IWalletRepository, 
+        @inject("IBookingRepository") private bookingRepo: IBookingRepository
     ) {
         this.razorpay = new RPay({
             key_id: config.payment.razorpayID,

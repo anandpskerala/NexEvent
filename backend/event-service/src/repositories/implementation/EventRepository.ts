@@ -6,7 +6,9 @@ import eventModel from "../../models/eventModel";
 import savedEventsModel from "../../models/savedEventsModel";
 import { ITicket } from "../../shared/types/ITicket";
 import { deleteCache, getCache, setCache } from "../../shared/utils/cache";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class EventRepository implements IEventRepository {
     private model: Model<IEvent>;
     private savedModel: Model<ISavedEvents>;

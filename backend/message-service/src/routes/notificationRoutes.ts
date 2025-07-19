@@ -1,13 +1,10 @@
 import { Router } from "express";
-import { NotificationRepository } from "../repositories/implementation/NotificationRepository";
-import { NotificationService } from "../services/implementation/notificationService";
 import { NotificationController } from "../controllers/notificationController";
+import { container } from "../containers";
 
 const router = Router();
 
-const notificationRepo = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepo);
-const controller = new NotificationController(notificationService);
+const controller = container.resolve(NotificationController);
 
 router.get("/stream/:id", controller.notificationStream);
 router.get("/all/:id", controller.getAllNotifications);

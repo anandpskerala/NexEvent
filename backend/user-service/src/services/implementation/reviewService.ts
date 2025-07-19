@@ -1,13 +1,15 @@
-import { ReviewRepository } from "../../repositories/implementation/ReviewRepository";
+import { inject, injectable } from "tsyringe";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { IReview } from "../../shared/types/IReview";
 import { ReviewPaginationType, ReviewType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { IReviewService } from "../interfaces/IReviewService";
+import { IReviewRepository } from "../../repositories/interfaces/IReviewRepository";
 
+@injectable()
 export class ReviewService implements IReviewService {
-    constructor(private reviewRepo: ReviewRepository) { }
+    constructor(@inject("IReviewRepository") private reviewRepo: IReviewRepository) { }
 
     public async createReview(data: IReview): Promise<ReviewType> {
         try {

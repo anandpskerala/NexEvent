@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { GroupBy } from "../shared/types/RevenueAnalytics";
 import { IAnalyticService } from "../services/interfaces/IAnalyticService";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class AnalyticsController {
-    constructor(private analyticService: IAnalyticService) {
+    constructor(@inject("IAnalyticService") private analyticService: IAnalyticService) {
 
     }
 

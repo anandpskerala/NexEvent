@@ -3,9 +3,11 @@ import { INotificationService } from "../services/interfaces/INotificationServic
 import { HttpResponse } from "../shared/constants/httpResponse";
 import logger from "../shared/utils/logger";
 import { addClient, broadcastInit, removeClient } from "../shared/utils/sseManager";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class NotificationController {
-    constructor(private notificationService: INotificationService) { }
+    constructor(@inject("INotificationService") private notificationService: INotificationService) { }
 
     public notificationStream = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
@@ -18,6 +20,7 @@ export class NotificationController {
             res.setHeader("Content-Type", "text/event-stream");
             res.setHeader("Cache-Control", "no-cache");
             res.setHeader("Connection", "keep-alive");
+            res.flushHeaders?.();
 
             addClient(id, res);
 
@@ -26,6 +29,11 @@ export class NotificationController {
 
             req.on("close", () => {
                 logger.info(`SSE disconnected for user: ${id}`);
+                removeClient(id);
+            });
+
+            req.on("aborted", () => {
+                logger.info(`Client aborted connection for user: ${id}`);
                 removeClient(id);
             });
 

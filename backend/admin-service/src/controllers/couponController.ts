@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import { ICouponService } from "../services/interfaces/ICouponService";
+import { inject, injectable } from "tsyringe";
 
-
+@injectable()
 export class CouponController {
-    constructor(private couponService: ICouponService) { }
+    constructor(@inject("ICouponService") private couponService: ICouponService) { }
 
     public createCoupon = async (req: Request, res: Response): Promise<void> => {
         const { couponCode, couponName, description, discount, startDate, endDate, minAmount, maxAmount } = req.body;

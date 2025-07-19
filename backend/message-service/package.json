@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "axios": "^1.9.0",
+    "cors": "^2.8.5",
     "joi": "^17.13.3",
     "kafkajs": "^2.2.4",
     "livekit-server-sdk": "^2.13.0",
@@ -36,6 +37,8 @@
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
     "redis": "^5.5.6",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.10.0",
     "uuid": "^11.1.0"
   }
 }

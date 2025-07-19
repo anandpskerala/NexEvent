@@ -1,3 +1,4 @@
+import { inject, injectable } from "tsyringe";
 import kafka from "../../kafka";
 import { KafkaProducer } from "../../kafka/producer";
 import { TOPICS } from "../../kafka/topics";
@@ -10,9 +11,10 @@ import { ReportPaginationType, ReportReturnType } from "../../shared/types/Retur
 import logger from "../../shared/utils/logger";
 import { IReportService } from "../interfaces/IReportService";
 
+@injectable()
 export class ReportService implements IReportService {
     private producer: KafkaProducer;
-    constructor(private repo: IReportRepository) {
+    constructor(@inject("IReportRepository") private repo: IReportRepository) {
         this.producer = new KafkaProducer(kafka);
      }
 

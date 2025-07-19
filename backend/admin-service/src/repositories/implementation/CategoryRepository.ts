@@ -2,9 +2,10 @@ import categoryModel from "../../models/categoryModel";
 import { ICategory } from "../../shared/types/ICategory";
 import { ICategoryRepository } from "../interfaces/ICategoryRepository";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class CategoryRepository extends BaseRepository<ICategory> implements ICategoryRepository {
-
     constructor() {
         super(categoryModel);
     }

@@ -9,11 +9,16 @@ import { IRequestService } from "../interfaces/IRequestService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO } from "../../shared/mappers/userMapper";
 import { toRequestDTO, toRequestsDTO } from "../../shared/mappers/requestMapper";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class RequestService implements IRequestService {
     private cloudinary: CloudinaryService;
 
-    constructor(private requestRepo: IRequestRepository, private userRepo: IUserRepository) {
+    constructor(
+        @inject("IRequestRepository") private requestRepo: IRequestRepository, 
+        @inject("IUserRepository") private userRepo: IUserRepository
+    ) {
         this.cloudinary = new CloudinaryService();
     }
 

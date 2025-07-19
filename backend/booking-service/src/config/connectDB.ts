@@ -11,7 +11,11 @@ const connectDB = async () => {
 
         await mongoose.connect(config.db.mongoURI);
     } catch (error) {
-        logger.error("MongoDB connection error: ", error)
+        if (error instanceof Error) {
+            logger.error("Booking MongoDB connection error: ", error.message);
+        } else {
+            logger.error("Booking MongoDB connection error: ", String(error));
+        }
     }
 }
 

@@ -14,12 +14,14 @@ import { config } from "../../config";
 import { PaymentMethod, PaymentStatus } from "../../shared/types/Payments";
 import { fetchUsers } from "../../shared/utils/getUsers";
 import mongoose from 'mongoose';
+import { inject, injectable } from 'tsyringe';
 
+@injectable()
 export class BookingService implements IBookingService {
     constructor(
-        private repo: IBookingRepository,
-        private paymentRepo: IPaymentRepository,
-        private walletRepo: IWalletRepository
+        @inject("IBookingRepository") private repo: IBookingRepository,
+        @inject("IPaymentRepository") private paymentRepo: IPaymentRepository,
+        @inject("IWalletRepository") private walletRepo: IWalletRepository
     ) { }
 
 
@@ -31,6 +33,7 @@ export class BookingService implements IBookingService {
             const eventId = typeof data.eventId === 'string' ? data.eventId : data.eventId.id as string;
 
             const count = await this.repo.countBooking(data.userId, eventId);
+            console.log(count);
             if (count > config.maxTicketLimit) {
                 await session.abortTransaction();
                 return {

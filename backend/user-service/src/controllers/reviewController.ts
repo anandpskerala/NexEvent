@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { Types } from "mongoose";
 import { IReviewService } from "../services/interfaces/IReviewService";
+import { inject, injectable } from "tsyringe";
 
+
+@injectable()
 export class ReviewController {
-    constructor(private reviewService: IReviewService) {}
+    constructor(@inject("IReviewService") private reviewService: IReviewService) {}
 
     public addReview = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;

@@ -2,7 +2,9 @@ import { Model } from "mongoose";
 import { IRequestRepository } from "../interfaces/IRequestRepository";
 import { AllIRequests, IRequests } from "../../shared/types/IRequests";
 import requestModel from "../../models/requestModel";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class RequestRepository implements IRequestRepository {
     private readonly model: Model<IRequests>;
 

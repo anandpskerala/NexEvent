@@ -3,7 +3,9 @@ import { IReviewRepository } from "../interfaces/IReviewRepository";
 import { AllReviews, IReview } from "../../shared/types/IReview";
 import reviewModel from "../../models/reviewModel";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class ReviewRepository extends BaseRepository<IReview> implements IReviewRepository {
     constructor() {
         super(reviewModel);

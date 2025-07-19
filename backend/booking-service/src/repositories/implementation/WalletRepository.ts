@@ -2,7 +2,9 @@ import { Model } from "mongoose";
 import { IWalletRepository } from "../interfaces/IWalletRepository";
 import { IWallet } from "../../shared/types/IWallet";
 import walletModel from "../../models/walletModel";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class WalletRepository implements IWalletRepository {
     private model: Model<IWallet>;
 

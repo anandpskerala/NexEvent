@@ -1,11 +1,14 @@
+import { inject, injectable } from "tsyringe";
 import { INotificationRepository } from "../../repositories/interfaces/INotificationRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { UnreadPaginationType, UnreadReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
+import { INotificationService } from "../interfaces/INotificationService";
 
-export class NotificationService {
-    constructor(private repo: INotificationRepository) {}
+@injectable()
+export class NotificationService implements INotificationService {
+    constructor(@inject("INotificationRepository") private repo: INotificationRepository) {}
 
     public async getUnreads(userId: string): Promise<UnreadReturnType> {
         try {

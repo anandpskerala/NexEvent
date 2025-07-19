@@ -4,10 +4,15 @@ import { TOPICS } from "../kafka/topics";
 import { UserProducer } from "../kafka/producer/userProducer";
 import { IUserService } from "../services/interfaces/IUserService";
 import { UserDTO } from "../shared/dtos/userDTO";
+import { inject, injectable } from "tsyringe";
 
 
+@injectable()
 export class UserController {
-    constructor(public userService: IUserService, private producer: UserProducer<UserDTO>) {}
+    constructor(
+        @inject("IUserService") public userService: IUserService, 
+        @inject("UserProducer") private producer: UserProducer<UserDTO>
+    ) {}
 
     public getUser = async (req: Request, res: Response): Promise<void> => {
         const id = req.params.id;

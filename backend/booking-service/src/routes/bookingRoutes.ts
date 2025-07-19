@@ -1,20 +1,13 @@
 import { Router } from "express";
-import { BookingRepository } from "../repositories/implementation/BookingRepository";
-import { PaymentRepository } from "../repositories/implementation/PaymentRepository";
-import { WalletRepository } from "../repositories/implementation/WalletRepository";
-import { BookingService } from "../services/implementation/bookingService";
 import { BookingController } from "../controllers/bookingController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { validate } from "../middlewares/validate";
 import { bookingSchema, failedBookingSchema } from "../shared/validators/bookingSchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const bookingRepo = new BookingRepository();
-const paymentRepo = new PaymentRepository();
-const walletRepo = new WalletRepository();
-const bookingService = new BookingService(bookingRepo, paymentRepo, walletRepo);
-const bookingController = new BookingController(bookingService);
+const bookingController = container.resolve(BookingController);
 
 router.post("/booking", validate(bookingSchema), bookingController.create);
 router.get("/booking/:id", bookingController.getBooking);

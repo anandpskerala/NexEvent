@@ -4,11 +4,15 @@ import { UserProducer } from "../kafka/producer/userProducer";
 import { TOPICS } from "../kafka/topics";
 import { IAuthService } from "../services/interfaces/IAuthService";
 import { UserDTO } from "../shared/dtos/userDTO";
+import { inject, injectable } from "tsyringe";
 
 
-
+@injectable()
 export class AuthController {
-    constructor(private authService: IAuthService, private producer: UserProducer<UserDTO>) { }
+    constructor(
+        @inject("IAuthService") private authService: IAuthService, 
+        @inject("UserProducer") private producer: UserProducer<UserDTO>
+    ) { }
 
     public loginController = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;

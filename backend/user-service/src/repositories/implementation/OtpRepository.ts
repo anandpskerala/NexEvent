@@ -2,7 +2,9 @@ import { IOtpRepository } from '../interfaces/IOtpRepository';
 import { IOtp } from '../../shared/types/IOtp';
 import redis from '../../config/redisClient';
 import { v4 as uuid } from 'uuid';
+import { injectable } from 'tsyringe';
 
+@injectable()
 export class OtpRepository implements IOtpRepository {
     private readonly TTL_SECONDS = 5 * 60;
     private getKey(userId: string): string {

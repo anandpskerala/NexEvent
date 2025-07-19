@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { IBooking } from "../shared/types/IBooking";
 import { IBookingService } from "../services/interfaces/IBookingService";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class BookingController {
-    constructor(private bookingService: IBookingService) { }
+    constructor(@inject("IBookingService") private bookingService: IBookingService) { }
 
     public create = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;

@@ -1,13 +1,10 @@
 import { Router } from "express";
-import { AnalyticsRepository } from "../repositories/implementation/AnalyticsRepository";
-import { AnalyticService } from "../services/implementation/analyticService";
 import { AnalyticsController } from "../controllers/analyticsController";
+import { container } from "../containers";
 
 const router = Router();
 
-const analyticsRepo = new AnalyticsRepository();
-const analyticService = new AnalyticService(analyticsRepo);
-const analyticsController = new AnalyticsController(analyticService);
+const analyticsController = container.resolve(AnalyticsController)
 
 router.get("/analytics/revenue", analyticsController.getRevenueReports);
 router.get("/analytics/topselling", analyticsController.getTopSellingReports);

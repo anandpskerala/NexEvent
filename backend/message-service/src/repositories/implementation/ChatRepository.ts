@@ -6,7 +6,9 @@ import { ChatRoom } from "../../shared/types/ChatRoom";
 import messageModel from "../../models/messageModel";
 import chatRoomModel from "../../models/chatRoomModel";
 import { BaseRepository } from "../BaseRepository";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class ChatRepository extends BaseRepository<Message> implements IChatRepository {
     private chatRoom: Model<ChatRoom>;
 
