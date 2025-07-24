@@ -15,6 +15,7 @@ spec:
       containers:
         - name: admin-service
           image: anandpskerala/admin-service:v1.0.5
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5002
           envFrom:
@@ -42,6 +43,7 @@ kind: Service
 metadata:
   name: admin-service
 spec:
+  type: ClusterIP
   selector:
     app: admin-service
   ports:

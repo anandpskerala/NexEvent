@@ -14,7 +14,8 @@ spec:
     spec:
       containers:
         - name: booking-service
-          image: anandpskerala/booking-service:v1.0.3
+          image: anandpskerala/booking-service:v1.0.5
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5005
           envFrom:
@@ -42,6 +43,7 @@ kind: Service
 metadata:
   name: booking-service
 spec:
+  type: ClusterIP
   selector:
     app: booking-service
   ports:

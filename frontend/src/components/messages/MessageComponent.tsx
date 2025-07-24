@@ -39,6 +39,7 @@ export const MessageComponent = ({ user, selected }: { user: User; selected: Use
     });
   };
 
+  
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];

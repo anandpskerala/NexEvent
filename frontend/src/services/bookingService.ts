@@ -202,7 +202,7 @@ export const getUserBookings = async (userId: string, page: number, limit: numbe
 
 
 export const getWalletDetails = async (userId: string) => {
-    const res = await axiosInstance.get(`/event/payment/wallet/${userId}`);
+    const res = await axiosInstance.get(`/bookings/payment/wallet/${userId}`);
     return res.data;
 }
 

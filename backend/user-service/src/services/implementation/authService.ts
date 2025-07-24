@@ -103,8 +103,6 @@ export class AuthService implements IAuthService {
                 authProvider: "email"
             });
 
-            console.log(user)
-
             const otpNumber = this.authUtils.generateOtp();
             await this.otpRepo.create({
                 userId: user.id,

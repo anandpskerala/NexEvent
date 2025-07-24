@@ -15,6 +15,7 @@ spec:
       containers:
         - name: api-gateway
           image: anandpskerala/api-gateway:v1.0.2
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
           envFrom:

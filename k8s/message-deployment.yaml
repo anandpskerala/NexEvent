@@ -15,6 +15,7 @@ spec:
       containers:
         - name: message-service
           image: anandpskerala/message-service:v1.0.6
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5004
           envFrom:
@@ -42,6 +43,7 @@ kind: Service
 metadata:
   name: message-service
 spec:
+  type: ClusterIP
   selector:
     app: message-service
   ports:

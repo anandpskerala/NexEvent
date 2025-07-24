@@ -252,7 +252,7 @@ export class BookingService implements IBookingService {
     public async getOrganizerBookings(userId: string, search: string, page: number, limit: number): Promise<BookingPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const events = await this.repo.getAllEvents({ userId }, skip, 0);
+            const events = await this.repo.getAllEvents({ userId: String(userId) }, skip, 0);
             const eventIds = events.map(event => event.id);
 
             if (eventIds.length === 0) {

@@ -15,6 +15,7 @@ spec:
       containers:
         - name: event-service
           image: anandpskerala/event-service:v1.0.6
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5003
           envFrom:
@@ -42,6 +43,7 @@ kind: Service
 metadata:
   name: event-service
 spec:
+  type: ClusterIP
   selector:
     app: event-service
   ports:
