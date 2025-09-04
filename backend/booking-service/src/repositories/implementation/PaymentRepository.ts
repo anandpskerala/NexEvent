@@ -1,4 +1,4 @@
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { IPaymentRepository } from "../interfaces/IPaymentRepository";
 import { IPayment } from "../../shared/types/IPayment";
 import paymentModel from "../../models/paymentModel";
@@ -30,8 +30,8 @@ export class PaymentRepository implements IPaymentRepository {
         return doc?.toJSON();
     }
 
-    async changeStatus(bookingId: string, status: string): Promise<IPayment | undefined> {
-        const doc = await this.model.findOneAndUpdate({bookingId}, {$set: {status}}, {new: true});
+    async changeStatus(bookingId: string, status: string, session?: mongoose.ClientSession): Promise<IPayment | undefined> {
+        const doc = await this.model.findOneAndUpdate({bookingId}, {$set: {status}}, {new: true, session});
         return doc?.toJSON();
     }
 

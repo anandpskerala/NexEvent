@@ -5,8 +5,9 @@ import { ISavedEvents } from "../../shared/types/ISavedEvents";
 import eventModel from "../../models/eventModel";
 import savedEventsModel from "../../models/savedEventsModel";
 import { ITicket } from "../../shared/types/ITicket";
-import { deleteCache, getCache, setCache } from "../../shared/utils/cache";
+import { deleteCache, deleteCacheByPrefix, getCache, setCache } from "../../shared/utils/cache";
 import { injectable } from "tsyringe";
+import { generateQueryKey } from "../../shared/utils/cacheCrypto";
 
 @injectable()
 export class EventRepository implements IEventRepository {
@@ -20,7 +21,7 @@ export class EventRepository implements IEventRepository {
 
     async createEvent(event: IEvent): Promise<IEvent> {
         const doc = await this.model.create(event);
-        await deleteCache(`events:all`);
+        await deleteCacheByPrefix("events:");
         return doc.toJSON();
     }
 
@@ -44,7 +45,7 @@ export class EventRepository implements IEventRepository {
 
     async createTicket(id: string, currency: string, entryType: string, showQuantity: boolean, refunds: boolean, tickets: ITicket[]): Promise<void> {
         await this.model.updateOne({ _id: id }, { $set: { currency, entryType, showQuantity, refunds, tickets } });
-        await deleteCache(`events:${id}`);
+        await deleteCacheByPrefix("events:");
     }
 
     async getEvent(id: string): Promise<IEvent | undefined> {
@@ -69,7 +70,7 @@ export class EventRepository implements IEventRepository {
     }
 
     async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]> {
-        const cacheKey = `events:${JSON.stringify({ query, skip, limit, sortFilter })}`;
+        const cacheKey = `events:${generateQueryKey({query, skip, limit, sortFilter})}`//`events:${JSON.stringify({ query, skip, limit, sortFilter })}`;
         const cachedEvent = await getCache<IEvent[]>(cacheKey);
         if (cachedEvent) {     
             return cachedEvent;
@@ -104,7 +105,7 @@ export class EventRepository implements IEventRepository {
 
     async updateEvent(id: string, event: Partial<IEvent>): Promise<void> {
         await this.model.updateOne({ _id: id }, { $set: { ...event } });
-        await deleteCache(`events:${id}`);
+        await deleteCacheByPrefix("events:");
     }
 
     async checkStock(eventId: string, ticketId: string, stock: number): Promise<boolean> {
@@ -128,7 +129,7 @@ export class EventRepository implements IEventRepository {
                 $inc: { "tickets.$.quantity": -quantity }
             }
         );
-        await deleteCache(`events:${eventId}`);
+        await deleteCacheByPrefix("events:");
     }
 
     async getSavedEvent(eventId: string, userId: string): Promise<ISavedEvents | undefined> {

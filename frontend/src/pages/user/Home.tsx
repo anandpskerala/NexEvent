@@ -50,7 +50,7 @@ const Home = () => {
 
       try {
         const [eventRes, nearbyEvent, categoryRes] = await Promise.all([
-          getEventList("", 1, "", 8),
+          getEventList("", 1, "", 4),
           getNearbyEvents(location?.lat as number, location?.lng as number),
           getCategories("", 1, 10),
         ]);

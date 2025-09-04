@@ -52,7 +52,7 @@ const EventPage = () => {
     const fetchRequest = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await getEventList(debouncedSearch, page, user?.id as string, 10);
+            const res = await getEventList(debouncedSearch, page, user?.id as string, 10, true);
             if (res) {
                 setEvents(res.events);
                 setPage(Number(res.page));

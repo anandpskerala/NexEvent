@@ -26,7 +26,7 @@ export const removeSaveEvent = async (id: string) => {
 
 export const cancelEventService = async (eventId: string) => {
     try {
-        const res = await axiosInstance.put(`/event/booking/${eventId}`);
+        const res = await axiosInstance.put(`/bookings/booking/${eventId}`);
         if (res.data) {
             toast.success(res.data.message);
         }
@@ -96,6 +96,7 @@ export const getEventList = async (
     page: number = 1, 
     userId: string = "", 
     limit: number = 10,
+    isOrganizer: boolean = false,
     category: string = "",
     eventType: string = "",
     eventStatus: string = "",
@@ -104,7 +105,7 @@ export const getEventList = async (
     sortBy: string = "createdAt"
 ) => {
     try {
-        const res = await axiosInstance.get(`/event/all?search=${search}&page=${page}&userId=${userId}&limit=${limit}&category=${category}&eventType=${eventType}&eventStatus=${eventStatus}&startDate=${startDate}&endDate=${endDate}&sortBy=${sortBy}`);
+        const res = await axiosInstance.get(`/event/all?search=${search}&page=${page}&userId=${userId}&limit=${limit}&category=${category}&eventType=${eventType}&eventStatus=${eventStatus}&startDate=${startDate}&endDate=${endDate}&sortBy=${sortBy}&isOrganizer=${isOrganizer}`);
         return res.data;
     } catch (error) {
         console.error(error);

@@ -32,10 +32,10 @@ export class BookingRepository implements IBookingRepository {
         }
     }
 
-    async cancelBooking(bookingId: string) {
+    async cancelBooking(bookingId: string, session?: mongoose.ClientSession) {
         await this.update(bookingId, {
             status: 'cancelled'
-        })
+        }, session)
     }
 
     async getBookingWithQuery(query: FilterQuery<IBooking>, skip: number, limit: number): Promise<{ items: IBooking[]; total: number; }> {
@@ -62,8 +62,8 @@ export class BookingRepository implements IBookingRepository {
         return doc[0].toJSON();
     }
 
-    async update(id: string, item: Partial<IBooking>): Promise<void> {
-        await this.model.updateOne({ _id: id }, { $set: item });
+    async update(id: string, item: Partial<IBooking>, session?: mongoose.ClientSession): Promise<void> {
+        await this.model.updateOne({ _id: id }, { $set: item }, {session});
     }
 
     async delete(id: string): Promise<void> {
@@ -120,8 +120,8 @@ export class BookingRepository implements IBookingRepository {
     }
 
 
-    async updateEvent(id: string, event: Partial<IEvent>): Promise<void> {
-        await this.eventModel.updateOne({ _id: id }, { $set: { ...event } });
+    async updateEvent(id: string, event: Partial<IEvent>, session?: mongoose.mongo.ClientSession): Promise<void> {
+        await this.eventModel.updateOne({ _id: id }, { $set: { ...event } }, {session});
     }
 
     async getAllEvents(query: FilterQuery<IEvent>, skip: number, limit: number, sortFilter?: Record<string, SortOrder>): Promise<IEvent[]> {

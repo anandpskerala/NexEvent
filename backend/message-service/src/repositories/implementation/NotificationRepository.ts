@@ -11,11 +11,7 @@ export class NotificationRepository extends BaseRepository<INotification> implem
     constructor() {
         super(notificationModel);
     }
-    
-    // async create(notification: INotification): Promise<INotification> {
-    //     const doc = await this.model.create(notification);
-    //     return doc.toJSON();
-    // }
+
 
     async getUnreadByUser(userId: string): Promise<INotification[]> {
         const docs = (await this.model.find({ userId, read: false })).map(doc => doc.toJSON());
@@ -34,7 +30,6 @@ export class NotificationRepository extends BaseRepository<INotification> implem
         ])
 
         const notifications = docs.map(doc => doc.toJSON());
-
         return {
             notifications,
             total

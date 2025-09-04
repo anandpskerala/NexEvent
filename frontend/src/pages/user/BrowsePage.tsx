@@ -163,7 +163,7 @@ const BrowsePage = () => {
         const fetchRequest = async () => {
             setLoading(true);
             try {
-                const eventRes = await getEventList(debouncedSearch, page, "", 25, payload.category, payload.eventType, payload.eventStatus, payload.startDate, payload.endDate, payload.sortBy);
+                const eventRes = await getEventList(debouncedSearch, page, "", 25, false, payload.category, payload.eventType, payload.eventStatus, payload.startDate, payload.endDate, payload.sortBy);
                 if (eventRes) {
                     setEvents(eventRes.events);
                     setPage(Number(eventRes.page));

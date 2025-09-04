@@ -53,7 +53,7 @@ export class NotificationService implements INotificationService {
     public async getAllNotification(userId: string, page: number, limit: number, isRead: boolean = true): Promise<UnreadPaginationType> {
         try {
             const offset = (page - 1) * limit;
-            const result = await this.repo.getAllNotification(userId, offset, limit, isRead)
+            const result = await this.repo.getAllNotification(userId, offset, limit, isRead);
             return {
                 message: HttpResponse.NOTIFICATION_FETCHED,
                 status: StatusCode.OK,

@@ -1,84 +1,94 @@
-import { Model } from "mongoose";
-import { IWalletRepository } from "../interfaces/IWalletRepository";
-import { IWallet } from "../../shared/types/IWallet";
-import walletModel from "../../models/walletModel";
 import { injectable } from "tsyringe";
+import mongoose, { Model, Types } from "mongoose";
+import walletModel from "../../models/walletModel";
+import { TransactionModel } from "../../models/transactionModel";
+import { IWalletRepository } from "../interfaces/IWalletRepository";
+import { IWallet, IWalletTransaction, TransactionType } from "../../shared/types/IWallet";
 
 @injectable()
 export class WalletRepository implements IWalletRepository {
-    private model: Model<IWallet>;
+    private walletModel: Model<IWallet>;
+    private transactionModel: Model<IWalletTransaction>;
 
     constructor() {
-        this.model = walletModel;
+        this.walletModel = walletModel;
+        this.transactionModel = TransactionModel;
     }
 
     public async findByUserID(userId: string): Promise<IWallet | undefined> {
-        const doc = await this.model.findOne({ userId });
+        const doc = await this.walletModel.findOne({ userId });
         return doc?.toJSON();
     }
 
     public async checkBalance(userId: string, amount: number): Promise<boolean> {
-        const exists = await this.findByUserID(userId);
-        if (!exists) return false;
-
-        if (exists.balance < amount) return false;
-        return true;
+        const wallet = await this.findByUserID(userId);
+        return wallet ? wallet.balance >= amount : false;
     }
 
-    public async debit(id: string, amount: number): Promise<string | undefined> {
-        const res = await this.model.findByIdAndUpdate(id,
-            {
-                $inc: { balance: -amount },
-                $push: {
-                    transactions: {
-                        type: "DEBIT",
-                        amount: amount,
-                        description: "Order payment"
-                    }
-                }
-            },
+    public async debit(userId: string, amount: number, description = "Order payment"): Promise<string | undefined> {
+        const wallet = await this.walletModel.findOneAndUpdate(
+            { userId, balance: { $gte: amount } },
+            { $inc: { balance: -amount } },
             { new: true }
         );
 
-        return res?.transactions[res.transactions.length - 1].id
+        if (!wallet) return undefined;
+
+        const tx = await this.transactionModel.create({
+            walletId: wallet._id,
+            type: TransactionType.DEBIT,
+            amount,
+            description,
+        });
+
+        return tx.id;
     }
 
-    public async credit(userId: string, amount: number): Promise<string | undefined> {
-        const res = await this.model.findOneAndUpdate(
-            {
-                userId
-            },
-            {
-                $inc: { balance: amount },
-                $push: {
-                    transactions: {
-                        type: "CREDIT",
-                        amount: amount,
-                        description: "Refund"
-                    }
-                }
-            },
-            { new: true }
-        );
+    public async credit(userId: string, amount: number, description = "Refund", session?: mongoose.ClientSession): Promise<string | undefined> {
+        const wallet = (await this.walletModel.findOneAndUpdate(
+            { userId },
+            { $inc: { balance: amount } },
+            { new: true, session }
+        ))?.toJSON();
 
-        return res?.transactions[res.transactions.length - 1].id
+        if (!wallet) return undefined;
+
+        const txDocs = await this.transactionModel.create([{
+            walletId: wallet.id,
+            type: TransactionType.CREDIT,
+            amount,
+            description
+        }], { session });
+
+        const tx = txDocs[0].toJSON();
+        return tx.id;
     }
 
     async create(item: Partial<IWallet>): Promise<IWallet> {
-        const doc = await this.model.create(item);
+        const doc = await this.walletModel.create(item);
         return doc.toJSON();
     }
 
     async update(id: string, item: Partial<IWallet>): Promise<void> {
-        await this.model.updateOne({_id: id}, {$set: item});
+        await this.walletModel.updateOne({ _id: id }, { $set: item });
     }
 
     async delete(id: string): Promise<void> {
-        await this.model.deleteOne({_id: id});
+        await this.walletModel.deleteOne({ _id: id });
+        await this.transactionModel.deleteMany({ walletId: id });
     }
 
     async findByID(id: string): Promise<IWallet | undefined> {
-        const doc = await this.model.findOne({_id: id});
+        const doc = await this.walletModel.findById(id);
         return doc?.toJSON();
+    }
+
+    async getTransactions(walletId: string, limit = 50, skip = 0): Promise<IWalletTransaction[]> {
+        return this.transactionModel
+            .find({ walletId: new Types.ObjectId(walletId) })
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit)
+            .lean();
     }
 }

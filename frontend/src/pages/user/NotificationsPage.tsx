@@ -60,8 +60,8 @@ const NotificationsPage = () => {
     const unreadCount = notifications.filter(n => !n.read).length;
 
     useEffect(() => {
-        const fetchRequest = async () => {
-                const res = await fetchNotifications(user?.id as string, page, 10);
+        const fetchRequest = async (read: boolean) => {
+                const res = await fetchNotifications(user?.id as string, page, 10, read);
                 if (res) {
                     setNotifications(res.notifications);
                     setPage(res.page);
@@ -69,7 +69,7 @@ const NotificationsPage = () => {
                 }
         }
 
-        fetchRequest();
+        fetchRequest(filter === 'all'? false: true);
     }, [filter, page, user?.id]);
 
 

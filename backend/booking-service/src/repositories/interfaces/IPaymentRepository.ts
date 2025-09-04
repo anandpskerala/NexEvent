@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { IPayment } from "../../shared/types/IPayment";
 
 export interface IPaymentRepository {
@@ -5,6 +6,6 @@ export interface IPaymentRepository {
     create(item: Partial<IPayment>): Promise<IPayment>;
     update(id: string, item: Partial<IPayment>): Promise<void>;
     delete(id: string): Promise<void>;
-    changeStatus(bookingId: string, status: string): Promise<IPayment | undefined>;
+    changeStatus(bookingId: string, status: string, session?: mongoose.ClientSession): Promise<IPayment | undefined>;
     upsert(bookingId: string, data: Partial<IPayment>): Promise<IPayment | undefined>;
 }

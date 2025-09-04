@@ -15,14 +15,22 @@ import { PaymentMethod, PaymentStatus } from "../../shared/types/Payments";
 import { fetchUsers } from "../../shared/utils/getUsers";
 import mongoose from 'mongoose';
 import { inject, injectable } from 'tsyringe';
+import { KafkaProducer } from '../../kafka/producer';
+import kafka from '../../kafka';
+import { INotification } from '../../shared/types/INotification';
+import { TOPICS } from '../../kafka/topics';
+import { TransactionType } from '../../shared/types/IWallet';
 
 @injectable()
 export class BookingService implements IBookingService {
+    private producer: KafkaProducer;
     constructor(
         @inject("IBookingRepository") private repo: IBookingRepository,
         @inject("IPaymentRepository") private paymentRepo: IPaymentRepository,
         @inject("IWalletRepository") private walletRepo: IWalletRepository
-    ) { }
+    ) {
+        this.producer = new KafkaProducer(kafka);
+    }
 
 
     public async createBooking(data: IBooking): Promise<BookingReturnType> {
@@ -33,7 +41,6 @@ export class BookingService implements IBookingService {
             const eventId = typeof data.eventId === 'string' ? data.eventId : data.eventId.id as string;
 
             const count = await this.repo.countBooking(data.userId, eventId);
-            console.log(count);
             if (count > config.maxTicketLimit) {
                 await session.abortTransaction();
                 return {
@@ -127,8 +134,19 @@ export class BookingService implements IBookingService {
         try {
             await this.repo.cancelBooking(bookingId);
             const doc = await this.paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
-            if (!doc?.amount && Number(doc?.amount) > 0) {
+            if (doc?.amount && Number(doc?.amount) > 0) {
                 await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
+            }
+
+            const booking = await this.repo.findByID(bookingId);
+
+            if (booking) {
+                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                    userId: booking?.userId,
+                    title: `Booking #${booking.orderId} cancelled`,
+                    type: "booking",
+                    message: `Your booking no #${booking.orderId} has been cancelled`
+                })
             }
             return {
                 message: HttpResponse.TICKETS_CANCELLED,
@@ -143,38 +161,68 @@ export class BookingService implements IBookingService {
         }
     }
 
+
     public async cancelAllBookings(eventId: string): Promise<BookingReturnType> {
-        try {
-            const bookings = await this.repo.findBookingsByEventID(eventId);
-            await this.repo.updateEvent(eventId, { status: "cancelled" })
-            if (!bookings || bookings.length === 0) {
-                return {
-                    message: HttpResponse.ALL_CANCELLED,
-                    status: StatusCode.OK
-                };
-            }
+        const MAX_RETRIES = 3;
+        let attempt = 0;
 
-            for (const booking of bookings) {
-                const bookingId = booking.id;
-                await this.repo.cancelBooking(bookingId as string);
-                const paymentDoc = await this.paymentRepo.changeStatus(bookingId as string, PaymentStatus.REFUNDED);
+        while (attempt < MAX_RETRIES) {
+            const session = await mongoose.startSession();
+            session.startTransaction();
+            try {
+                const bookings = await this.repo.findBookingsByEventID(eventId);
 
-                if (paymentDoc && paymentDoc.amount > 0) {
-                    await this.walletRepo.credit(paymentDoc.userId, paymentDoc.amount);
+                await this.repo.updateEvent(eventId, { status: "cancelled" }, session);
+
+                if (!bookings || bookings.length === 0) {
+                    await session.commitTransaction();
+                    session.endSession();
+                    return { message: HttpResponse.ALL_CANCELLED, status: StatusCode.OK };
                 }
-            }
 
-            return {
-                message: HttpResponse.ALL_CANCELLED,
-                status: StatusCode.OK
-            };
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
+                for (const booking of bookings) {
+                    await this.repo.cancelBooking(booking.id as string, session);
+
+                    const paymentDoc = await this.paymentRepo.changeStatus(
+                        booking.id as string,
+                        PaymentStatus.REFUNDED,
+                        session
+                    );
+
+                    if (paymentDoc && paymentDoc?.amount > 0) {
+                        await this.walletRepo.credit(
+                            paymentDoc.userId,
+                            paymentDoc.amount,
+                            TransactionType.REFUND,
+                            session
+                        );
+                    }
+                }
+
+                await session.commitTransaction();
+                session.endSession();
+                return { message: HttpResponse.ALL_CANCELLED, status: StatusCode.OK };
+            } catch (error) {
+                await session.abortTransaction();
+                session.endSession();
+
+                attempt++;
+
+                logger.error(`Attempt ${attempt} failed for cancelAllBookings:`, error);
+
+                if (attempt >= MAX_RETRIES) {
+                    return {
+                        message: HttpResponse.INTERNAL_SERVER_ERROR,
+                        status: StatusCode.INTERNAL_SERVER_ERROR
+                    };
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 200 * attempt));
+                return { message: HttpResponse.INTERNAL_SERVER_ERROR, status: StatusCode.INTERNAL_SERVER_ERROR };
             }
         }
+
+        return { message: HttpResponse.INTERNAL_SERVER_ERROR, status: StatusCode.INTERNAL_SERVER_ERROR };
     }
 
     public async failedBooking(bookingId: string, eventId: string, amount: number, currency: string, userId: string): Promise<BookingReturnType> {

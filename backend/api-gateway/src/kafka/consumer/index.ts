@@ -29,7 +29,8 @@ export class Consumer {
             waitForLeaders: true,
             topics: [
                 { topic: TOPICS.STOCK_UPDATED, numPartitions: 1, replicationFactor: 1 },
-                { topic: TOPICS.NEW_MESSAGE, numPartitions: 1, replicationFactor: 1 }
+                { topic: TOPICS.NEW_MESSAGE, numPartitions: 1, replicationFactor: 1 },
+                { topic: TOPICS.NOTIFICATION_CREATED, numPartitions: 1, replicationFactor: 1 }
             ]
         });
 
@@ -40,6 +41,7 @@ export class Consumer {
     public async listen(): Promise<void> {
         await this.consumer.subscribe({ topic: TOPICS.STOCK_UPDATED, fromBeginning: false });
         await this.consumer.subscribe({ topic: TOPICS.NEW_MESSAGE, fromBeginning: false });
+        await this.consumer.subscribe({ topic: TOPICS.NOTIFICATION_CREATED, fromBeginning: false });
 
         await this.consumer.run({
             autoCommit: true,
@@ -57,6 +59,10 @@ export class Consumer {
                     
                     case TOPICS.NEW_MESSAGE:
                         await this.handler.handleNewMessage(parsed);
+                        break;
+                    
+                    case TOPICS.NOTIFICATION_CREATED:
+                        await this.handler.handleNewNotification(parsed);
                         break;
 
                     default:

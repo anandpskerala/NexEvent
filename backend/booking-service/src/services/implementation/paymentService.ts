@@ -13,16 +13,21 @@ import { IPaymentService } from "../interfaces/IPaymentService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import mongoose from "mongoose";
 import { inject, injectable } from "tsyringe";
+import { KafkaProducer } from "../../kafka/producer";
+import kafka from "../../kafka";
+import { INotification } from "../../shared/types/INotification";
+import { TOPICS } from "../../kafka/topics";
 
 
 @injectable()
 export class PaymentService implements IPaymentService {
     private stripe: Stripe;
     private razorpay: RPay;
+    private producer: KafkaProducer;
 
     constructor(
-        @inject("IPaymentRepository") private repo: IPaymentRepository, 
-        @inject("IWalletRepository") private walletRepo: IWalletRepository, 
+        @inject("IPaymentRepository") private repo: IPaymentRepository,
+        @inject("IWalletRepository") private walletRepo: IWalletRepository,
         @inject("IBookingRepository") private bookingRepo: IBookingRepository
     ) {
         this.razorpay = new RPay({
@@ -32,17 +37,18 @@ export class PaymentService implements IPaymentService {
 
         this.stripe = new Stripe(config.payment.stripeSecret as string, {
             typescript: true
-        })
+        });
+        this.producer = new KafkaProducer(kafka);
     }
 
     public async createStripeOrder(
-        eventId: string, 
-        tickets: Record<string, { ticketId: string, name: string; price: number, quantity: number }>, 
-        amount: number, 
-        currency: string, 
-        promoCode: string, 
-        paymentMethod: string, 
-        bookingId: string, 
+        eventId: string,
+        tickets: Record<string, { ticketId: string, name: string; price: number, quantity: number }>,
+        amount: number,
+        currency: string,
+        promoCode: string,
+        paymentMethod: string,
+        bookingId: string,
         orderId: string
     ): Promise<StripeReturnType> {
         try {
@@ -122,7 +128,7 @@ export class PaymentService implements IPaymentService {
             const now = new Date();
             const expires = new Date(booking?.expiresAt?.toISOString() as string)
             let paymentStatus: 'pending' | 'paid' | 'failed' | 'cancelled' = 'paid';
-            
+
             if (booking?.status === PaymentStatus.PENDING && now > expires) {
                 paymentStatus = 'pending';
             }
@@ -151,6 +157,13 @@ export class PaymentService implements IPaymentService {
                     status: StatusCode.BAD_REQUEST,
                 }
             }
+
+            this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                userId: userId,
+                title: `Booking confirmed for ${event.title}`,
+                type: "booking",
+                message: `Your booking has been confirmed`
+            });
 
             return {
                 message: HttpResponse.PAYMENT_SUCCESS,
@@ -196,13 +209,13 @@ export class PaymentService implements IPaymentService {
 
 
     public async verifyRPayPayment(
-        razorpay_order_id: string, 
-        razorpay_payment_id: string, 
-        razorpay_signature: string, 
-        userId: string, 
-        eventId: string, 
-        bookingId: string, 
-        currency: string, 
+        razorpay_order_id: string,
+        razorpay_payment_id: string,
+        razorpay_signature: string,
+        userId: string,
+        eventId: string,
+        bookingId: string,
+        currency: string,
         amount: number
     ): Promise<PaymentReturnType> {
         try {
@@ -252,6 +265,13 @@ export class PaymentService implements IPaymentService {
                         await this.bookingRepo.updateTickets(event.id?.toString() as string, bookedTicket.ticketId, bookedTicket.quantity);
                     }
                 }
+
+                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                    userId: userId,
+                    title: `Booking confirmed for ${event.title}`,
+                    type: "booking",
+                    message: `Your booking has been confirmed`
+                })
                 return {
                     message: HttpResponse.PAYMENT_SUCCESS,
                     status: StatusCode.OK,
@@ -274,10 +294,10 @@ export class PaymentService implements IPaymentService {
     }
 
     public async pay(
-        userId: string, 
-        eventId: string, 
-        currency: string, 
-        amount: number, 
+        userId: string,
+        eventId: string,
+        currency: string,
+        amount: number,
         bookingId: string
     ): Promise<PaymentReturnType> {
         try {
@@ -337,6 +357,13 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
+            this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                userId: userId,
+                title: `Booking confirmed for ${event.title}`,
+                type: "booking",
+                message: `Your booking has been confirmed`
+            })
+
             return {
                 message: HttpResponse.PAYMENT_SUCCESS,
                 status: StatusCode.OK,
@@ -359,20 +386,25 @@ export class PaymentService implements IPaymentService {
                 return {
                     message: HttpResponse.WALLET_DOESNT_EXISTS,
                     status: StatusCode.BAD_REQUEST
-                }
+                };
             }
+            const transactions = await this.walletRepo.getTransactions(wallet.id as string);
 
             return {
                 message: HttpResponse.WALLER_FETCHED,
                 status: StatusCode.OK,
-                wallet
-            }
+                wallet: {
+                    ...wallet,
+                    transactions
+                }
+            };
         } catch (error) {
-            logger.error(error)
+            logger.error(error);
             return {
                 message: HttpResponse.INTERNAL_SERVER_ERROR,
                 status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+            };
         }
     }
+
 }

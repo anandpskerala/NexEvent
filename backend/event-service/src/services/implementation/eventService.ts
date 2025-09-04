@@ -93,7 +93,7 @@ export class EventService implements IEventService {
                 ...event,
                 isSaved: saved ? true : false
             }
-            
+
             return {
                 message: HttpResponse.FETCHED_EVENT,
                 status: StatusCode.OK,
@@ -109,10 +109,9 @@ export class EventService implements IEventService {
     }
 
 
-    public async getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string): Promise<EventPaginationType> {
+    public async getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string, isOrganizer?: boolean): Promise<EventPaginationType> {
         try {
             const filter: FilterQuery<IEvent> = {};
-
             if (search?.trim()) {
                 filter.$or = [
                     { title: { $regex: search.trim(), $options: 'i' } },
@@ -126,10 +125,16 @@ export class EventService implements IEventService {
 
             if (eventStatus) {
                 filter.status = eventStatus;
+            } else {
+                filter.status = "upcoming";
             }
 
             if (eventType) {
                 filter.eventType = eventType;
+            }
+
+            if (isOrganizer === true) {
+                filter.userId = userId;
             }
 
             let sortFilter: Record<string, SortOrder> = { createdAt: -1 };

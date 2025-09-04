@@ -109,7 +109,7 @@ export const AdminSideBar: React.FC<{sidebarCollapsed: boolean, section: string}
             <AdminSidebarItem 
               icon={<BellIcon />} 
               text="Notifications" 
-              href="/admin/notifications" 
+              href="/notifications" 
               collapsed={sidebarCollapsed} 
               active={section === "notifications"} 
             />

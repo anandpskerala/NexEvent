@@ -1,14 +1,19 @@
-import redisClient from "../../../config/redis";
-import { NotificationRepository } from "../../../repositories/implementation/NotificationRepository";
+import kafka from "../..";
+import { INotificationRepository } from "../../../repositories/interfaces/INotificationRepository";
 import { INotification } from "../../../shared/types/INotfication";
+import { KafkaProducer } from "../../producer";
+import { TOPICS } from "../../topics";
 
 export class ConsumerHandler {
-    constructor(private notificationRepository: NotificationRepository) {}
+    private producer: KafkaProducer;
+    constructor(private notificationRepository: INotificationRepository) {
+        this.producer = new KafkaProducer(kafka);
+    }
 
     async handleNewNotification(data: INotification) {
         if (data) {
             const notification = await this.notificationRepository.create(data);
-            redisClient.publish(`notifications:${notification.userId}`, JSON.stringify(notification));
+            this.producer.sendData<INotification>(TOPICS.NOTIFICATION_CREATED, notification);
         }
     }
 }

@@ -1,32 +1,6 @@
 import mongoose, { Schema, Types } from "mongoose";
-import { IWallet, IWalletTransaction } from "../shared/types/IWallet";
+import { IWallet } from "../shared/types/IWallet";
 
-const transactionSchema = new Schema<IWalletTransaction>({
-    type: {
-        type: String,
-        enum: ['CREDIT', 'DEBIT', 'REFUND'],
-        required: true
-    },
-    amount: {
-        type: Number,
-        required: true
-    },
-    description: {
-        type: String
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    }
-});
-transactionSchema.set('toJSON', {
-    virtuals: true,
-    versionKey: false,
-    transform: (_doc, ret: Partial<IWalletTransaction> & { _id?: Types.ObjectId }) => {
-        ret.id = ret._id?.toString();
-        delete ret._id;
-    }
-});
 
 const schema = new Schema<IWallet>({
     userId: {
@@ -38,10 +12,6 @@ const schema = new Schema<IWallet>({
         type: Number,
         default: 0
     },
-    transactions: {
-        type: [transactionSchema],
-        default: []
-    }
 }, {
     timestamps: true
     

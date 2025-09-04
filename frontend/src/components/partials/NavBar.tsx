@@ -37,7 +37,7 @@ export const NavBar: React.FC<NavBarProps> = ({ isLogged = false, name = "guest"
     };
 
     const handleMarkAllRead = () => {
-        markAllAsRead(user?.id as string);
+        markAllAsRead();
     };
 
     useEffect(() => {
