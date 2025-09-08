@@ -5,30 +5,30 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class RequestController {
-    constructor(@inject("IRequestService") private request: IRequestService) {};
+    constructor(@inject("IRequestService") private _request: IRequestService) {};
 
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.params.id;
         const { organization, website, reason, documents } = req.body;
-        const result = await this.request.createRequest({userId, organization, website, reason, documents});
+        const result = await this._request.createRequest({userId, organization, website, reason, documents});
         res.status(result.status).json({message: result.message});
     }
 
     public getRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.params.id;
-        const result = await this.request.getRequest(userId);
+        const result = await this._request.getRequest(userId);
         res.status(result.status).json({message: result.message, request: result.request});
     }
 
     public deleteRequest = async (req: Request, res: Response): Promise<void> => {
         const reqId = req.params.id;
-        const result = await this.request.deleteRequest(reqId);
+        const result = await this._request.deleteRequest(reqId);
         res.status(result.status).json({message: result.message});
     }
 
     public getAllRequests = async (req: Request, res: Response): Promise<void> => {
         const { page = 1, limit = 10 } = req.query;
-        const result = await this.request.getAllRequests(Number(page), Number(limit));
+        const result = await this._request.getAllRequests(Number(page), Number(limit));
         res.status(result.status).json({requests: result.requests, page: result.page, pages: result.pages, total: result.total})
     }
 
@@ -36,7 +36,7 @@ export class RequestController {
         const userId = req.params.id
         const { action, rejectionReason } = req.body;
 
-        const result = await this.request.updateRequest(userId, action, rejectionReason);
+        const result = await this._request.updateRequest(userId, action, rejectionReason);
         res.status(result.status).json({message: result.message});
     }
 }

@@ -1,5 +1,4 @@
 import { StatusCode } from "../../shared/constants/statusCode";
-import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IRequest } from "../../shared/types/IRequest";
 import { UserReturnType, RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
@@ -10,17 +9,15 @@ import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO } from "../../shared/mappers/userMapper";
 import { toRequestDTO, toRequestsDTO } from "../../shared/mappers/requestMapper";
 import { inject, injectable } from "tsyringe";
+import { ICloudinaryService } from "../interfaces/ICloudinaryService";
 
 @injectable()
 export class RequestService implements IRequestService {
-    private cloudinary: CloudinaryService;
-
     constructor(
-        @inject("IRequestRepository") private requestRepo: IRequestRepository, 
-        @inject("IUserRepository") private userRepo: IUserRepository
-    ) {
-        this.cloudinary = new CloudinaryService();
-    }
+        @inject("IRequestRepository") private _requestRepo: IRequestRepository, 
+        @inject("IUserRepository") private _userRepo: IUserRepository,
+        @inject("ICloudinaryService") private _cloudinary: ICloudinaryService
+    ) {}
 
     public async createRequest(data: Partial<IRequest>): Promise<RequestReturnType> {
         try {
@@ -38,7 +35,7 @@ export class RequestService implements IRequestService {
                 }
             }
 
-            const existing = await this.requestRepo.findByUserID(data.userId.toString());
+            const existing = await this._requestRepo.findByUserID(data.userId.toString());
             if (existing) {
                 return {
                     status: StatusCode.BAD_REQUEST,
@@ -46,7 +43,7 @@ export class RequestService implements IRequestService {
                 }
             }
 
-            await this.requestRepo.create(data);
+            await this._requestRepo.create(data);
             return {
                 status: StatusCode.CREATED,
                 message: HttpResponse.REQUEST_SENT
@@ -70,7 +67,7 @@ export class RequestService implements IRequestService {
                 }
             }
 
-            const request = await this.requestRepo.findByUserID(userId);
+            const request = await this._requestRepo.findByUserID(userId);
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.REQUEST_FETCHED,
@@ -94,7 +91,7 @@ export class RequestService implements IRequestService {
                 };
             }
 
-            const request = await this.requestRepo.findByID(reqId);
+            const request = await this._requestRepo.findByID(reqId);
             if (!request) {
                 return {
                     message: HttpResponse.REQUEST_DOESNT_EXISTS,
@@ -103,10 +100,10 @@ export class RequestService implements IRequestService {
             }
 
             if (request.documents) {
-                this.cloudinary.deleteImage(request.documents);
+                this._cloudinary.deleteImage(request.documents);
             }
 
-            await this.requestRepo.delete(request.id as string);
+            await this._requestRepo.delete(request.id as string);
             return {
                 message: HttpResponse.REAPPLY,
                 status: StatusCode.OK
@@ -123,8 +120,8 @@ export class RequestService implements IRequestService {
     public async getAllRequests(page: number, limit: number): Promise<RequestPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const total = await this.requestRepo.countDocs();
-            const requests = await this.requestRepo.getRequests(skip, limit);
+            const total = await this._requestRepo.countDocs();
+            const requests = await this._requestRepo.getRequests(skip, limit);
             return {
                 message: HttpResponse.REQUEST_FETCHED,
                 status: StatusCode.OK,
@@ -151,19 +148,19 @@ export class RequestService implements IRequestService {
                 }
             }
 
-            const request = await this.requestRepo.findByUserID(userId);
+            const request = await this._requestRepo.findByUserID(userId);
             if (!request) {
                 return {
                     message: HttpResponse.REQUEST_DOESNT_EXISTS,
                     status: StatusCode.NOT_FOUND
                 }
             }
-            await this.requestRepo.updateRequest(userId, action, rejectionReason);
+            await this._requestRepo.updateRequest(userId, action, rejectionReason);
             if (action === "accepted") {
-                await this.userRepo.addRole(userId, "organizer");
-                await this.userRepo.update(userId, {organizerId: request.id});
+                await this._userRepo.addRole(userId, "organizer");
+                await this._userRepo.update(userId, {organizerId: request.id});
             }
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
 
             return {
                 message: `Request ${action}`,

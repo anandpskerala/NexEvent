@@ -4,7 +4,7 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class RequestController {
-    constructor(@inject("IRequestService") private requestService: IRequestService) {}
+    constructor(@inject("IRequestService") private _requestService: IRequestService) {}
 
     public createRequest = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
@@ -19,19 +19,19 @@ export class RequestController {
             useCase,
             additionalInfo
         }
-        const result = await this.requestService.createRequest(data);
+        const result = await this._requestService.createRequest(data);
         res.status(result.status).json({message: result.message, request: result.request});
     }
 
     public getRequest = async (req: Request, res: Response): Promise<void> => {
         const {id} = req.params;
-        const result = await this.requestService.getRequest(id);
+        const result = await this._requestService.getRequest(id);
         res.status(result.status).json({message: result.message, request: result.request});
     }
 
     public getRequests = async (req: Request, res: Response): Promise<void> => {
         const { page = 1, limit = 10 } = req.query;
-        const result = await this.requestService.getAllRequest(Number(page), Number(limit));
+        const result = await this._requestService.getAllRequest(Number(page), Number(limit));
         res.status(result.status).json({
             message: result.message,
             total: result.total,
@@ -44,12 +44,12 @@ export class RequestController {
     public updateRequest = async (req: Request, res: Response): Promise<void> => {
         const {id} = req.params;
         const { status } = req.body;
-        const result = await this.requestService.updateRequest(id, status);
+        const result = await this._requestService.updateRequest(id, status);
         res.status(result.status).json({message: result.message});
     }
 
     public deleteRequest = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const result = await this.requestService.deleteRequest(id);
+        const result = await this._requestService.deleteRequest(id);
         res.status(result.status).json({message: result.message});
     }}

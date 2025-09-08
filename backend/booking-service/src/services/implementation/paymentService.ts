@@ -13,32 +13,30 @@ import { IPaymentService } from "../interfaces/IPaymentService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import mongoose from "mongoose";
 import { inject, injectable } from "tsyringe";
-import { KafkaProducer } from "../../kafka/producer";
-import kafka from "../../kafka";
 import { INotification } from "../../shared/types/INotification";
 import { TOPICS } from "../../kafka/topics";
+import { IKafkaProducer } from "../../kafka/producer/IKafkaProducer";
 
 
 @injectable()
 export class PaymentService implements IPaymentService {
-    private stripe: Stripe;
-    private razorpay: RPay;
-    private producer: KafkaProducer;
+    private _stripe: Stripe;
+    private _razorpay: RPay;
 
     constructor(
         @inject("IPaymentRepository") private repo: IPaymentRepository,
         @inject("IWalletRepository") private walletRepo: IWalletRepository,
-        @inject("IBookingRepository") private bookingRepo: IBookingRepository
+        @inject("IBookingRepository") private bookingRepo: IBookingRepository,
+        @inject("IKafkaProducer") private _producer: IKafkaProducer
     ) {
-        this.razorpay = new RPay({
+        this._razorpay = new RPay({
             key_id: config.payment.razorpayID,
             key_secret: config.payment.razorpaySecret
         });
 
-        this.stripe = new Stripe(config.payment.stripeSecret as string, {
+        this._stripe = new Stripe(config.payment.stripeSecret as string, {
             typescript: true
         });
-        this.producer = new KafkaProducer(kafka);
     }
 
     public async createStripeOrder(
@@ -66,7 +64,7 @@ export class PaymentService implements IPaymentService {
                 }));
 
 
-            const order = await this.stripe.checkout.sessions.create({
+            const order = await this._stripe.checkout.sessions.create({
                 payment_method_types: ["card"],
                 mode: "payment",
                 line_items: lineItems,
@@ -109,7 +107,7 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
-            const session = await this.stripe.checkout.sessions.retrieve(sessionId);
+            const session = await this._stripe.checkout.sessions.retrieve(sessionId);
 
             if (session.payment_status != "paid") {
                 return {
@@ -158,7 +156,7 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
-            this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+            this._producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                 userId: userId,
                 title: `Booking confirmed for ${event.title}`,
                 type: "booking",
@@ -192,7 +190,7 @@ export class PaymentService implements IPaymentService {
                 payment_capture: 1
             };
 
-            const order = await this.razorpay.orders.create(options);
+            const order = await this._razorpay.orders.create(options);
             return {
                 message: HttpResponse.PAYMENT_INITIATED,
                 status: StatusCode.CREATED,
@@ -266,7 +264,7 @@ export class PaymentService implements IPaymentService {
                     }
                 }
 
-                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                this._producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                     userId: userId,
                     title: `Booking confirmed for ${event.title}`,
                     type: "booking",
@@ -357,7 +355,7 @@ export class PaymentService implements IPaymentService {
                 }
             }
 
-            this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+            this._producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                 userId: userId,
                 title: `Booking confirmed for ${event.title}`,
                 type: "booking",

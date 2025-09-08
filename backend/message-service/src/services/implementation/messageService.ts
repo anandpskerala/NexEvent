@@ -2,8 +2,6 @@ import axios from "axios";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { config } from "../../config";
 import { Message } from "../../shared/types/Message";
-import { KafkaProducer } from "../../kafka/producer";
-import kafka from "../../kafka";
 import { TOPICS } from "../../kafka/topics";
 import redisClient from "../../config/redis";
 import { IUser } from "../../shared/types/IUser";
@@ -14,18 +12,20 @@ import { MessagePaginationType, MessageReturnType, UserReturnType } from "../../
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { IMessageService } from "../interfaces/IMessageService";
 import { inject, injectable } from "tsyringe";
+import { IKafkaProducer } from "../../kafka/producer/IKafkaProducer";
 
 
 @injectable()
 export class MessageService implements IMessageService {
-    private producer: KafkaProducer;
-    constructor(@inject("IChatRepository") private repo: IChatRepository) {
-        this.producer = new KafkaProducer(kafka);
+    constructor(
+        @inject("IChatRepository") private _repo: IChatRepository,
+        @inject("IKafkaProducer") private _producer: IKafkaProducer
+    ) {
     }
 
     public async sendMessage(data: Message): Promise<MessageReturnType> {
         try {
-            const message = await this.repo.sendMessage(data);
+            const message = await this._repo.sendMessage(data);
             const unreadKey = `unread:${data.receiver}:${data.sender}`;
             await redisClient.incr(unreadKey);
             await redisClient.expire(unreadKey, 24 * 60 * 60);
@@ -36,7 +36,7 @@ export class MessageService implements IMessageService {
                 message: "New message from a user"
             }
             redisClient.publish(`notifications:${testNoti.userId}`, JSON.stringify(testNoti));
-            this.producer.sendData<Message>(TOPICS.NEW_MESSAGE, message);
+            this._producer.sendData<Message>(TOPICS.NEW_MESSAGE, message);
             return {
                 message: HttpResponse.MESSAGE_SENT,
                 status: StatusCode.CREATED,
@@ -60,7 +60,7 @@ export class MessageService implements IMessageService {
                 }
             }
 
-            await this.repo.markAsRead(userId, peerId);
+            await this._repo.markAsRead(userId, peerId);
             const unreadKey = `unread:${userId}:${peerId}`;
             await redisClient.set(unreadKey, 0);
             return {
@@ -78,7 +78,7 @@ export class MessageService implements IMessageService {
 
     public async getInteractedChats(userId: string): Promise<UserReturnType> {
         try {
-            const ids = await this.repo.getInteractions(userId);
+            const ids = await this._repo.getInteractions(userId);
             if (ids.length === 0) {
                 return {
                     message: HttpResponse.NO_INTERACTIONS,
@@ -95,7 +95,7 @@ export class MessageService implements IMessageService {
                     const key = `unread:${userId}:${user.id}`;
                     const count = await redisClient.get(key);
 
-                    const lastMessage = await this.repo.getLastMessage(userId, user.id as string);
+                    const lastMessage = await this._repo.getLastMessage(userId, user.id as string);
                     return {
                         ...user,
                         unreadCount: parseInt(count || "0", 10),
@@ -121,7 +121,7 @@ export class MessageService implements IMessageService {
 
     public async getMessages(peer1: string, peer2: string, limit: number, offset: number): Promise<MessagePaginationType> {
         try {
-            const messages = await this.repo.getMessage(peer1, peer2, limit, offset);
+            const messages = await this._repo.getMessage(peer1, peer2, limit, offset);
             return {
                 message: HttpResponse.MESSAGES_FETCHED,
                 status: StatusCode.OK,

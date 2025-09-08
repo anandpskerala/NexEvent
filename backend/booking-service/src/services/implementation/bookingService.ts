@@ -15,21 +15,19 @@ import { PaymentMethod, PaymentStatus } from "../../shared/types/Payments";
 import { fetchUsers } from "../../shared/utils/getUsers";
 import mongoose from 'mongoose';
 import { inject, injectable } from 'tsyringe';
-import { KafkaProducer } from '../../kafka/producer';
-import kafka from '../../kafka';
 import { INotification } from '../../shared/types/INotification';
 import { TOPICS } from '../../kafka/topics';
 import { TransactionType } from '../../shared/types/IWallet';
+import { IKafkaProducer } from '../../kafka/producer/IKafkaProducer';
 
 @injectable()
 export class BookingService implements IBookingService {
-    private producer: KafkaProducer;
     constructor(
-        @inject("IBookingRepository") private repo: IBookingRepository,
-        @inject("IPaymentRepository") private paymentRepo: IPaymentRepository,
-        @inject("IWalletRepository") private walletRepo: IWalletRepository
+        @inject("IBookingRepository") private _repo: IBookingRepository,
+        @inject("IPaymentRepository") private _paymentRepo: IPaymentRepository,
+        @inject("IWalletRepository") private _walletRepo: IWalletRepository,
+        @inject("IKafkaProducer") private _producer: IKafkaProducer
     ) {
-        this.producer = new KafkaProducer(kafka);
     }
 
 
@@ -40,7 +38,7 @@ export class BookingService implements IBookingService {
 
             const eventId = typeof data.eventId === 'string' ? data.eventId : data.eventId.id as string;
 
-            const count = await this.repo.countBooking(data.userId, eventId);
+            const count = await this._repo.countBooking(data.userId, eventId);
             if (count > config.maxTicketLimit) {
                 await session.abortTransaction();
                 return {
@@ -50,7 +48,7 @@ export class BookingService implements IBookingService {
             }
 
             for (const ticketData of data.tickets) {
-                const isAvailable = await this.repo.checkStock(eventId, ticketData.ticketId, ticketData.quantity);
+                const isAvailable = await this._repo.checkStock(eventId, ticketData.ticketId, ticketData.quantity);
                 if (!isAvailable) {
                     await session.abortTransaction();
                     return {
@@ -60,10 +58,10 @@ export class BookingService implements IBookingService {
                 }
             }
 
-            const event = await this.repo.findByEventID(eventId);
+            const event = await this._repo.findByEventID(eventId);
             if (event?.tickets) {
                 for (const bookedTicket of data.tickets) {
-                    await this.repo.updateTickets(eventId, bookedTicket.ticketId, -bookedTicket.quantity, session);
+                    await this._repo.updateTickets(eventId, bookedTicket.ticketId, -bookedTicket.quantity, session);
                 }
             }
 
@@ -72,7 +70,7 @@ export class BookingService implements IBookingService {
                 data.status = "paid";
             }
 
-            const booking = await this.repo.create(data, session);
+            const booking = await this._repo.create(data, session);
 
             await session.commitTransaction();
             return {
@@ -95,7 +93,7 @@ export class BookingService implements IBookingService {
 
     public async getBooking(id: string): Promise<BookingReturnType> {
         try {
-            const booking = await this.repo.findBooking(id);
+            const booking = await this._repo.findBooking(id);
             return {
                 message: HttpResponse.BOOKING_FETCHED,
                 status: StatusCode.OK,
@@ -113,7 +111,7 @@ export class BookingService implements IBookingService {
     public async getBookings(userId: string, page: number, limit: number): Promise<BookingPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const res = await this.repo.findByUserID(userId, skip, limit);
+            const res = await this._repo.findByUserID(userId, skip, limit);
             return {
                 message: HttpResponse.BOOKING_FETCHED,
                 status: StatusCode.OK,
@@ -132,16 +130,16 @@ export class BookingService implements IBookingService {
 
     public async cancelBooking(bookingId: string): Promise<BookingReturnType> {
         try {
-            await this.repo.cancelBooking(bookingId);
-            const doc = await this.paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
+            await this._repo.cancelBooking(bookingId);
+            const doc = await this._paymentRepo.changeStatus(bookingId, PaymentStatus.REFUNDED);
             if (doc?.amount && Number(doc?.amount) > 0) {
-                await this.walletRepo.credit(doc?.userId as string, doc?.amount as number);
+                await this._walletRepo.credit(doc?.userId as string, doc?.amount as number);
             }
 
-            const booking = await this.repo.findByID(bookingId);
+            const booking = await this._repo.findByID(bookingId);
 
             if (booking) {
-                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                this._producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                     userId: booking?.userId,
                     title: `Booking #${booking.orderId} cancelled`,
                     type: "booking",
@@ -170,9 +168,9 @@ export class BookingService implements IBookingService {
             const session = await mongoose.startSession();
             session.startTransaction();
             try {
-                const bookings = await this.repo.findBookingsByEventID(eventId);
+                const bookings = await this._repo.findBookingsByEventID(eventId);
 
-                await this.repo.updateEvent(eventId, { status: "cancelled" }, session);
+                await this._repo.updateEvent(eventId, { status: "cancelled" }, session);
 
                 if (!bookings || bookings.length === 0) {
                     await session.commitTransaction();
@@ -181,16 +179,16 @@ export class BookingService implements IBookingService {
                 }
 
                 for (const booking of bookings) {
-                    await this.repo.cancelBooking(booking.id as string, session);
+                    await this._repo.cancelBooking(booking.id as string, session);
 
-                    const paymentDoc = await this.paymentRepo.changeStatus(
+                    const paymentDoc = await this._paymentRepo.changeStatus(
                         booking.id as string,
                         PaymentStatus.REFUNDED,
                         session
                     );
 
                     if (paymentDoc && paymentDoc?.amount > 0) {
-                        await this.walletRepo.credit(
+                        await this._walletRepo.credit(
                             paymentDoc.userId,
                             paymentDoc.amount,
                             TransactionType.REFUND,
@@ -227,7 +225,7 @@ export class BookingService implements IBookingService {
 
     public async failedBooking(bookingId: string, eventId: string, amount: number, currency: string, userId: string): Promise<BookingReturnType> {
         try {
-            const booked = await this.paymentRepo.upsert(bookingId, {
+            const booked = await this._paymentRepo.upsert(bookingId, {
                 userId,
                 eventId,
                 bookingId,
@@ -238,7 +236,7 @@ export class BookingService implements IBookingService {
             });
 
             if (booked) {
-                await this.repo.update(booked.bookingId, {
+                await this._repo.update(booked.bookingId, {
                     paymentId: booked.id,
                     paymentMethod: booked.method,
                     status: PaymentStatus.FAILED
@@ -261,7 +259,7 @@ export class BookingService implements IBookingService {
 
     public async downloadTicket(bookingId: string, res: Response): Promise<void> {
         try {
-            const booking = await this.repo.findBooking(bookingId);
+            const booking = await this._repo.findBooking(bookingId);
             if (!booking) {
                 res.status(StatusCode.NOT_FOUND).json({
                     message: HttpResponse.BOOKING_NOT_FOUND
@@ -300,7 +298,7 @@ export class BookingService implements IBookingService {
     public async getOrganizerBookings(userId: string, search: string, page: number, limit: number): Promise<BookingPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const events = await this.repo.getAllEvents({ userId: String(userId) }, skip, 0);
+            const events = await this._repo.getAllEvents({ userId: String(userId) }, skip, 0);
             const eventIds = events.map(event => event.id);
 
             if (eventIds.length === 0) {
@@ -311,7 +309,7 @@ export class BookingService implements IBookingService {
                 }
             }
 
-            const bookings = await this.repo.getBookingWithQuery({
+            const bookings = await this._repo.getBookingWithQuery({
                 $or: [
                     { orderId: { $regex: search, $options: "i" } }
                 ], eventId: { $in: eventIds }
@@ -343,7 +341,7 @@ export class BookingService implements IBookingService {
 
     public async verifyBooking(userId: string, eventId: string): Promise<BookingVerifyType> {
         try {
-            const result = await this.repo.findWithUserIdAndEventId(userId, eventId);
+            const result = await this._repo.findWithUserIdAndEventId(userId, eventId);
             if (!result) {
                 return {
                     message: HttpResponse.NOT_PURCHASED,
@@ -367,7 +365,7 @@ export class BookingService implements IBookingService {
 
     public async checkCouponApplied(promoCode: string, userId: string): Promise<BookingReturnType> {
         try {
-            const applied = await this.repo.checkForPromoCode(promoCode, userId);
+            const applied = await this._repo.checkForPromoCode(promoCode, userId);
             if (!applied) {
                 return {
                     message: HttpResponse.COUPON_ELIGIBLE,

@@ -1,6 +1,4 @@
 import { inject, injectable } from "tsyringe";
-import kafka from "../../kafka";
-import { KafkaProducer } from "../../kafka/producer";
 import { TOPICS } from "../../kafka/topics";
 import { IRequestRepository } from "../../repositories/interfaces/IRequestRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
@@ -10,18 +8,20 @@ import { IRequests } from "../../shared/types/IRequests";
 import { RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
 import { fetchUsers } from "../../shared/utils/getUsers";
 import logger from "../../shared/utils/logger";
+import { IKafkaProducer } from "../../kafka/producer/IKafkaProducer";
 
 
 @injectable()
 export class RequestService {
-    private producer: KafkaProducer;
-    constructor(@inject("IRequestRepository") private repo: IRequestRepository) {
-        this.producer = new KafkaProducer(kafka);
+    constructor(
+        @inject("IRequestRepository") private _repo: IRequestRepository,
+        @inject("IKafkaProducer") private _producer: IKafkaProducer
+    ) {
     }
 
     public async createRequest(data: IRequests): Promise<RequestReturnType> {
         try {
-            const request = await this.repo.createRequest(data);
+            const request = await this._repo.createRequest(data);
             return {
                 message: HttpResponse.REQUEST_CREATED,
                 status: StatusCode.CREATED,
@@ -38,7 +38,7 @@ export class RequestService {
 
     public async getRequest(id: string): Promise<RequestReturnType> {
         try {
-            const request = await this.repo.getRequest(id);
+            const request = await this._repo.getRequest(id);
             return {
                 message: HttpResponse.REQUEST_FETCHED,
                 status: StatusCode.OK,
@@ -56,7 +56,7 @@ export class RequestService {
     public async getAllRequest(page: number, limit: number): Promise<RequestPaginationType> {
         try {
             const skip = (page - 1) * limit;
-            const result = await this.repo.getRequests(skip, limit);
+            const result = await this._repo.getRequests(skip, limit);
             const userIds = result.items.map((item: IRequests) => item.userId);
 
             const userMap = await fetchUsers(userIds);
@@ -87,9 +87,9 @@ export class RequestService {
 
     public async updateRequest(id: string, status: "pending" | "accepted" | "rejected"): Promise<RequestReturnType> {
         try {
-            const request = await this.repo.updateRequest(id, { status });
+            const request = await this._repo.updateRequest(id, { status });
             if (request) {
-                this.producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
+                this._producer.sendData<INotification>(TOPICS.NEW_NOTIFICATION, {
                     userId: request.userId,
                     title: "Feature request update",
                     type: "request",
@@ -118,7 +118,7 @@ export class RequestService {
                 }
             }
 
-            const res = await this.repo.deleteRequest(id);
+            const res = await this._repo.deleteRequest(id);
             if (!res) {
                 return {
                     message: HttpResponse.REQUEST_DELETION_FAILED,

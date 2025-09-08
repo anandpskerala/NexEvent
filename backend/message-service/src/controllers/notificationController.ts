@@ -7,7 +7,7 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class NotificationController {
-    constructor(@inject("INotificationService") private notificationService: INotificationService) { }
+    constructor(@inject("INotificationService") private _notificationService: INotificationService) { }
 
     public notificationStream = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
@@ -28,7 +28,7 @@ export class NotificationController {
 
             addClient(id, res);
 
-            const unread = await this.notificationService.getUnreads(id);
+            const unread = await this._notificationService.getUnreads(id);
             broadcastInit(id, unread.result);
 
             req.on("close", () => {
@@ -52,14 +52,14 @@ export class NotificationController {
 
     public readAllNotifications = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const result = await this.notificationService.markAllAsRead(id);
+        const result = await this._notificationService.markAllAsRead(id);
         res.status(result.status).json({ message: result.message });
     }
 
     public getAllNotifications = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
         const { page = 1, limit = 10, isRead = 'false' } = req.query;
-        const result = await this.notificationService.getAllNotification(id, Number(page), Number(limit), isRead === 'true');
+        const result = await this._notificationService.getAllNotification(id, Number(page), Number(limit), isRead === 'true');
         res.status(result.status).json({
             message: result.message,
             notifications: result.notifications,

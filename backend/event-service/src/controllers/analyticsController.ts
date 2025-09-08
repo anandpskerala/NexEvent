@@ -5,19 +5,19 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class AnalyticsController {
-    constructor(@inject("IAnalyticService") private analyticService: IAnalyticService) {
+    constructor(@inject("IAnalyticService") private _analyticService: IAnalyticService) {
 
     }
 
     public getRevenueReports = async (req: Request, res: Response): Promise<void> => {
         const { mode = "today", organizerId = "" } = req.query;
-        const result = await this.analyticService.getBookingAnalytics(mode as GroupBy, organizerId !== "" ? organizerId as string: undefined);
+        const result = await this._analyticService.getBookingAnalytics(mode as GroupBy, organizerId !== "" ? organizerId as string: undefined);
         res.status(result.status).json({message: result.message, report: result.analytics});
     }
 
     public getTopSellingReports = async (req: Request, res: Response): Promise<void> => {
         const { mode = "today", limit = 10, organizerId = "" } = req.query;
-        const result = await this.analyticService.getTopAnalytics(mode as GroupBy, organizerId !== "" ? organizerId as string: undefined, Number(limit));
+        const result = await this._analyticService.getTopAnalytics(mode as GroupBy, organizerId !== "" ? organizerId as string: undefined, Number(limit));
         res.status(result.status).json({message: result.message, report: result.analytics});
     }
 }

@@ -10,42 +10,42 @@ import { inject, injectable } from "tsyringe";
 @injectable()
 export class AuthController {
     constructor(
-        @inject("IAuthService") private authService: IAuthService, 
-        @inject("UserProducer") private producer: UserProducer<UserDTO>
+        @inject("IAuthService") private _authService: IAuthService, 
+        @inject("UserProducer") private _producer: UserProducer<UserDTO>
     ) { }
 
     public loginController = async (req: Request, res: Response): Promise<void> => {
         const { email, password } = req.body;
-        const result = await this.authService.loginUser(email, password, res);
+        const result = await this._authService.loginUser(email, password, res);
         res.status(result.status).json({ message: result.message, user: result.user });
     };
 
     public signupController = async (req: Request, res: Response): Promise<void> => {
         const { firstName, lastName, email, password } = req.body;
-        const result = await this.authService.registerUser(firstName, lastName, email, password, res);
+        const result = await this._authService.registerUser(firstName, lastName, email, password, res);
         res.status(result.status).json({ message: result.message, user: result.user });
     }
 
 
     public logoutController = async (req: Request, res: Response): Promise<void> => {
-        const result = this.authService.logOut(res);
+        const result = this._authService.logOut(res);
         res.status(result.status).json({ message: result.message });
     }
 
     public refreshToken = async (req: Request, res: Response): Promise<void> => {
         const token = req.cookies.refreshToken;
-        const result = await this.authService.refreshToken(token, res);
+        const result = await this._authService.refreshToken(token, res);
         res.status(result.status).json({ message: result.message });
     }
 
 
     public googleAUth = async (req: Request, res: Response): Promise<void> => {
         const { firstName, lastName, email, googleId } = req.body;
-        const result = await this.authService.googleAuth(firstName, lastName, email, googleId, res);
+        const result = await this._authService.googleAuth(firstName, lastName, email, googleId, res);
 
         if (result.status === StatusCode.CREATED && result.user) {
             try {
-                this.producer.sendData(TOPICS.USER_CREATED, result.user);
+                this._producer.sendData(TOPICS.USER_CREATED, result.user);
             } catch (error) {
                 console.error("Post-registration user fetch failed:", error);
             }
@@ -56,20 +56,20 @@ export class AuthController {
 
     public forgotPassword = async (req: Request, res: Response): Promise<void> => {
         const { email } = req.body;
-        const result = await this.authService.forgotPassword(email);
+        const result = await this._authService.forgotPassword(email);
         res.status(result.status).json({ message: result.message })
     }
 
     public resetPassword = async (req: Request, res: Response): Promise<void> => {
         const { requestId, newPassword } = req.body;
-        const result = await this.authService.resetPassword(requestId, newPassword);
+        const result = await this._authService.resetPassword(requestId, newPassword);
         res.status(result.status).json({ message: result.message });
     }
 
     public changePassword = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
         const { currentPassword, newPassword } = req.body;
-        const result = await this.authService.changePassword(userId as string, currentPassword, newPassword);
+        const result = await this._authService.changePassword(userId as string, currentPassword, newPassword);
         res.status(result.status).json({ message: result.message });
     }
 }

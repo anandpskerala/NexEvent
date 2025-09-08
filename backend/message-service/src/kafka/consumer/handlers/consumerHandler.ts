@@ -1,7 +1,7 @@
 import kafka from "../..";
 import { INotificationRepository } from "../../../repositories/interfaces/INotificationRepository";
 import { INotification } from "../../../shared/types/INotfication";
-import { KafkaProducer } from "../../producer";
+import { KafkaProducer } from "../../producer/kafkaProducer";
 import { TOPICS } from "../../topics";
 
 export class ConsumerHandler {

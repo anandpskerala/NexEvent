@@ -1,6 +1,5 @@
 import { FilterQuery, SortOrder, Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IEvent } from "../../shared/types/IEvent";
 import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType, StockReturnType } from "../../shared/types/ReturnType";
 import { ITicket } from "../../shared/types/ITicket";
@@ -9,19 +8,20 @@ import { IEventRepository } from "../../repositories/interfaces/IEventRepository
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { inject, injectable } from "tsyringe";
 import { IEventService } from "../interfaces/IEventService";
+import { ICloudinaryService } from "../interfaces/ICloudinaryService";
 
 @injectable()
 export class EventService implements IEventService {
-    private cloudinary: CloudinaryService;
-    constructor(@inject("IEventRepository") private eventRepo: IEventRepository) {
-        this.cloudinary = new CloudinaryService();
-    }
+    constructor(
+        @inject("IEventRepository") private eventRepo: IEventRepository,
+        @inject("ICloudinaryService") private _cloudinary: ICloudinaryService
+    ) {}
 
     public async createEvent(event: IEvent): Promise<EventReturnType> {
         try {
             const existing = await this.eventRepo.findByTitle(event.title);
             if (existing) {
-                this.cloudinary.deleteImage(event.image);
+                this._cloudinary.deleteImage(event.image);
                 return {
                     message: HttpResponse.EVENT_ALREADY_EXISTS,
                     status: StatusCode.BAD_REQUEST
@@ -268,7 +268,7 @@ export class EventService implements IEventService {
         try {
             const existing = await this.eventRepo.findByID(event.id as string);
             if (!existing) {
-                this.cloudinary.deleteImage(event.image);
+                this._cloudinary.deleteImage(event.image);
                 return {
                     message: HttpResponse.EVENT_ALREADY_EXISTS,
                     status: StatusCode.BAD_REQUEST
@@ -276,7 +276,7 @@ export class EventService implements IEventService {
             }
 
             if (existing.image !== event.image) {
-                this.cloudinary.deleteImage(existing.image);
+                this._cloudinary.deleteImage(existing.image);
             }
 
             if (!event.endDate && event.eventFormat == 'single') {

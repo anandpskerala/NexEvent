@@ -1,4 +1,3 @@
-import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { UserPaginationType, UserReturnType, UsersReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
@@ -7,18 +6,18 @@ import { HttpResponse } from "../../shared/constants/httpResponse";
 import { toUserDTO, toUsersDTO } from "../../shared/mappers/userMapper";
 import { inject, injectable } from "tsyringe";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
+import { ICloudinaryService } from "../interfaces/ICloudinaryService";
 
 @injectable()
 export class UserService implements IUserService {
-    private cloudinary: CloudinaryService;
-
-    constructor(@inject("IUserRepository") private userRepo: IUserRepository) {
-        this.cloudinary = new CloudinaryService();
-    }
+    constructor(
+        @inject("IUserRepository") private _userRepo: IUserRepository,
+        @inject("ICloudinaryService") private _cloudinary: ICloudinaryService
+    ) {}
 
     public async getAllUsers(search: string, page: number, limit: number, role?: string, status?: string, myID?: string): Promise<UserPaginationType> {
         try {
-            const result = await this.userRepo.getAllUsers(search, page, limit, role, status, myID);
+            const result = await this._userRepo.getAllUsers(search, page, limit, role, status, myID);
             return {
                 message: HttpResponse.USER_FETCHED,
                 status: StatusCode.OK,
@@ -45,7 +44,7 @@ export class UserService implements IUserService {
                 }
             }
 
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     status: StatusCode.NOT_FOUND,
@@ -75,7 +74,7 @@ export class UserService implements IUserService {
                 }
             }
 
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -106,7 +105,7 @@ export class UserService implements IUserService {
                 }
             }
 
-            let user = await this.userRepo.findByEmail(email);
+            let user = await this._userRepo.findByEmail(email);
             if (!user) {
                 return {
                     status: StatusCode.NOT_FOUND,
@@ -114,8 +113,8 @@ export class UserService implements IUserService {
                 }
             }
 
-            this.userRepo.update(user.id as string, {email, firstName, lastName, phoneNumber});
-            user = await this.userRepo.findByEmail(email);
+            this._userRepo.update(user.id as string, {email, firstName, lastName, phoneNumber});
+            user = await this._userRepo.findByEmail(email);
 
             return {
                 status: StatusCode.OK,
@@ -140,7 +139,7 @@ export class UserService implements IUserService {
                 };
             }
 
-            let user = await this.userRepo.findByID(userId);
+            let user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     status: StatusCode.NOT_FOUND,
@@ -149,10 +148,10 @@ export class UserService implements IUserService {
             }
 
             if (user.image) {
-                await this.cloudinary.deleteImage(user.image);
+                await this._cloudinary.deleteImage(user.image);
             }
 
-            await this.userRepo.updateProfileImage(userId, image)
+            await this._userRepo.updateProfileImage(userId, image)
             user = { ...user, image: image };
             return {
                 status: StatusCode.OK,
@@ -170,8 +169,8 @@ export class UserService implements IUserService {
 
     public async updateUser(email: string, firstName: string, lastName: string, phoneNumber: number, roles: string[], isBlocked: boolean): Promise<UserReturnType> {
         try {
-            await this.userRepo.updateUser(email, firstName, lastName, phoneNumber, roles, isBlocked)
-            const user = await this.userRepo.findByEmail(email);
+            await this._userRepo.updateUser(email, firstName, lastName, phoneNumber, roles, isBlocked)
+            const user = await this._userRepo.findByEmail(email);
             return {
                 message: HttpResponse.USER_UPDATED,
                 status: StatusCode.OK,
@@ -188,14 +187,14 @@ export class UserService implements IUserService {
 
     public async deleteUser(id: string): Promise<UserReturnType> {
         try {
-            const user = await this.userRepo.findByID(id);
+            const user = await this._userRepo.findByID(id);
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
                     status: StatusCode.NOT_FOUND
                 }
             }
-            await this.userRepo.delete(id);
+            await this._userRepo.delete(id);
             return {
                 message: HttpResponse.USER_DELETED,
                 status: StatusCode.OK,
@@ -219,7 +218,7 @@ export class UserService implements IUserService {
                 }
             }
 
-            const users = await this.userRepo.getBulkUsers(ids);
+            const users = await this._userRepo.getBulkUsers(ids);
             return {
                 message: HttpResponse.USER_FETCHED,
                 status: StatusCode.OK,

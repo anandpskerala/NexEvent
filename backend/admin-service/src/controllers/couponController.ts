@@ -4,11 +4,11 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class CouponController {
-    constructor(@inject("ICouponService") private couponService: ICouponService) { }
+    constructor(@inject("ICouponService") private _couponService: ICouponService) { }
 
     public createCoupon = async (req: Request, res: Response): Promise<void> => {
         const { couponCode, couponName, description, discount, startDate, endDate, minAmount, maxAmount } = req.body;
-        const result = await this.couponService.createCoupon({
+        const result = await this._couponService.createCoupon({
             couponCode,
             couponName,
             description,
@@ -23,13 +23,13 @@ export class CouponController {
 
     public getCoupon = async (req: Request, res: Response): Promise<void> => {
         const id = req.params.id;
-        const result = await this.couponService.getCouponInfo(id);
+        const result = await this._couponService.getCouponInfo(id);
         res.status(result.status).json({ message: result.message, coupon: result.coupon });
     }
 
     public getCoupons = async (req: Request, res: Response): Promise<void> => {
         const { search = "", page = 1, limit = 10 } = req.query;
-        const result = await this.couponService.getCoupons(search as string, page as number, limit as number);
+        const result = await this._couponService.getCoupons(search as string, page as number, limit as number);
         res.status(result.status).json({
             message: result.message,
             total: result.total,
@@ -43,7 +43,7 @@ export class CouponController {
     public updateCoupon = async (req: Request, res: Response): Promise<void> => {
         const id = req.params.id;
         const { couponCode, couponName, description, discount, startDate, endDate, minAmount, maxAmount, status } = req.body;
-        const result = await this.couponService.updateCoupon(id ,{
+        const result = await this._couponService.updateCoupon(id ,{
             couponCode,
             couponName,
             description,
@@ -59,7 +59,7 @@ export class CouponController {
 
     public deleteCoupon = async (req: Request, res: Response): Promise<void> => {
         const id = req.params.id;
-        const result = await this.couponService.deleteCoupon(id);
+        const result = await this._couponService.deleteCoupon(id);
         res.status(result.status).json({ message: result.message });
     }
 }

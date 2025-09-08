@@ -5,7 +5,7 @@ import { inject, injectable } from "tsyringe";
 
 @injectable()
 export class BookingController {
-    constructor(@inject("IBookingService") private bookingService: IBookingService) { }
+    constructor(@inject("IBookingService") private _bookingService: IBookingService) { }
 
     public create = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
@@ -19,20 +19,20 @@ export class BookingController {
             couponCode
         };
 
-        const result = await this.bookingService.createBooking(data);
+        const result = await this._bookingService.createBooking(data);
         res.status(result.status).json({ message: result.message, booking: result.booking });
     }
 
     public getBooking = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const result = await this.bookingService.getBooking(id);
+        const result = await this._bookingService.getBooking(id);
         res.status(result.status).json({ message: result.message, booking: result.booking });
     }
 
     public getBookings = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
         const { page, limit } = req.query;
-        const result = await this.bookingService.getBookings(id as string, Number(page), Number(limit));
+        const result = await this._bookingService.getBookings(id as string, Number(page), Number(limit));
         res.status(result.status).json(
             {
                 message: result.message,
@@ -46,32 +46,32 @@ export class BookingController {
 
     public cancelBooking = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const result = await this.bookingService.cancelBooking(id);
+        const result = await this._bookingService.cancelBooking(id);
         res.status(result.status).json({ message: result.message });
     }
 
     public cancelAllBookings = async(req: Request, res: Response): Promise<void> => {
         const {id} = req.params;
-        const result = await this.bookingService.cancelAllBookings(id);
+        const result = await this._bookingService.cancelAllBookings(id);
         res.status(result.status).json({message: result.message});
     }
 
     public failedBooking = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { eventId, bookingId, amount, currency } = req.body;
-        const result = await this.bookingService.failedBooking(bookingId, eventId, amount, currency, userId);
+        const result = await this._bookingService.failedBooking(bookingId, eventId, amount, currency, userId);
         res.status(result.status).json({message: result.message});
     }
 
     public downloadTicket = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        await this.bookingService.downloadTicket(id, res);
+        await this._bookingService.downloadTicket(id, res);
     }
 
     public getOrganizerBookings = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { search = "", page = 1, limit = 10 } = req.query;
-        const result = await this.bookingService.getOrganizerBookings(userId, search as string, Number(page), Number(limit));
+        const result = await this._bookingService.getOrganizerBookings(userId, search as string, Number(page), Number(limit));
         res.status(result.status).json(
             {
                 message: result.message,
@@ -86,14 +86,14 @@ export class BookingController {
     public checkCoupon = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { couponCode } = req.query;
-        const result = await this.bookingService.checkCouponApplied(couponCode as string, userId);
+        const result = await this._bookingService.checkCouponApplied(couponCode as string, userId);
         res.status(result.status).json({ message: result.message });
     }
 
     public verifyBooking =  async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { id } = req.params;
-        const result = await this.bookingService.verifyBooking(userId, id);
+        const result = await this._bookingService.verifyBooking(userId, id);
         res.status(result.status).json({message: result.message, verified: result.verified});
     }
 }

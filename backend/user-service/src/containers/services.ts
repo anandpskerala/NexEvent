@@ -7,6 +7,8 @@ import { IReviewService } from "../services/interfaces/IReviewService";
 import { ReviewService } from "../services/implementation/reviewService";
 import { IUserService } from "../services/interfaces/IUserService";
 import { UserService } from "../services/implementation/userService";
+import { ICloudinaryService } from "../services/interfaces/ICloudinaryService";
+import { CloudinaryService } from "../services/implementation/cloudinaryService";
 
 
 export function registerServices() {
@@ -14,4 +16,5 @@ export function registerServices() {
     container.register<IRequestService>("IRequestService", {useClass: RequestService});
     container.register<IReviewService>("IReviewService", {useClass: ReviewService});
     container.register<IUserService>("IUserService", {useClass: UserService});
+    container.register<ICloudinaryService>("ICloudinaryService", {useClass: CloudinaryService});
 }

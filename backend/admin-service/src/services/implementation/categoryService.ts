@@ -1,5 +1,4 @@
 import { StatusCode } from "../../shared/constants/statusCode";
-import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { ICategory } from "../../shared/types/ICategory";
 import { CategoryPaginationType, CategoryReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
@@ -7,13 +6,14 @@ import { ICategoryRepository } from "../../repositories/interfaces/ICategoryRepo
 import { ICategoryService } from "../interfaces/ICategoryService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { inject, injectable } from "tsyringe";
+import { ICloudinaryService } from "../interfaces/ICloudinaryService";
 
 @injectable()
 export class CategoryService implements ICategoryService {
-    private cloudinary: CloudinaryService;
-    constructor(@inject("ICategoryRepository") private categoryRepo: ICategoryRepository) {
-        this.cloudinary = new CloudinaryService();
-    }
+    constructor(
+        @inject("ICategoryRepository") private _categoryRepo: ICategoryRepository,
+        @inject("ICloudinaryService") private _cloudinary: ICloudinaryService
+    ) {}
 
     public async createCategory(name: string, description: string, image: string): Promise<CategoryReturnType> {
         try {
@@ -24,7 +24,7 @@ export class CategoryService implements ICategoryService {
                 }
             }
 
-            const existing = await this.categoryRepo.findByName(name);
+            const existing = await this._categoryRepo.findByName(name);
             if (existing) {
                 return {
                     message: HttpResponse.CATEGORY_ALREADY_EXISTS,
@@ -32,7 +32,7 @@ export class CategoryService implements ICategoryService {
                 }
             }
 
-            await this.categoryRepo.createCategory(name, description, image);
+            await this._categoryRepo.createCategory(name, description, image);
             return {
                 message: HttpResponse.CATEGORY_CREATED,
                 status: StatusCode.CREATED
@@ -55,7 +55,7 @@ export class CategoryService implements ICategoryService {
                 }
             }
 
-            const category = await this.categoryRepo.findByID(id);
+            const category = await this._categoryRepo.findByID(id);
             return {
                 message: HttpResponse.CATEGORY_FETCHED,
                 status: StatusCode.OK,
@@ -72,7 +72,7 @@ export class CategoryService implements ICategoryService {
 
     public async getCategories(name: string, page: number, limit: number): Promise<CategoryPaginationType> {
         try {
-            const result = await this.categoryRepo.findAll(name, page, limit);
+            const result = await this._categoryRepo.findAll(name, page, limit);
             return {
                 message: HttpResponse.CATEGORY_FETCHED,
                 status: StatusCode.OK,
@@ -93,7 +93,7 @@ export class CategoryService implements ICategoryService {
 
     public async updateCategory(category: ICategory): Promise<CategoryReturnType> {
         try {
-            const existing = await this.categoryRepo.findByID(category.id as string);
+            const existing = await this._categoryRepo.findByID(category.id as string);
             if (!existing) {
                 return {
                     message: HttpResponse.CATEGORY_DOESNT_EXISTS,
@@ -102,10 +102,10 @@ export class CategoryService implements ICategoryService {
             }
 
             if (existing.image !== category.image) {
-                this.cloudinary.deleteImage(existing.image);
+                this._cloudinary.deleteImage(existing.image);
             }
 
-            await this.categoryRepo.updateCategory(category);
+            await this._categoryRepo.updateCategory(category);
             return {
                 message: HttpResponse.CATEGORY_UPDATED,
                 status: StatusCode.OK
@@ -121,7 +121,7 @@ export class CategoryService implements ICategoryService {
 
     public async deleteCategory(id: string): Promise<CategoryReturnType> {
         try {
-            const existing = await this.categoryRepo.findByID(id);
+            const existing = await this._categoryRepo.findByID(id);
             if (!existing) {
                 return {
                     message: HttpResponse.CATEGORY_DOESNT_EXISTS,
@@ -129,8 +129,8 @@ export class CategoryService implements ICategoryService {
                 }
             }
 
-            await this.cloudinary.deleteImage(existing.image);
-            await this.categoryRepo.deleteCategory(id);
+            await this._cloudinary.deleteImage(existing.image);
+            await this._categoryRepo.deleteCategory(id);
             return {
                 message: HttpResponse.CATEGORY_DELETED,
                 status: StatusCode.OK

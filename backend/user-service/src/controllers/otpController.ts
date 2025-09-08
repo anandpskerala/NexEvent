@@ -9,13 +9,13 @@ import { inject, injectable } from "tsyringe";
 @injectable()
 export class OTPController {
     constructor(
-        @inject("IAuthService") private authService: IAuthService, 
-        @inject("UserProducer") private producer: UserProducer<UserDTO>
+        @inject("IAuthService") private _authService: IAuthService, 
+        @inject("UserProducer") private _producer: UserProducer<UserDTO>
     ) { }
 
     public getOtpTimer = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
-        const result = await this.authService.getOtpTimer(userId as string);
+        const result = await this._authService.getOtpTimer(userId as string);
         const data: { message: string, timeLeft?: number } = { message: result.message };
         if (result.status === StatusCode.OK) {
             data.timeLeft = result.timeLeft;
@@ -26,12 +26,12 @@ export class OTPController {
     public verifyOtp = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
         const { otp } = req.body;
-        const result = await this.authService.verifyOtp(userId as string, otp, res);
+        const result = await this._authService.verifyOtp(userId as string, otp, res);
         if (result.status === StatusCode.OK) {
 
 
             if (result.user) {
-                this.producer.sendData(TOPICS.USER_CREATED, result.user);
+                this._producer.sendData(TOPICS.USER_CREATED, result.user);
             }
         }
         res.status(result.status).json({message: result.message, user: result.user});
@@ -39,7 +39,7 @@ export class OTPController {
 
     public resendOtp = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
-        const result = await this.authService.resendOtp(userId as string);
+        const result = await this._authService.resendOtp(userId as string);
         res.status(result.status).json({message: result.message});
     }
 }

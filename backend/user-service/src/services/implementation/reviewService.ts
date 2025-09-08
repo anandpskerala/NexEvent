@@ -9,11 +9,11 @@ import { IReviewRepository } from "../../repositories/interfaces/IReviewReposito
 
 @injectable()
 export class ReviewService implements IReviewService {
-    constructor(@inject("IReviewRepository") private reviewRepo: IReviewRepository) { }
+    constructor(@inject("IReviewRepository") private _reviewRepo: IReviewRepository) { }
 
     public async createReview(data: IReview): Promise<ReviewType> {
         try {
-            const exists = await this.reviewRepo.checkExists(data.eventId, data.userId.toString());
+            const exists = await this._reviewRepo.checkExists(data.eventId, data.userId.toString());
             if (exists) {
                 return {
                     message: HttpResponse.ALREADY_RATED,
@@ -21,7 +21,7 @@ export class ReviewService implements IReviewService {
                 }
             }
 
-            await this.reviewRepo.addReview(data);
+            await this._reviewRepo.addReview(data);
             return {
                 message: HttpResponse.REVIEW_POSTED,
                 status: StatusCode.CREATED
@@ -38,7 +38,7 @@ export class ReviewService implements IReviewService {
     public async getReviews(eventId: string, page: number, limit: number): Promise<ReviewPaginationType> {
         try {
             const offset = (page - 1) * limit;
-            const res = await this.reviewRepo.getReviews(eventId, offset, limit);
+            const res = await this._reviewRepo.getReviews(eventId, offset, limit);
             return {
                 message: HttpResponse.REVIEW_FETCHED,
                 status: StatusCode.OK,
