@@ -36,3 +36,9 @@ export interface UnreadPaginationType {
     page?: number;
     pages?: number;
 }
+
+export interface ConferenceReturnType {
+    message: string;
+    status: StatusCode;
+    token?: string;
+}

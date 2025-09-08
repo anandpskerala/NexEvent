@@ -1,16 +1,14 @@
 import { Router } from "express";
 import { protectedRoute } from "../middlewares/protectedRoutes";
-import { ReportRepository } from "../repositories/implementation/ReportRepository";
-import { ReportService } from "../services/implementation/reportService";
-import { ReportController } from "../controllers/reportController";
+import { container } from "../containers";
 import { validate } from "../middlewares/validate";
 import { reportSchema } from "../shared/validators/reportSchema";
+import { ReportController } from "../controllers/reportController";
 
 const router = Router();
 
-const reportRepo = new ReportRepository();
-const reportService = new ReportService(reportRepo);
-const reportController = new ReportController(reportService);
+
+const reportController = container.resolve(ReportController);
 
 router.post("/", validate(reportSchema), reportController.createReport);
 router.put("/:id/status", protectedRoute, reportController.updateReport);

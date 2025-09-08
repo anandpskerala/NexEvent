@@ -5,20 +5,22 @@ import { ICouponRepository } from "../../repositories/interfaces/ICouponReposito
 import { CouponPaginationType, CouponReturnType } from "../../shared/types/ReturnType";
 import { ICouponService } from "../interfaces/ICouponService";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class CouponService implements ICouponService {
-    constructor(private repo: ICouponRepository) { }
+    constructor(@inject("ICouponRepository") private _repo: ICouponRepository) { }
 
     public async createCoupon(data: ICoupon): Promise<CouponReturnType> {
         try {
-            const exists = await this.repo.findByName(data.couponName);
+            const exists = await this._repo.findByName(data.couponName);
             if (exists) {
                 return {
                     message: HttpResponse.COUPON_ALREADY_EXISTS,
                     status: StatusCode.BAD_REQUEST
                 }
             }
-            const coupon = await this.repo.create(data);
+            const coupon = await this._repo.create(data);
             return {
                 message: HttpResponse.COUPON_CREATED,
                 status: StatusCode.CREATED,
@@ -35,7 +37,7 @@ export class CouponService implements ICouponService {
 
     public async getCouponInfo(couponCode: string): Promise<CouponReturnType> {
         try {
-            const coupon = await this.repo.findByCode(couponCode);
+            const coupon = await this._repo.findByCode(couponCode);
             if (!coupon) {
                 return {
                     message: HttpResponse.COUPON_DOESNT_EXISTS,
@@ -59,7 +61,7 @@ export class CouponService implements ICouponService {
 
     public async getCoupons(name: string, page: number, limit: number): Promise<CouponPaginationType> {
         try {
-            const result = await this.repo.findAll(name, page, limit);
+            const result = await this._repo.findAll(name, page, limit);
             return {
                 message: HttpResponse.COUPON_FETCHED,
                 status: StatusCode.OK,
@@ -79,7 +81,7 @@ export class CouponService implements ICouponService {
 
     public async updateCoupon(id: string, coupon: ICoupon): Promise<CouponReturnType> {
         try {
-            const existing = await this.repo.findByID(id as string);
+            const existing = await this._repo.findByID(id as string);
             if (!existing) {
                 return {
                     message: HttpResponse.COUPON_DOESNT_EXISTS,
@@ -87,7 +89,7 @@ export class CouponService implements ICouponService {
                 }
             }
 
-            await this.repo.update(existing.id as string, coupon);
+            await this._repo.update(existing.id as string, coupon);
             return {
                 message: HttpResponse.COUPON_UPDATED,
                 status: StatusCode.OK
@@ -104,7 +106,7 @@ export class CouponService implements ICouponService {
 
     public async deleteCoupon(id: string): Promise<CouponReturnType> {
             try {
-                const existing = await this.repo.findByID(id);
+                const existing = await this._repo.findByID(id);
                 if (!existing) {
                     return {
                         message: HttpResponse.COUPON_DOESNT_EXISTS,
@@ -112,7 +114,7 @@ export class CouponService implements ICouponService {
                     }
                 }
     
-                await this.repo.delete(id);
+                await this._repo.delete(id);
                 return {
                     message: HttpResponse.COUPON_DELETED,
                     status: StatusCode.OK

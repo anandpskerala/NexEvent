@@ -1,17 +1,14 @@
 import { Router } from "express";
 import { organizerRoute } from "../middlewares/organizerRoute";
 import { protectedRoute } from "../middlewares/protectedRoutes";
-import { RequestRepository } from "../repositories/implementation/RequestRepository";
-import { RequestService } from "../services/implementation/requestService";
+import { container } from "../containers";
 import { RequestController } from "../controllers/requestController";
 import { validate } from "../middlewares/validate";
 import { requestSchema } from "../shared/validators/requestSchema";
 
 const router = Router();
 
-const requestRepo = new RequestRepository();
-const requestService = new RequestService(requestRepo);
-const requestController = new RequestController(requestService);
+const requestController = container.resolve(RequestController);
 
 router.post("/", organizerRoute, validate(requestSchema), requestController.createRequest);
 router.get("/:id", requestController.getRequest);

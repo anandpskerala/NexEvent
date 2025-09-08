@@ -1,4 +1,3 @@
-import { Types } from "mongoose";
 import jwt from "jsonwebtoken";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { AuthUtils } from "../../shared/utils/authUtils";
@@ -12,20 +11,23 @@ import { IForgotRepository } from "../../repositories/interfaces/IForgotReposito
 import { IOtpRepository } from "../../repositories/interfaces/IOtpRepository";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { toUserDTO } from "../../shared/mappers/userMapper";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class AuthService implements IAuthService {
     public authUtils: AuthUtils;
     constructor(
-        private userRepo: IUserRepository,
-        private otpRepo: IOtpRepository,
-        private forgotRepo: IForgotRepository,
+        @inject("IUserRepository") private _userRepo: IUserRepository,
+        @inject("IOtpRepository") private _otpRepo: IOtpRepository,
+        @inject("IForgotRepository") private _forgotRepo: IForgotRepository,
     ) {
         this.authUtils = new AuthUtils();
     }
 
     public async loginUser(email: string, password: string, res: Response): Promise<UserReturnType> {
         try {
-            const user = await this.userRepo.findByEmail(email);
+            const user = await this._userRepo.findByEmail(email);
 
             if (!user || user.authProvider !== "email") {
                 return {
@@ -49,12 +51,13 @@ export class AuthService implements IAuthService {
                 }
             }
 
+            this.authUtils.setAuthToken(res, user.id as string, user.roles);
             if (!user.isVerified) {
-                const otp = await this.otpRepo.findOtp(user.id as string);
+                const otp = await this._otpRepo.findOtp(user.id as string);
                 if (!otp) {
                     const otpNumber = this.authUtils.generateOtp();
-                    await this.otpRepo.create({
-                        userId: new Types.ObjectId(user.id),
+                    await this._otpRepo.create({
+                        userId: user.id,
                         otp: otpNumber,
                     });
 
@@ -63,15 +66,14 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.OTP_SENT,
                     status: StatusCode.OK,
-                    user
+                    user: toUserDTO(user)
                 }
             }
 
-            this.authUtils.setAuthToken(res, user.id as string, user.roles);
             return {
                 message: HttpResponse.LOGIN_SUCCESSFUL,
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error);
@@ -84,7 +86,7 @@ export class AuthService implements IAuthService {
 
     public async registerUser(firstName: string, lastName: string, email: string, password: string, res: Response): Promise<UserReturnType> {
         try {
-            let user = await this.userRepo.findByEmail(email);
+            let user = await this._userRepo.findByEmail(email);
             if (user) {
                 return {
                     message: HttpResponse.USER_ALREADY_EXISTS,
@@ -93,7 +95,7 @@ export class AuthService implements IAuthService {
             }
 
             const hashedPassword = await this.authUtils.hashPassword(password);
-            user = await this.userRepo.create({
+            user = await this._userRepo.create({
                 firstName,
                 lastName,
                 email,
@@ -102,8 +104,8 @@ export class AuthService implements IAuthService {
             });
 
             const otpNumber = this.authUtils.generateOtp();
-            await this.otpRepo.create({
-                userId: new Types.ObjectId(user.id),
+            await this._otpRepo.create({
+                userId: user.id,
                 otp: otpNumber
             })
 
@@ -112,7 +114,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.OTP_SENT,
                 status: StatusCode.CREATED,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error);
@@ -151,7 +153,7 @@ export class AuthService implements IAuthService {
 
             const decoded = jwt.verify(token, config.jwt.refreshTokenSecret) as { userId: string };
 
-            const user = await this.userRepo.findByID(decoded.userId);
+            const user = await this._userRepo.findByID(decoded.userId);
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -169,7 +171,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.TOKEN_REFRESH,
                 status: StatusCode.OK,
-                user
+                user: toUserDTO(user)
             }
         } catch (error) {
             logger.error(error)
@@ -186,7 +188,7 @@ export class AuthService implements IAuthService {
                 lastName = " "
             }
 
-            let user = await this.userRepo.findByEmail(email);
+            let user = await this._userRepo.findByEmail(email);
             if (user) {
                 if (!user.googleId) {
                     return {
@@ -205,10 +207,10 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.LOGIN_SUCCESSFUL,
                     status: StatusCode.OK,
-                    user
+                    user: toUserDTO(user)
                 }
             } else {
-                user = await this.userRepo.create({
+                user = await this._userRepo.create({
                     firstName,
                     lastName,
                     email,
@@ -220,7 +222,7 @@ export class AuthService implements IAuthService {
                 return {
                     message: HttpResponse.SIGNUP_SUCESS,
                     status: StatusCode.CREATED,
-                    user
+                    user: toUserDTO(user)
                 }
             }
 
@@ -242,7 +244,7 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const user = await this.userRepo.findByEmail(email, "email");
+            const user = await this._userRepo.findByEmail(email, "email");
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -250,9 +252,9 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            let request = await this.forgotRepo.findByUserId(user.id as string);
+            let request = await this._forgotRepo.findByUserId(user.id as string);
             if (!request) {
-                request = await this.forgotRepo.create({ userId: new Types.ObjectId(user.id) });
+                request = await this._forgotRepo.create({ userId: user.id });
                 sendResetPasswordMail(user.email, request.requestId);
             }
 
@@ -278,7 +280,7 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const request = await this.forgotRepo.findByRequestId(requestId);
+            const request = await this._forgotRepo.findByRequestId(requestId);
             if (!request) {
                 return {
                     message: HttpResponse.REQUEST_TIMEOUT,
@@ -286,7 +288,7 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const user = await this.userRepo.findByID(String(request.userId).toString());
+            const user = await this._userRepo.findByID(String(request.userId).toString());
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -294,10 +296,10 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            await this.forgotRepo.delete(request.id);
+            await this._forgotRepo.delete(request.id);
 
             const hashedPassword = await this.authUtils.hashPassword(newPassword);
-            await this.userRepo.update(user.id as string, { password: hashedPassword });
+            await this._userRepo.update(user.id as string, { password: hashedPassword });
             return {
                 message: HttpResponse.PASS_CHANGED,
                 status: StatusCode.OK
@@ -320,7 +322,8 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const otp = await this.otpRepo.findOtp(userId);
+            const otp = await this._otpRepo.findOtp(userId);
+            console.log(otp);
             if (!otp) {
                 return {
                     message: HttpResponse.NO_OTP_FOUND,
@@ -360,14 +363,14 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const checkOtp = await this.otpRepo.findOtp(userId, otp);
+            const checkOtp = await this._otpRepo.findOtp(userId, otp);
             if (!checkOtp) {
                 return {
                     message: HttpResponse.INVALID_OTP,
                     status: StatusCode.NOT_FOUND
                 }
             }
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -375,8 +378,8 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            await this.userRepo.update(user.id as string, { isVerified: true })
-            await this.otpRepo.delete(checkOtp.id)
+            await this._userRepo.update(user.id as string, { isVerified: true })
+            await this._otpRepo.delete(checkOtp.id)
 
             const { accessToken, refreshToken } = this.authUtils.getTokens(user?.id as string, user?.roles);
             res.cookie("accessToken", accessToken, {
@@ -396,7 +399,7 @@ export class AuthService implements IAuthService {
             return {
                 message: HttpResponse.OTP_VERIFIED,
                 status: StatusCode.OK,
-                user: { ...user, isVerified: true }
+                user: toUserDTO({ ...user, isVerified: true })
             }
         } catch (error) {
             logger.error(error);
@@ -416,7 +419,7 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     message: HttpResponse.USER_NOT_FOUND,
@@ -424,13 +427,13 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const existing = await this.otpRepo.findOtp(userId);
+            const existing = await this._otpRepo.findOtp(userId);
             if (existing) {
-                await this.otpRepo.delete(existing.id);
+                await this._otpRepo.delete(existing.id);
             }
             const otpNumber = this.authUtils.generateOtp();
-            await this.otpRepo.create({
-                userId: new Types.ObjectId(user.id),
+            await this._otpRepo.create({
+                userId: user.id,
                 otp: otpNumber
             })
 
@@ -457,7 +460,7 @@ export class AuthService implements IAuthService {
                 }
             }
 
-            const user = await this.userRepo.findByID(userId);
+            const user = await this._userRepo.findByID(userId);
             if (!user) {
                 return {
                     status: StatusCode.NOT_FOUND,
@@ -489,7 +492,7 @@ export class AuthService implements IAuthService {
             }
 
             const hashedPassword = await this.authUtils.hashPassword(newPassword);
-            await this.userRepo.update(user.id as string, { password: hashedPassword });
+            await this._userRepo.update(user.id as string, { password: hashedPassword });
             return {
                 status: StatusCode.OK,
                 message: HttpResponse.PASS_CHANGED

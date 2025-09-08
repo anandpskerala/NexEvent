@@ -1,8 +1,6 @@
-import { Types } from "mongoose";
-
 export interface IForgotRequest {
   id: string;
-  userId: Types.ObjectId;
+  userId: string;
   requestId: string;
   expiry: Date
 }

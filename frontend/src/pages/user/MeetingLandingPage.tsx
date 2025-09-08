@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Star, MessageSquare, Calendar, CheckCircle, ArrowRight } from 'lucide-react';
 import type { Review } from '../../interfaces/entities/Review';
 import { useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import { formatDate } from '../../utils/stringUtils';
 import type { RootState } from '../../store';
@@ -10,6 +9,8 @@ import { useSelector } from 'react-redux';
 import { NavBar } from '../../components/partials/NavBar';
 import { toast } from 'sonner';
 import { AxiosError } from 'axios';
+import { getEventDetails } from '../../services/eventService';
+import { postReview } from '../../services/reviewService';
 
 
 const MeetingLandingPage: React.FC = () => {
@@ -65,14 +66,9 @@ const MeetingLandingPage: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            const res = await axiosInstance.post("/user/review", {
-                rating: review.rating,
-                title: review.title,
-                message: review.message,
-                eventId: id
-            });
-            if (res.data) {
-                toast.success(res.data.message);
+            const res = await postReview(id as string, review);
+            if (res) {
+                toast.success(res.message);
                 setStep('submitted');
             }
         } catch (error) {
@@ -96,13 +92,9 @@ const MeetingLandingPage: React.FC = () => {
 
     useEffect(() => {
         const fetchEvent = async (id: string) => {
-            try {
-                const res = await axiosInstance.get(`/event/event/${id}`);
-                if (res.data) {
-                    setEvent(res.data.event);
-                }
-            } catch (error) {
-                console.error(error);
+            const res = await getEventDetails(id);
+            if (res) {
+                setEvent(res.event);
             }
         }
 

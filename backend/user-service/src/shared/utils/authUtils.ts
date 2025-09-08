@@ -2,7 +2,6 @@ import { Response } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { generateToken } from "./tokenUtils";
-import { Types } from "mongoose";
 import { config } from "../../config";
 import { sendOtpMail } from "./mailer";
 
@@ -18,7 +17,7 @@ export class AuthUtils {
     }
 
     public getTokens(userId: string, roles: string[]): { accessToken: string, refreshToken: string } {
-        return generateToken(new Types.ObjectId(userId), roles);
+        return generateToken(userId, roles);
     }
 
     public sendOtp(email: string, otp: number): void {

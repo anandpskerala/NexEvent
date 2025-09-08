@@ -1,4 +1,5 @@
-import { IBookingRepository } from "../../repositories/interfaces/IBookingRepository";
+import { inject, injectable } from "tsyringe";
+import { IAnalyticsRepository } from "../../repositories/interfaces/IAnalyticsRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { AnalyticsReturnType, AnalyticsTopSellingType } from "../../shared/types/ReturnType";
@@ -6,8 +7,9 @@ import { GroupBy } from "../../shared/types/RevenueAnalytics";
 import logger from "../../shared/utils/logger";
 import { IAnalyticService } from "../interfaces/IAnalyticService";
 
+@injectable()
 export class AnalyticService implements IAnalyticService {
-    constructor(private repo: IBookingRepository) {
+    constructor(@inject("IAnalyticsRepository") private repo: IAnalyticsRepository) {
 
     }
 

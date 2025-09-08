@@ -1,23 +1,12 @@
 import { Router } from "express";
-import { UserProducer } from "../kafka/producer/userProducer";
-import { IUser } from "../shared/types/IUser";
-import { UserRepository } from "../repositories/implementation/UserRepository";
-import { OtpRepository } from "../repositories/implementation/OtpRepository";
-import { ForgotRepository } from "../repositories/implementation/ForgotRepository";
-import { AuthService } from "../services/implementation/authService";
 import { AuthController } from "../controllers/authController";
 import { validate } from "../middlewares/validate";
 import { googleAuthSchema, loginSchema, signupSchema } from "../shared/validators/authSchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const producer = new UserProducer<IUser>();
-const userRepo = new UserRepository();
-const otpRepo = new OtpRepository();
-const forgotRepo = new ForgotRepository();
-
-const authService = new AuthService(userRepo, otpRepo, forgotRepo);
-const authController = new AuthController(authService, producer);
+const authController = container.resolve(AuthController)
 
 router.post("/login", validate(loginSchema), authController.loginController);
 router.post("/register", validate(signupSchema), authController.signupController);

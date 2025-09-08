@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Calendar, Clock, Image, X } from 'lucide-react';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventFormSkeleton } from '../skeletons/EventsFormSkeleton';
 import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { APIProvider, Map, Marker } from '@vis.gl/react-google-maps';
-import { AxiosError } from 'axios';
 import { uploadToCloudinary } from '../../utils/cloudinary';
 import type { EventFormProps } from '../../interfaces/props/formProps';
 import type { EventData } from '../../interfaces/entities/FormState';
@@ -13,6 +11,8 @@ import type { Category } from '../../interfaces/entities/Category';
 import type { EventErrorState } from '../../interfaces/entities/ErrorState';
 import config from '../../config/config';
 import { validateEvent } from '../../interfaces/validators/eventValidator';
+import { getCategories } from '../../services/categoryService';
+import { eventManagement } from '../../services/eventService';
 
 
 
@@ -153,23 +153,16 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
             if (event.image && event.image instanceof File) {
                 image = await uploadToCloudinary(event.image)
             }
-            let method = axiosInstance.post;
-            let url = "/event/event";
+
             let navUrl = "/organizer/create-ticket"
             if (isEdit) {
-                method = axiosInstance.patch;
-                url = `event/event/${event.id}`;
                 navUrl = "/organizer/edit-ticket"
             }
-            const res = await method(url, { ...event, image: image, userId: user.id });
-            if (res.data) {
-                navigate(`${navUrl}/${res.data.event}`);
+            const res = await eventManagement({ ...event, image: image, userId: user.id }, isEdit);
+            if (res) {
+                navigate(`${navUrl}/${res.event}`);
             }
         } catch (error) {
-            if (error instanceof AxiosError) {
-                console.log(error.response?.data.message);
-            }
-
             if (error instanceof yup.ValidationError) {
                 const errorMap: EventErrorState = {};
                 error.inner.forEach(e => {
@@ -187,8 +180,9 @@ export const EventForm: React.FC<EventFormProps> = ({ user, initialData, isEdit 
         const fetchCategories = async () => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/admin/category`);
-                setCategories(res.data.categories);
+                const res = await getCategories("", 1, 0);
+                console.log(res);
+                setCategories(res.categories);
             } catch (error) {
                 console.error(error);
             } finally {

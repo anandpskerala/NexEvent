@@ -4,11 +4,11 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import type { RootState } from '../../store';
 import { RoomProviderWrapper } from '../../components/videoConference/RoomProviderWrapper';
 import { VideoConference } from '../../components/videoConference/VideoConference';
-import axiosInstance from '../../utils/axiosInstance';
 import { AxiosError } from 'axios';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { toast } from 'sonner';
 import { NavBar } from '../../components/partials/NavBar';
+import { verifyBookingData } from '../../services/bookingService';
 
 const VideoConferencePage = () => {
     const { id } = useParams<{ id: string }>();
@@ -21,8 +21,8 @@ const VideoConferencePage = () => {
     useEffect(() => {
         const verifyBooking = async () => {
             try {
-                const res = await axiosInstance.get(`/event/verify/booking/${id}`);
-                if (res.data?.verified) {
+                const res = await verifyBookingData(id as string);
+                if (res?.verified) {
                     setVerified(true);
                 } else {
                     setVerified(false);

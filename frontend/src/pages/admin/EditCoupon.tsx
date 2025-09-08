@@ -3,10 +3,10 @@ import type { ICoupon } from '../../interfaces/entities/Coupons';
 import type { RootState } from '../../store';
 import { useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import axiosInstance from '../../utils/axiosInstance';
 import { CouponForm } from '../../components/forms/CouponForm';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
+import { getCouponDetails } from '../../services/couponService';
 
 const EditCoupon = () => {
     const { id } = useParams();
@@ -21,9 +21,9 @@ const EditCoupon = () => {
     useEffect(() => {
         try {
             const fetchRequest = async () => {
-                const res = await axiosInstance.get(`/admin/coupon/${id}`);
-                if (res.data) {
-                    setCoupon(res.data.coupon);
+                const res = await getCouponDetails(id as string)
+                if (res) {
+                    setCoupon(res.coupon);
                 }
             }
             fetchRequest();

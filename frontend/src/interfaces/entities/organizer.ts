@@ -2,6 +2,7 @@ import type { User } from "./User";
 
 export interface OrganizerData {
     id: string;
+    user?: User;
     userId: User | string;
     organization: string;
     website: string;
@@ -14,7 +15,8 @@ export interface OrganizerData {
 
 export interface Organization {
     id: string;
-    userId: User;
+    user: User;
+    userId: string;
     organization: string;
     website?: string;
     reason: string;

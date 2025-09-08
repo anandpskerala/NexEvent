@@ -12,8 +12,6 @@ export class MessageProxy {
             proxyReqPathResolver: (req: Request): string => {
                 return req.originalUrl.replace(/^\/api\/messages/, '');
             },
-
-
             proxyReqOptDecorator: (proxyReqOpts: RequestOptions, srcReq: Request): RequestOptions => {
                 if (srcReq.headers['x-user-id']) {
                     proxyReqOpts.headers = {
@@ -34,6 +32,7 @@ export class MessageProxy {
 
             proxyErrorHandler: (err: unknown, res: Response) => {
                 logger.error('Proxy Error : ', err);
+                console.log(err)
                 res.status(StatusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal proxy error" })
             }
         })

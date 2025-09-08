@@ -1,24 +1,27 @@
 import { FilterQuery, SortOrder, Types } from "mongoose";
 import { StatusCode } from "../../shared/constants/statusCode";
-import { CloudinaryService } from "../../shared/utils/cloudinary";
 import { IEvent } from "../../shared/types/IEvent";
-import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType } from "../../shared/types/ReturnType";
+import { EventPaginationType, EventReturnType, EventsReturnType, RawReturnType, SavedEventPaginationType, SavedEventReturnType, StockReturnType } from "../../shared/types/ReturnType";
 import { ITicket } from "../../shared/types/ITicket";
 import logger from "../../shared/utils/logger";
 import { IEventRepository } from "../../repositories/interfaces/IEventRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { inject, injectable } from "tsyringe";
+import { IEventService } from "../interfaces/IEventService";
+import { ICloudinaryService } from "../interfaces/ICloudinaryService";
 
-export class EventService {
-    private cloudinary: CloudinaryService;
-    constructor(private eventRepo: IEventRepository) {
-        this.cloudinary = new CloudinaryService();
-    }
+@injectable()
+export class EventService implements IEventService {
+    constructor(
+        @inject("IEventRepository") private eventRepo: IEventRepository,
+        @inject("ICloudinaryService") private _cloudinary: ICloudinaryService
+    ) {}
 
     public async createEvent(event: IEvent): Promise<EventReturnType> {
         try {
             const existing = await this.eventRepo.findByTitle(event.title);
             if (existing) {
-                this.cloudinary.deleteImage(event.image);
+                this._cloudinary.deleteImage(event.image);
                 return {
                     message: HttpResponse.EVENT_ALREADY_EXISTS,
                     status: StatusCode.BAD_REQUEST
@@ -106,10 +109,9 @@ export class EventService {
     }
 
 
-    public async getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string): Promise<EventPaginationType> {
+    public async getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string, isOrganizer?: boolean): Promise<EventPaginationType> {
         try {
             const filter: FilterQuery<IEvent> = {};
-
             if (search?.trim()) {
                 filter.$or = [
                     { title: { $regex: search.trim(), $options: 'i' } },
@@ -123,10 +125,16 @@ export class EventService {
 
             if (eventStatus) {
                 filter.status = eventStatus;
+            } else {
+                filter.status = "upcoming";
             }
 
             if (eventType) {
                 filter.eventType = eventType;
+            }
+
+            if (isOrganizer === true) {
+                filter.userId = userId;
             }
 
             let sortFilter: Record<string, SortOrder> = { createdAt: -1 };
@@ -260,7 +268,7 @@ export class EventService {
         try {
             const existing = await this.eventRepo.findByID(event.id as string);
             if (!existing) {
-                this.cloudinary.deleteImage(event.image);
+                this._cloudinary.deleteImage(event.image);
                 return {
                     message: HttpResponse.EVENT_ALREADY_EXISTS,
                     status: StatusCode.BAD_REQUEST
@@ -268,7 +276,7 @@ export class EventService {
             }
 
             if (existing.image !== event.image) {
-                this.cloudinary.deleteImage(existing.image);
+                this._cloudinary.deleteImage(existing.image);
             }
 
             if (!event.endDate && event.eventFormat == 'single') {
@@ -360,6 +368,42 @@ export class EventService {
                 page,
                 pages: Math.ceil(docs.total / limit),
                 events: docs.events
+            }
+        } catch (error) {
+            logger.error(error);
+            return {
+                message: HttpResponse.INTERNAL_SERVER_ERROR,
+                status: StatusCode.INTERNAL_SERVER_ERROR
+            }
+        }
+    }
+
+    public async getStock(eventId: string, tickets: { ticketId: string, quantity: number }[]): Promise<StockReturnType> {
+        try {
+            let outOfStock = true;
+            if (tickets && eventId) {
+                tickets.forEach(async (ticketData) => {
+                    const check = await this.eventRepo.checkStock(eventId.toString(), ticketData.ticketId, ticketData.quantity);
+                    if (!check) {
+                        outOfStock = false;
+                        return {
+                            message: HttpResponse.NO_STOCKS,
+                            status: StatusCode.OK,
+                            stock: outOfStock
+                        }
+                    }
+                })
+            } else {
+                return {
+                    message: HttpResponse.MISSING_FIELDS,
+                    status: StatusCode.BAD_REQUEST,
+                    stock: outOfStock
+                }
+            }
+            return {
+                message: HttpResponse.STOCKS_AVAILABLE,
+                status: StatusCode.OK,
+                stock: outOfStock
             }
         } catch (error) {
             logger.error(error);

@@ -1,46 +1,84 @@
-import { Model } from "mongoose";
+import { PrismaClient, RequestStatus } from "@prisma/client";
 import { IRequestRepository } from "../interfaces/IRequestRepository";
 import { IRequest } from "../../shared/types/IRequest";
-import requestModel from "../../models/requestModel";
+import { injectable } from "tsyringe";
 
+const prisma = new PrismaClient();
+
+@injectable()
 export class RequestRepository implements IRequestRepository {
-    private model: Model<IRequest>
-    constructor() {
-        this.model = requestModel;
+    async findByUserID(userId: string): Promise<IRequest | undefined> {
+        const doc = await prisma.organizerRequest.findFirst({
+            where: { userId },
+            include: { user: true },
+        });
+
+        return doc ?? undefined;
     }
 
-    public async findByUserID(userId: string): Promise<IRequest | undefined> {
-        const doc = await this.model.findOne({userId}).populate("userId");
-        return doc?.toJSON();
+    async create(item: Partial<IRequest>): Promise<IRequest> {
+        const doc = await prisma.organizerRequest.create({
+            data: {
+                userId: item.userId!,
+                organization: item.organization!,
+                website: item.website!,
+                reason: item.reason!,
+                documents: item.documents!,
+                status: item.status!,
+                rejectionReason: item.rejectionReason,
+            },
+        });
+
+        return doc;
     }
 
-    public async create(item: Partial<IRequest>): Promise<IRequest> {
-        const doc = await this.model.create(item);
-        return doc.toJSON();
+    async countDocs(): Promise<number> {
+        return prisma.organizerRequest.count();
     }
 
-    public async countDocs(): Promise<number> {
-        return await this.model.countDocuments();
+    async getRequests(skip: number, limit: number): Promise<IRequest[]> {
+        return prisma.organizerRequest.findMany({
+            skip,
+            take: limit,
+            orderBy: { createdAt: "desc" },
+            include: { user: true },
+        });
     }
 
-    public async getRequests(skip: number, limit: number): Promise<IRequest[]> {
-        return await this.model.find().skip(skip).limit(limit).sort({createdAt: -1}).populate("userId");
+    async updateRequest(userId: string, action: RequestStatus, rejectionReason?: string): Promise<void> {
+        await prisma.organizerRequest.updateMany({
+            where: { userId },
+            data: {
+                status: action,
+                rejectionReason,
+            },
+        });
     }
 
-    public async updateRequest(userId: string, action: string, rejectionReason?: string): Promise<void> {
-        await this.model.updateOne({userId}, {$set: {status: action, rejectionReason}});
+    async update(id: string, item: Partial<IRequest>): Promise<void> {
+        await prisma.organizerRequest.update({
+            where: { id },
+            data: {
+                ...(item.organization && { organization: item.organization }),
+                ...(item.website && { website: item.website }),
+                ...(item.reason && { reason: item.reason }),
+                ...(item.documents && { documents: item.documents }),
+                ...(item.status && { status: item.status }),
+                ...(item.rejectionReason !== undefined && { rejectionReason: item.rejectionReason }),
+            },
+        });
     }
 
-    public async update(id: string, item: Partial<IRequest>): Promise<void> {
-        await this.model.updateOne({_id: id}, {$set: item});
-    }
-
-    public async delete(id: string): Promise<void> {
-        await this.model.deleteOne({_id: id});
+    async delete(id: string): Promise<void> {
+        await prisma.organizerRequest.delete({ where: { id } });
     }
 
     async findByID(id: string): Promise<IRequest | undefined> {
-        const doc = await this.model.findOne({_id: id});
-        return doc?.toJSON();
+        const doc = await prisma.organizerRequest.findUnique({
+            where: { id },
+            include: { user: true },
+        });
+
+        return doc ?? undefined;
     }
 }

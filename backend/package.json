@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"cd user-service && pnpm start\" \"cd admin-service && pnpm start\" \"cd event-service && pnpm start\" \"cd message-service && pnpm start\" \"cd api-gateway && pnpm start\""
+    "dev": "concurrently \"cd user-service && pnpm start\" \"cd admin-service && pnpm start\" \"cd event-service && pnpm start\" \"cd message-service && pnpm start\" \"cd api-gateway && pnpm start\" \"cd booking-service && pnpm start\""
   },
   "keywords": [],
   "author": "",

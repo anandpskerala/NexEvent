@@ -72,7 +72,7 @@ const schema = new Schema<IEvent>({
         required: true
     },
     userId: {
-        type: Types.ObjectId,
+        type: String,
         required: true
     },
     image: {

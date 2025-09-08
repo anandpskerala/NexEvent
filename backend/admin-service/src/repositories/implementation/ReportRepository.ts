@@ -2,7 +2,9 @@ import { Model } from "mongoose";
 import { AllIReports, IReport } from "../../shared/types/IReport";
 import { IReportRepository } from "../interfaces/IReportRepository";
 import reportModel from "../../models/reportModel";
+import { injectable } from "tsyringe";
 
+@injectable()
 export class ReportRepository implements IReportRepository {
     private readonly model: Model<IReport>;
 

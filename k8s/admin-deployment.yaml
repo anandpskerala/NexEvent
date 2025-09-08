@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-service
+  template:
+    metadata:
+      labels:
+        app: admin-service
+    spec:
+      containers:
+        - name: admin-service
+          image: anandpskerala/admin-service:v1.0.6
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - secretRef:
+                name: admin-env
+          env:
+            - name: KAFKA_BROKER
+              value: kafka.default.svc.cluster.local:9092
+            - name: USER_SERVICE
+              value: http://user-service.default.svc.cluster.local:5001
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: admin-service
+spec:
+  type: ClusterIP
+  selector:
+    app: admin-service
+  ports:
+    - port: 5002
+      targetPort: 5002
+      protocol: TCP

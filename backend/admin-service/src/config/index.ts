@@ -18,6 +18,7 @@ export const config = {
     cloudinary: {
         cloudName: process.env.CLOUD_NAME,
         apiKey: process.env.CLOUD_API_KEY,
-        secret: process.env.CLOUD_SECRET
+        secret: process.env.CLOUD_SECRET,
+        preset: process.env.CLOUD_PRESET,
     },
 }

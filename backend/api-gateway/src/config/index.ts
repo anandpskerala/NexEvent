@@ -14,6 +14,7 @@ export const config = {
         event: process.env.EVENT_SERVICE || "",
         payment: process.env.PAYMENT_SERVICE || "",
         message: process.env.MESSAGE_SERVICE || "",
+        booking: process.env.BOOKING_SERVICE || "",
         kafka: process.env.KAFKA_BROKER || 'host.docker.internal:9092'
     },
     jwt: {

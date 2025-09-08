@@ -9,7 +9,7 @@ const AboutPage = () => {
     return (
         <div className="flex flex-col min-h-screen bg-white">
             <NavBar isLogged={user?.isVerified} name={user?.firstName} user={user} section='about'/>
-            <div className="mt-20 bg-gray-50">
+            <div className="mt-16 bg-gray-50">
                 <div className="bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white py-20 px-6">
                     <div className="max-w-4xl mx-auto text-center">
                         <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">

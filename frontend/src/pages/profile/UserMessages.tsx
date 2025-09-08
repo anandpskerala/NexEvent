@@ -6,7 +6,7 @@ import { MessageComponent } from '../../components/messages/MessageComponent';
 import type { User } from '../../interfaces/entities/User';
 import { useSearchParams } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
+import { getUserDetails } from '../../services/profileService';
 
 const UserMessages = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -27,9 +27,9 @@ const UserMessages = () => {
         const fetchUser = async () => {
             setLoading(true);
             try {
-                const { data } = await axiosInstance.get(`/user/${chatId}`);
-                if (isMounted && data?.user) {
-                    setSelectedChat(data.user);
+                const { user } = await getUserDetails(chatId);
+                if (isMounted && user) {
+                    setSelectedChat(user);
                 }
             } catch (err) {
                 console.error("Failed to fetch chat user", err);

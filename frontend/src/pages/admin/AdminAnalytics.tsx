@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import type { RevenueAnalyticsGraphPoint, TopSelling } from '../../interfaces/entities/RevenueAnalytics';
 import type { RootState } from '../../store';
-import axiosInstance from '../../utils/axiosInstance';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { formatCurrency } from '../../utils/stringUtils';
@@ -16,6 +15,7 @@ import {
     Tooltip
 } from 'recharts';
 import { Filter } from 'lucide-react';
+import { getAnalyticData } from '../../services/analyticServices';
 
 const AdminAnalytics = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -26,21 +26,9 @@ const AdminAnalytics = () => {
 
     useEffect(() => {
         const fetchAnalytics = async (mode: string) => {
-            try {
-                const [revenueRes, topRes] = await Promise.all([
-                    axiosInstance.get(`/event/analytics/revenue?mode=${mode}`),
-                    axiosInstance.get(`/event/analytics/topselling?mode=${mode}&limit=10`)
-                ]);
-                if (revenueRes.data) {
-                    setAnalytics(revenueRes.data.report)
-                }
-
-                if (topRes.data) {
-                    setTopSelling(topRes.data.report);
-                }
-            } catch (error) {
-                console.error(error);
-            }
+            const [revenueData, topData] = await getAnalyticData(mode);
+            if (revenueData) setAnalytics(revenueData.report);
+            if (topData) setTopSelling(topData.report);
         }
         fetchAnalytics(timeFilter)
     }, [timeFilter])

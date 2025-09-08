@@ -1,3 +1,5 @@
+import "reflect-metadata";
+import "./containers";
 import express, { Application } from "express";
 import connectDB from "./config/db";
 import router from "./routes";

@@ -1,17 +1,12 @@
 import { Router } from "express";
-import { UserRepository } from "../repositories/implementation/UserRepository";
-import { RequestRepository } from "../repositories/implementation/RequestRepository";
-import { RequestService } from "../services/implementation/requestService";
 import { RequestController } from "../controllers/requestController";
 import { protectedRoute } from "../middlewares/protectedRoute";
 import { adminRoute } from "../middlewares/adminRoute";
+import { container } from "../containers";
 
 const router = Router();
 
-const requestRepo = new RequestRepository();
-const userRepo = new UserRepository();
-const requestService = new RequestService(requestRepo, userRepo);
-const requestController = new RequestController(requestService);
+const requestController = container.resolve(RequestController);
 
 router.get("/requests", requestController.getAllRequests);
 router.post("/request/:id", protectedRoute, requestController.createRequest);

@@ -4,7 +4,6 @@ import { NavBar } from '../../components/partials/NavBar';
 import { UserSidebar } from '../../components/partials/UserSidebar';
 import { Calendar, Clock, MapPin, Tag, } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
 import { Link, useNavigate } from 'react-router-dom';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
@@ -12,11 +11,12 @@ import { formatDate, formatTime } from '../../utils/stringUtils';
 import type { Booking } from '../../interfaces/entities/Booking';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { CancelConfirmationModal } from '../../components/modals/CancelConfirmationModal';
-import { AxiosError, type AxiosResponse } from 'axios';
 import { toast } from 'sonner';
 import { Footer } from '../../components/partials/Footer';
 import config from '../../config/config';
 import type { RazorpayOptions, RazorpayResponse } from '../../interfaces/entities/RazorPay';
+import { cancelBooking, createRetryStripOrder, failedBookings, getRPayOrder, getUserBookings, handleRPayPayment, payByWallet, verifyStripe } from '../../services/bookingService';
+import type { AllEventData } from '../../interfaces/entities/FormState';
 
 const MyTickets = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -54,18 +54,14 @@ const MyTickets = () => {
     const handleCancel = async () => {
         setLoading(true);
         try {
-            const res = await axiosInstance.patch(`/event/booking/${selected?.id}`);
-            if (res.data) {
+            const res = await cancelBooking(selected?.id as string);
+            if (res) {
                 setEvents((prev) =>
                     prev.map((booking) =>
                         booking.id === selected?.id ? { ...booking, status: 'cancelled' } : booking
                     )
                 );
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
+                toast.success(res.message);
             }
         } finally {
             setLoading(false);
@@ -78,32 +74,17 @@ const MyTickets = () => {
         try {
             if (!booking) return;
             if (booking.paymentMethod === "razorpay") {
-                const res: AxiosResponse<{
-                    order: {
-                        id: string;
-                        amount: number;
-                        currency: string;
-                    };
-                }> = await axiosInstance.post("/event/payment/razorpay/order", {
-                    amount: booking.totalAmount,
-                    currency: booking.eventId.currency || "INR",
-                });
+                const res = await getRPayOrder(booking.totalAmount, booking.eventId.currency || "INR")
 
                 const options: RazorpayOptions = {
                     key: config.payment.RPayKey,
-                    amount: res.data.order.amount,
-                    currency: res.data.order.currency,
+                    amount: res.order.amount,
+                    currency: res.order.currency,
                     name: booking.eventId.title,
                     description: "Ticket Booking",
-                    order_id: res.data.order.id,
+                    order_id: res.order.id,
                     handler: async (response: RazorpayResponse) => {
-                        await axiosInstance.post("/event/payment/razorpay/verify", {
-                            ...response,
-                            bookingId: booking.id,
-                            eventId: booking.eventId.id,
-                            amount: res.data.order.amount,
-                            currency: res.data.order.currency
-                        });
+                        await handleRPayPayment(response, booking.id, booking.eventId.id, res.order);
                         toast.success("Payment successfull");
                         navigate(`/payment/${booking.orderId}`);
                     },
@@ -118,29 +99,16 @@ const MyTickets = () => {
 
                 const rzp = new window.Razorpay(options);
                 rzp.on('payment.failed', async () => {
-                    await axiosInstance.post(`/event/failed/booking`, {
-                        bookingId: booking.id,
-                        eventId: booking.eventId.id,
-                        amount: res.data.order.amount,
-                        currency: res.data.order.currency,
-                        status: 'failed'
-                    });
+                    await failedBookings(booking.id, booking.eventId.id, res.order.amount, res.order.currency)
                     window.location.reload();
                 })
                 rzp.open();
             }
 
             else if (booking.paymentMethod === "stripe") {
-                const res: AxiosResponse<{ order: string }> = await axiosInstance.post(
-                    "/event/payment/stripe/order",
-                    {
-                        eventId: booking.eventId.id, tickets: booking.tickets, promoCode: booking.couponCode, amount: booking.totalAmount * 100,
-                        bookingId: booking.id, currency: booking.eventId.currency || "INR", orderId: booking.orderId
-                    }
-                );
-
+                const res = await createRetryStripOrder(booking.eventId.id, booking.couponCode as string, booking.totalAmount, booking.id, booking.eventId.currency, booking.orderId, booking.tickets);
                 window.open(
-                    res.data.order,
+                    res.order,
                     "_blank",
                     "width=500,height=700"
                 );
@@ -151,10 +119,10 @@ const MyTickets = () => {
                     const { sessionId } = event.data;
                     if (sessionId) {
                         try {
-                            const res = await axiosInstance.post("/event/payment/stripe/verify", { sessionId });
-                            if (res.data) {
-                                toast.success(res.data.message);
-                                navigate(`/payment/${res.data.paymentId}`);
+                            const res = await verifyStripe(sessionId);
+                            if (res) {
+                                toast.success(res.message);
+                                navigate(`/payment/${res.paymentId}`);
                             }
                         } catch (err) {
                             console.log(err)
@@ -167,11 +135,9 @@ const MyTickets = () => {
             }
 
             else if (booking.paymentMethod === "wallet") {
-                const res = await axiosInstance.post(
-                    "/event/payment/wallet/pay",
-                    { eventId: booking.eventId.id, currency: booking.eventId.currency, amount: booking.totalAmount, bookingId: booking.id }
-                );
-                if (res.data.paymentId) {
+                const event: AllEventData = {...booking.eventId, isSaved: false}
+                const res = await payByWallet(event, booking.totalAmount, booking.id);
+                if (res.paymentId) {
                     toast.success("Payment successful via Wallet!");
                     navigate(`/payment/${booking.orderId}`)
                 } else {
@@ -189,11 +155,11 @@ const MyTickets = () => {
         setLoading(true);
         try {
             const fetchRequest = async (pageNumber = 1) => {
-                const res = await axiosInstance.get(`/event/bookings/${user?.id}?page=${pageNumber}&limit=10`)
-                if (res.data) {
-                    setEvents(res.data.bookings);
-                    setPage(Number(res.data.page));
-                    setPages(Number(res.data.pages));
+                const res = await getUserBookings(user?.id as string, pageNumber, 10);
+                if (res) {
+                    setEvents(res.bookings);
+                    setPage(Number(res.page));
+                    setPages(Number(res.pages));
                 }
             }
             fetchRequest(page);

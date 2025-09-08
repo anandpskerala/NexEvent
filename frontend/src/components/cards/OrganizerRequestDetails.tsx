@@ -109,7 +109,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
     const handleConfirm = async (reason?: string) => {
         try {
             const action = modalAction === 'approve' ? 'accepted' : 'rejected';
-            const res = await axiosInstance.patch(`/organizer/request/${request.userId}`, {
+            const res = await axiosInstance.patch(`/user/organizer/request/${request.userId}`, {
                 action,
                 rejectionReason: reason
             });
@@ -220,7 +220,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                         <div className="flex flex-col">
                             <span className="text-gray-500 text-sm">User ID</span>
                             <code className="bg-gray-100 px-2 py-1 rounded text-gray-800 font-mono text-sm mt-1">
-                                {typeof request.userId === 'string' ? request.userId : request.userId.id}
+                                {request.user?.id}
                             </code>
                         </div>
                     </div>
@@ -277,8 +277,7 @@ export const OrganizerRequestDetails: React.FC<RequestDetailsProps> = ({ user, r
                         </div>
 
                         {(
-                            (typeof request.userId === 'object' && request.userId?.id === user?.id && onReapply) ||
-                            (typeof request.userId === 'string' && request.userId === user?.id && onReapply)
+                            request.user?.id === user?.id && onReapply
                         ) && (
                                 <button
                                     className="ml-7 mt-15 px-4 py-2 bg-blue-600 text-white rounded cursor-pointer flex items-center gap-2"

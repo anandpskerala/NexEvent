@@ -4,13 +4,11 @@ import type { RootState } from '../../store';
 import type { ReportActions, Reports } from '../../interfaces/entities/Reports';
 import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
-import axiosInstance from '../../utils/axiosInstance';
 import { formatDate } from '../../utils/stringUtils';
 import Pagination from '../../components/partials/Pagination';
 import { Eye, Trash2 } from 'lucide-react';
-import { AxiosError } from 'axios';
-import { toast } from 'sonner';
 import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
+import { deleteUserReport, getUserReports, updateUserReport } from '../../services/userReportService';
 
 const UserReportsPage = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -49,11 +47,9 @@ const UserReportsPage = () => {
 
         setUpdating(true);
         try {
-            const res = await axiosInstance.put(`/admin/report/${selectedReport.id}/status`, {
-                status: newStatus
-            });
+            const res = await updateUserReport(selectedReport.id as string, newStatus);
 
-            if (res.data) {
+            if (res) {
                 setReports(prevReports =>
                     prevReports.map(report =>
                         report.id === selectedReport.id
@@ -71,16 +67,7 @@ const UserReportsPage = () => {
     };
 
     const handleDelete = async (id: string) => {
-        try {
-            const res = await axiosInstance.delete(`/admin/request/${id}`);
-            if (res.data) {
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-        }
+        await deleteUserReport(id);
     }
 
     const getStatusColor = (status: string) => {
@@ -97,14 +84,12 @@ const UserReportsPage = () => {
         const fetchReports = async (page: number, limit: number) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/admin/report?page=${page}&limit=${limit}`);
-                if (res.data) {
-                    setReports(res.data.reports);
-                    setPage(res.data.page);
-                    setPages(res.data.pages);
+                const res = await getUserReports(page, limit);
+                if (res) {
+                    setReports(res.reports);
+                    setPage(res.page);
+                    setPages(res.pages);
                 }
-            } catch (error) {
-                console.error(error)
             } finally {
                 setLoading(false);
             }
@@ -120,7 +105,7 @@ const UserReportsPage = () => {
                 <div className="p-6">
                     <AdminNavbar title="Reports" user={user} toggleSidebar={toggleSidebar} />
 
-                    <div className="w-full mx-auto p-6">
+                    <div className="w-full mx-auto py-6">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
                             <div className="overflow-x-auto rounded-md">
                                 <table className="w-full">

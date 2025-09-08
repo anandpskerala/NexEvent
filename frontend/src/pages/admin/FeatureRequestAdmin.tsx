@@ -6,11 +6,10 @@ import { AdminSideBar } from '../../components/partials/AdminSideBar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import type { FeatureRequest } from '../../interfaces/entities/FeatureRequest';
 import { captialize, formatDate } from '../../utils/stringUtils';
-import axiosInstance from '../../utils/axiosInstance';
 import Pagination from '../../components/partials/Pagination';
-import { AxiosError } from 'axios';
 import { toast } from 'sonner';
 import DeleteConfirmationModal from '../../components/modals/DeleteConfirmationModal';
+import { deleteFeatureRequest, getFeatureRequests, updateFeatureRequest } from '../../services/featureRequestService';
 
 type ModalMode = 'view' | 'edit' | 'create';
 type StatusType = "pending" | "accepted" | "rejected";
@@ -31,15 +30,11 @@ const FeatureRequestAdmin = () => {
 
     useEffect(() => {
         const fetchRequest = async (page: number, limit: number) => {
-            try {
-                const res = await axiosInstance.get(`/admin/request?page=${page}&limit=${limit}`);
-                if (res.data) {
-                    setRequests(res.data.requests);
-                    setPages(res.data.pages);
-                    setFilteredRequests(res.data.requests)
-                }
-            } catch (error) {
-                console.error(error);
+            const res = await getFeatureRequests(page, limit);
+            if (res) {
+                setRequests(res.requests);
+                setPages(res.pages);
+                setFilteredRequests(res.requests)
             }
         }
 
@@ -88,39 +83,25 @@ const FeatureRequestAdmin = () => {
 
     const handleDelete = async () => {
         if (!selectedRequest) return;
-        try {
-            const res = await axiosInstance.delete(`/admin/request/${selectedRequest?.id}`);
-            if (res.data) {
-                setRequests(requests.filter((request) => request.id != selectedRequest?.id));
-                setSelectedRequest(null);
-                setIsModalOpen(false);
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
+        const res = await deleteFeatureRequest(selectedRequest?.id as string);
+        if (res) {
+            setRequests(requests.filter((request) => request.id != selectedRequest?.id));
+            setSelectedRequest(null);
+            setIsModalOpen(false);
+            toast.success(res.message);
         }
     }
 
     const handleApply = async (id: string, data: FeatureRequest) => {
-        try {
-            await axiosInstance.patch(`/admin/request/${id}`, data);
-            setRequests((prevRequests: FeatureRequest[]) =>
-                prevRequests.map((req: FeatureRequest) =>
-                    req.id === id
-                        ? { ...req, status: data.status, updatedAt: new Date().toISOString() }
-                        : req
-                )
-            );
-            closeModal();
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            } else {
-                toast.error("Something went wrong");
-            }
-        }
+        await updateFeatureRequest(id, data);
+        setRequests((prevRequests: FeatureRequest[]) =>
+            prevRequests.map((req: FeatureRequest) =>
+                req.id === id
+                    ? { ...req, status: data.status, updatedAt: new Date().toISOString() }
+                    : req
+            )
+        );
+        closeModal();
     }
 
     const openModal = (mode: ModalMode, request: FeatureRequest | null = null): void => {
@@ -141,7 +122,7 @@ const FeatureRequestAdmin = () => {
                 <div className="p-6">
                     <AdminNavbar title="Feature Requests" user={authState} toggleSidebar={toggleSidebar} />
 
-                    <div className="w-full mx-auto p-6">
+                    <div className="w-full mx-auto py-6">
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
 
                             <div className="overflow-x-auto rounded-md">

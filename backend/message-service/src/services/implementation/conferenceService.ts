@@ -3,13 +3,17 @@ import { StatusCode } from "../../shared/constants/statusCode";
 import { config } from "../../config";
 import logger from "../../shared/utils/logger";
 import { HttpResponse } from "../../shared/constants/httpResponse";
+import { injectable } from "tsyringe";
+import { IConferenceService } from "../interfaces/IConferenceService";
+import { ConferenceReturnType } from "../../shared/types/ReturnType";
 
-export class ConferenceService {
+@injectable()
+export class ConferenceService implements IConferenceService {
     constructor() {
 
     }
 
-    public async createToken(identity: string, room: string) {
+    public async createToken(identity: string, room: string): Promise<ConferenceReturnType> {
         try {
             if (!identity || !room) {
                 return {

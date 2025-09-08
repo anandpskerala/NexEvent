@@ -1,13 +1,11 @@
 import { useEffect, useRef } from 'react';
-import { io, Socket } from 'socket.io-client';
 import type { Message } from '../interfaces/entities/Message';
-import config from '../config/config';
+import { useGlobalSocket } from '../contexts/SocketContext';
 
 export const useChatSocket = (
-    userId: string,
     onNewMessage: (msg: Message) => void
 ) => {
-    const socketRef = useRef<Socket | null>(null);
+    const { socket } = useGlobalSocket();
     const handlerRef = useRef(onNewMessage);
 
     useEffect(() => {
@@ -15,29 +13,16 @@ export const useChatSocket = (
     }, [onNewMessage]);
 
     useEffect(() => {
-        if (socketRef.current) return;
-        
-        const socket = io(config.socket, {
-            withCredentials: true,
-            query: { userId },
-        });
+        if (!socket) return;
 
-        socketRef.current = socket;
+        const handleMessage = (msg: Message) => {
+            handlerRef.current(msg);
+        };
 
-        socket.on('connect', () => {
-            console.log('Socket connected:', socket.id);
-            socket.emit('join', userId);
-        });
-
-        socket.on('new-message', (message: Message) => {
-            handlerRef.current(message);
-        });
+        socket.on('new-message', handleMessage);
 
         return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-                socketRef.current = null;
-            }
+            socket.off('new-message', handleMessage);
         };
-    }, [userId]);
+    }, [socket]);
 };

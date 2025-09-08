@@ -34,7 +34,7 @@ export const eventSchema = Joi.object({
     currency: Joi.string().optional(),
     status: Joi.string().optional(),
     tickets: Joi.array().items(ticketSchema).optional(),
-    location: locationSchema.required(),
+    location: locationSchema.optional(),
     showQuantity: Joi.boolean().optional(),
     refunds: Joi.boolean().optional(),
     startDate: Joi.string().isoDate().optional(),

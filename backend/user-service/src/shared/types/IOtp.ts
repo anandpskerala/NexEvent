@@ -1,8 +1,7 @@
-import { Types } from "mongoose";
-
 export interface IOtp {
   id: string;
-  userId: Types.ObjectId;
+  userId: string;
   otp: number;
-  expiry: Date
+  expiry: Date;
+  createdAt: string;
 }

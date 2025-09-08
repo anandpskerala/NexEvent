@@ -4,7 +4,6 @@ import { NavBar } from '../../components/partials/NavBar';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import { captialize, formatPrice } from '../../utils/stringUtils';
 import { AdvancedMarker, APIProvider, Map } from '@vis.gl/react-google-maps';
@@ -15,6 +14,8 @@ import config from '../../config/config';
 import { ReviewCard } from '../../components/cards/ReviewCard';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import type { User } from '../../interfaces/entities/User';
+import { getEventDetails, removeSaveEvent, saveEvent } from '../../services/eventService';
+import { getRequestDetails } from '../../services/organizerRequest';
 
 
 const EventDetailPage = () => {
@@ -24,7 +25,6 @@ const EventDetailPage = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [event, setEvent] = useState<AllEventData>();
     const [organizer, setOrganizer] = useState<OrganizerData>();
-    // const [isSaved, setSaved] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const mapCenter = useMemo(() => {
@@ -39,7 +39,7 @@ const EventDetailPage = () => {
     const isEventNotActive = useMemo(() => {
         const now = new Date();
         const eventDate = new Date(event?.startDate as string);
-        if (event?.availableTickets === 0 || now > eventDate || event?.status === "cancelled" || event?.status === "ended") {
+        if (Number(event?.availableTickets) <= 0 || now > eventDate || event?.status === "cancelled" || event?.status === "ended") {
             return true;
         }
         return false;
@@ -52,15 +52,13 @@ const EventDetailPage = () => {
 
     const updateSaved = async () => {
         try {
-            let res: AxiosResponse;
+            let res: AxiosResponse | null;
             if (event?.isSaved) {
-                res = await axiosInstance.delete(`/event/saved/${event?.id}`);
+                res = await removeSaveEvent(event.id as string);
             } else {
-                res = await axiosInstance.post(`/event/saved/${user?.id}`, { eventId: event?.id })
+                res = await saveEvent(event?.id as string, user?.id as string);
             }
-            if (res.data) {
-                //#todo remove
-                // setSaved(res.data.saved);
+            if (res) {
                 const saved = res.data.saved as boolean;
                 if (event) {
                     setEvent({
@@ -80,15 +78,15 @@ const EventDetailPage = () => {
 
             try {
                 const [eventRes] = await Promise.all([
-                    axiosInstance.get(`/event/event/${id}`),
+                    getEventDetails(id as string),
                 ]);
 
-                const eventData = eventRes.data?.event;
+                const eventData = eventRes.event;
                 setEvent(eventData);
 
                 if (eventData?.userId) {
-                    const orgRes = await axiosInstance.get(`/user/request/${eventData.userId}`);
-                    setOrganizer(orgRes.data?.request);
+                    const orgRes = await getRequestDetails(eventData.userId);
+                    setOrganizer(orgRes.request);
                 }
 
             } catch (error) {
@@ -250,11 +248,11 @@ const EventDetailPage = () => {
                                         <h3 className="text-lg font-bold text-gray-900 px-4 py-2">Organizer</h3>
                                         <div className="bg-white p-4 rounded-b-lg flex flex-col items-center">
                                             <div className="w-14 h-14 flex items-center justify-center bg-gray-200 rounded-full text-gray-500 font-bold mb-3">
-                                                {typeof organizer?.userId !== "string" ? organizer?.userId.firstName.slice(0, 2).toUpperCase() : organizer?.organization?.slice(0, 2).toUpperCase()}
+                                                {organizer?.user ? organizer?.user.firstName.slice(0, 2).toUpperCase() : organizer?.organization?.slice(0, 2).toUpperCase()}
                                             </div>
-                                            <Link to={`/profile/${typeof organizer?.userId !== "string" ? organizer?.userId.id : organizer?.userId}`} className="font-medium text-gray-900">{typeof organizer?.userId !== "string" ? organizer?.userId.firstName + " " + organizer?.userId.lastName : organizer.organization}</Link>
+                                            <Link to={`/profile/${organizer?.user ? organizer?.user.id : organizer?.userId}`} className="font-medium text-gray-900">{organizer?.user ? organizer?.user.firstName + " " + organizer?.user.lastName : organizer?.organization}</Link>
                                             <p className="text-sm text-gray-500 mb-4">Event Organizer</p>
-                                            <Link to={`/messages?user=${typeof organizer?.userId !== "string" ? organizer?.userId.id : organizer?.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                                            <Link to={`/messages?user=${organizer?.user ? organizer?.user.id : organizer?.userId}`} className="w-full bg-gray-900 hover:bg-black text-white py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-2">
                                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                                 </svg>

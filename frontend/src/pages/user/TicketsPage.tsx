@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { Booking } from '../../interfaces/entities/Booking';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import { NavBar } from '../../components/partials/NavBar';
 import { formatCurrency, formatDate } from '../../utils/stringUtils';
 import { ArrowLeft, Calendar, Check, Download, MapPin } from 'lucide-react';
+import { downloadTicket, getBooking } from '../../services/bookingService';
 
 const TicketsPage = () => {
     const { id } = useParams();
@@ -45,22 +45,7 @@ const TicketsPage = () => {
     };
 
     const handleDownloadAllTickets = async (bookingId: string) => {
-        try {
-            const res = await axiosInstance.get(`/event/ticket/download/${bookingId}`, {
-                responseType: 'blob',
-            });
-
-            const blob = new Blob([res.data], { type: 'application/pdf' });
-            const url = window.URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `ticket-${bookingId}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-        } catch (error) {
-            console.error('Download failed', error);
-        }
+        downloadTicket(bookingId);
     };
 
     const getTicketDescription = (ticketId: string) => {
@@ -74,9 +59,9 @@ const TicketsPage = () => {
         const fetchRequest = async (id: string) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/booking/${id}`);
-                if (res.data) {
-                    setBooking(res.data.booking);
+                const res = await getBooking(id);
+                if (res) {
+                    setBooking(res.booking);
                 }
             } catch (error) {
                 console.log(error)

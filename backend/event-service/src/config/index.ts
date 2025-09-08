@@ -9,7 +9,8 @@ export const config = {
         frontendUrl: process.env.FRONTEND_URL || ""
     },
     db: {
-        mongoURI: process.env.MONGO_URI || ""
+        mongoURI: process.env.MONGO_URI || "",
+        redis: process.env.REDIS_URI || ""
     },
     cloudinary: {
         cloudName: process.env.CLOUD_NAME,
@@ -19,11 +20,6 @@ export const config = {
     services: {
         kafka: process.env.KAFKA_BROKER || "",
         user: process.env.USER_SERVICE || ""
-    },
-    payment: {
-        razorpayID: process.env.RAZORPAY_KEY_ID,
-        razorpaySecret: process.env.RAZORPAY_KEY_SECRET,
-        stripeSecret: process.env.STRIPE_SECRET_KEY
     },
     maxTicketLimit: 3,
 }

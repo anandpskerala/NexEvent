@@ -32,5 +32,7 @@ export enum HttpResponse {
     WALLET_DOESNT_EXISTS = "Wallet doesn't exist for this user",
     WALLER_FETCHED = "Wallet fetched",
     INSUFFICENT_BALANCE = "Insufficent balance in your wallet",
+    NO_STOCKS = "Insufficent tickets",
+    STOCKS_AVAILABLE = "Tickets available",
     INTERNAL_SERVER_ERROR = "Internal server error"
 }

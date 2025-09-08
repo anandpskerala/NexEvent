@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../store';
 import type { Wallet } from '../../interfaces/entities/Wallet';
-import axiosInstance from '../../utils/axiosInstance';
 import { LazyLoadingScreen } from '../../components/partials/LazyLoadingScreen';
 import { NavBar } from '../../components/partials/NavBar';
 import { Link } from 'react-router-dom';
@@ -10,6 +9,7 @@ import { UserSidebar } from '../../components/partials/UserSidebar';
 import { ArrowDown, ArrowUp, Calendar, DollarSign, Music, Settings, Users } from 'lucide-react';
 import { formatDate } from '../../utils/stringUtils';
 import { Footer } from '../../components/partials/Footer';
+import { getWalletDetails } from '../../services/bookingService';
 
 const Wallet = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -67,9 +67,9 @@ const Wallet = () => {
         const fetchWallet = async (userId: string) => {
             setLoading(true);
             try {
-                const res = await axiosInstance.get(`/event/payment/wallet/${userId}`);
-                if (res.data) {
-                    setWallet(res.data.wallet);
+                const res = await getWalletDetails(userId);
+                if (res) {
+                    setWallet(res.wallet);
                 }
             } catch (error) {
                 console.log(error);

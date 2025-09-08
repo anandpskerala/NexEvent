@@ -6,6 +6,7 @@ import { ProtectedRoute } from "./ProtectedRoutes";
 import { AdminRoutes } from "./AdminRoutes";
 import { OrganizerRoutes } from "./OrganizerRoutes";
 import { LazyLoadingScreen } from "../components/partials/LazyLoadingScreen";
+import { SocketProvider } from "../contexts/SocketContext";
 
 
 const Login = lazy(() => import("../pages/user/Login"));
@@ -55,70 +56,74 @@ const FeatureRequestAdmin = lazy(() => import("../pages/admin/FeatureRequestAdmi
 const UserReportsPage = lazy(() => import("../pages/admin/UserReportsPage"));
 const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
 const AdminAnalytics = lazy(() => import("../pages/admin/AdminAnalytics"));
+const Error404 = lazy(() => import("../pages/errors/Error404"));
 
 const AppRoutes = () => {
     const { user } = useAppSelector((state: RootState) => state.auth);
 
     return (
-        <Suspense fallback={<LazyLoadingScreen />}>
-            <Routes>
-                <Route path="/about" element={<AboutPage />} />
-                <Route element={<AuthRedirect user={user} />}>
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/forgot-password" element={<ForgotPassword />} />
-                    <Route path="/reset-password/:id" element={<ResetPassword />} />
-                    <Route path="/otp-verification" element={!user?.isVerified ? <OtpPage /> : <Navigate to="/login" />} />
-                </Route>
+        <SocketProvider userId={user?.id as string}>
+            <Suspense fallback={<LazyLoadingScreen />}>
+                <Routes>
+                    <Route path="/about" element={<AboutPage />} />
+                    <Route element={<AuthRedirect user={user} />}>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/signup" element={<SignUp />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password/:id" element={<ResetPassword />} />
+                        <Route path="/otp-verification" element={!user?.isVerified ? <OtpPage /> : <Navigate to="/login" />} />
+                    </Route>
 
-                <Route element={<ProtectedRoute user={user} />}>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/events/browse" element={<BrowsePage />} />
-                    <Route path="/event/bookings/:id" element={<BookingPage />} />
-                    <Route path="/event/:id" element={<EventDetailPage />} />
-                    <Route path="/payment/:id" element={<ConfirmationPage />} />
-                    <Route path="/account/profile" element={<ProfilePage />} />
-                    <Route path="/account/request-organizer-form" element={<RequestOrganizer />} />
-                    <Route path="/account/tickets" element={<MyTickets />} />
-                    <Route path="/account/wallet" element={<Wallet />} />
-                    <Route path="/account/saved-events" element={<SavedEvents />} />
-                    <Route path="/messages" element={<UserMessages />} />
-                    <Route path="/booking/:id" element={<TicketsPage />} />
-                    <Route path="/profile/:id" element={<OrganizerProfile />} />
-                    <Route path="/meeting/:id" element={<VideoConferencePage />} />
-                    <Route path="/notifications" element={<NotificationsPage />} />
-                    <Route path="/landing/:id" element={<MeetingLandingPage />} />
-                </Route>
+                    <Route element={<ProtectedRoute user={user} />}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/events/browse" element={<BrowsePage />} />
+                        <Route path="/event/bookings/:id" element={<BookingPage />} />
+                        <Route path="/event/:id" element={<EventDetailPage />} />
+                        <Route path="/payment/:id" element={<ConfirmationPage />} />
+                        <Route path="/account/profile" element={<ProfilePage />} />
+                        <Route path="/account/request-organizer-form" element={<RequestOrganizer />} />
+                        <Route path="/account/tickets" element={<MyTickets />} />
+                        <Route path="/account/wallet" element={<Wallet />} />
+                        <Route path="/account/saved-events" element={<SavedEvents />} />
+                        <Route path="/messages" element={<UserMessages />} />
+                        <Route path="/booking/:id" element={<TicketsPage />} />
+                        <Route path="/profile/:id" element={<OrganizerProfile />} />
+                        <Route path="/meeting/:id" element={<VideoConferencePage />} />
+                        <Route path="/notifications" element={<NotificationsPage />} />
+                        <Route path="/landing/:id" element={<MeetingLandingPage />} />
+                    </Route>
 
-                <Route element={<OrganizerRoutes user={user} />}>
-                    <Route path="/organizer/events" element={<EventPage />} />
-                    <Route path="/organizer/create-event" element={<CreateEvent />} />
-                    <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
-                    <Route path="/organizer/create-ticket/:id" element={<CreateTicket />} />
-                    <Route path="/organizer/edit-ticket/:id" element={<EditTicket />} />
-                    <Route path="/organizer/bookings" element={<OrganizerBooking />} />
-                    <Route path="/organizer/request-a-feature" element={<FeatureRequestPage />} />
-                    <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
-                    <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
-                </Route>
+                    <Route element={<OrganizerRoutes user={user} />}>
+                        <Route path="/organizer/events" element={<EventPage />} />
+                        <Route path="/organizer/create-event" element={<CreateEvent />} />
+                        <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
+                        <Route path="/organizer/create-ticket/:id" element={<CreateTicket />} />
+                        <Route path="/organizer/edit-ticket/:id" element={<EditTicket />} />
+                        <Route path="/organizer/bookings" element={<OrganizerBooking />} />
+                        <Route path="/organizer/request-a-feature" element={<FeatureRequestPage />} />
+                        <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />
+                        <Route path="/organizer/analytics" element={<OrganizerAnalytics />} />
+                    </Route>
 
-                <Route element={<AdminRoutes user={user} />}>
-                    <Route path="/admin/users" element={<UserManagement />} />
-                    <Route path="/admin/organizer-requests" element={<OrganizerRequests />} />
-                    <Route path="/admin/organizer-requests/:id" element={<OrganizerRequestDetailsPage />} />
-                    <Route path="/admin/categories" element={<CategoryPage />} />
-                    <Route path="/admin/create-category" element={<CreateCategory />} />
-                    <Route path="/admin/edit-category/:id" element={<EditCategory />} />
-                    <Route path="/admin/coupons" element={<CouponPage />} />
-                    <Route path="/admin/create-coupon" element={<CreateCoupon />} />
-                    <Route path="/admin/edit-coupon/:id" element={<EditCoupon />} />
-                    <Route path="/admin/feature-request" element={<FeatureRequestAdmin />} />
-                    <Route path="/admin/user-reports" element={<UserReportsPage />} />
-                    <Route path="/admin/dashboard" element={<AdminDashboard />} />
-                    <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                </Route>
-            </Routes>
-        </Suspense>
+                    <Route element={<AdminRoutes user={user} />}>
+                        <Route path="/admin/users" element={<UserManagement />} />
+                        <Route path="/admin/organizer-requests" element={<OrganizerRequests />} />
+                        <Route path="/admin/organizer-requests/:id" element={<OrganizerRequestDetailsPage />} />
+                        <Route path="/admin/categories" element={<CategoryPage />} />
+                        <Route path="/admin/create-category" element={<CreateCategory />} />
+                        <Route path="/admin/edit-category/:id" element={<EditCategory />} />
+                        <Route path="/admin/coupons" element={<CouponPage />} />
+                        <Route path="/admin/create-coupon" element={<CreateCoupon />} />
+                        <Route path="/admin/edit-coupon/:id" element={<EditCoupon />} />
+                        <Route path="/admin/feature-request" element={<FeatureRequestAdmin />} />
+                        <Route path="/admin/user-reports" element={<UserReportsPage />} />
+                        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                    </Route>
+                    <Route path="*" element={<Error404 />} />
+                </Routes>
+            </Suspense>
+        </SocketProvider>
     );
 };
 

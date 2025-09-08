@@ -23,7 +23,7 @@ services:
 
   user-service:
     build: ./backend/user-service
-    image: anandpskerala/user-service:v1.0.2
+    image: anandpskerala/user-service:v1.0.7
     env_file:
       - ./backend/user-service/.env
     environment:
@@ -38,7 +38,7 @@ services:
 
   admin-service:
     build: ./backend/admin-service
-    image: anandpskerala/admin-service:v1.0.2
+    image: anandpskerala/admin-service:v1.0.6
     env_file:
       - ./backend/admin-service/.env
     environment:
@@ -54,7 +54,7 @@ services:
 
   event-service:
     build: ./backend/event-service
-    image: anandpskerala/event-service:v1.0.2
+    image: anandpskerala/event-service:v1.1.0
     env_file:
       - ./backend/event-service/.env
     environment:
@@ -69,7 +69,7 @@ services:
 
   message-service:
     build: ./backend/message-service
-    image: anandpskerala/message-service:v1.0.3
+    image: anandpskerala/message-service:v1.0.8
     env_file:
       - ./backend/message-service/.env
     environment:
@@ -82,11 +82,27 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+  
+  booking-service:
+    build: ./backend/booking-service
+    image: anandpskerala/booking-service:v1.0.8
+    env_file:
+      - ./backend/booking-service/.env
+    environment:
+      - KAFKA_BROKER=kafka:9092
+      - USER_SERVICE=http://user-service:5001
+    ports:
+      - "5005:5005"
+    depends_on:
+      - kafka
+    networks:
+      - app-network
+    restart: unless-stopped
 
   api-gateway:
     build:
       context: ./backend/api-gateway
-    image: anandpskerala/api-gateway:latest
+    image: anandpskerala/api-gateway:v1.0.3
     env_file:
       - ./backend/api-gateway/.env
     environment:
@@ -95,6 +111,7 @@ services:
       - ADMIN_SERVICE=http://admin-service:5002
       - EVENT_SERVICE=http://event-service:5003
       - MESSAGE_SERVICE=http://message-service:5004
+      - BOOKING_SERVICE=http://booking-service:5005
       - KAFKA_BROKER=kafka:9092
     ports:
       - "5000:5000"
@@ -130,7 +147,7 @@ services:
         VITE_STRIPE_KEY: ${VITE_STRIPE_KEY}
         VITE_LIVEKIT_URL: ${VITE_LIVEKIT_URL}
 
-    image: anandpskerala/frontend:v1.0.9
+    image: anandpskerala/frontend:v1.2.4
     env_file:
       - ./frontend/.env
     ports:

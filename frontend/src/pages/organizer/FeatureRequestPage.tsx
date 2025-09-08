@@ -8,9 +8,8 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import type { FeatureRequestFormData } from '../../interfaces/entities/FormState';
 import type { FeatureFormErrors } from '../../interfaces/entities/ErrorState';
 import { validateForm, validationSchema } from '../../interfaces/validators/featureFormValidator';
-import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'sonner';
-import { AxiosError } from 'axios';
+import { createFeatureRequest } from '../../services/featureRequestService';
 
 const FeatureRequestPage: React.FC = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -78,17 +77,12 @@ const FeatureRequestPage: React.FC = () => {
         setIsSubmitting(true);
 
         try {
-            const res = await axiosInstance.post(`/admin/request`, formData);
-            if (res.data) {
+            const res = await createFeatureRequest(formData);
+            if (res) {
                 setIsSubmitted(true);
                 toast.success(res.data.message);
             }
-        } catch (error) {
-            console.error('Submission error:', error);
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-        } finally {
+        }  finally {
             setIsSubmitting(false);
         }
     };
@@ -139,9 +133,9 @@ const FeatureRequestPage: React.FC = () => {
     return (
         <div className="flex h-screen bg-gray-50">
             <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='request a feature' />
-            <div className="flex-1 overflow-auto mt-5">
+            <div className="flex-1 overflow-auto mt-5 px-2">
                 <AdminNavbar title='Request for feature' user={user} toggleSidebar={toggleSidebar} />
-                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-6 px-4">
                     <div className="max-w-4xl mx-auto">
                         <div className="text-center mb-8">
                             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">

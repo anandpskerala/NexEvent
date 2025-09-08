@@ -6,7 +6,7 @@ import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import type { TopSelling, RevenueAnalyticsGraphPoint } from '../../interfaces/entities/RevenueAnalytics';
 import { Calendar, DollarSign, Filter, TrendingUp, Users } from 'lucide-react';
 import { formatCurrency } from '../../utils/stringUtils';
-import axiosInstance from '../../utils/axiosInstance';
+import { getAnalyticData } from '../../services/analyticServices';
 
 const AdminDashboard = () => {
     const { user } = useSelector((state: RootState) => state.auth);
@@ -53,21 +53,9 @@ const AdminDashboard = () => {
 
     useEffect(() => {
         const fetchAnalytics = async (mode: string) => {
-            try {
-                const [revenueRes, topRes] = await Promise.all([
-                    axiosInstance.get(`/event/analytics/revenue?mode=${mode}`),
-                    axiosInstance.get(`/event/analytics/topselling?mode=${mode}&limit=10`)
-                ]);
-                if (revenueRes.data) {
-                    setAnalytics(revenueRes.data.report)
-                }
-
-                if (topRes.data) {
-                    setTopSelling(topRes.data.report);
-                }
-            } catch (error) {
-                console.error(error);
-            }
+            const [revenueData, topData] = await getAnalyticData(mode);
+            if (revenueData) setAnalytics(revenueData.report);
+            if (topData) setTopSelling(topData.report);
         }
         fetchAnalytics(timeFilter)
     }, [timeFilter])
@@ -79,7 +67,7 @@ const AdminDashboard = () => {
                 <div className="p-6">
                     <AdminNavbar title="Dashboard" user={user} toggleSidebar={toggleSidebar} />
 
-                    <div className="max-w-7xl mx-auto">
+                    <div className="max-w-full mx-auto">
                         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
                             <div className="flex flex-wrap gap-4 items-center">
                                 <div className="flex items-center gap-2">

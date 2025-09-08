@@ -1,6 +1,7 @@
 const config = {
     backendUrl: import.meta.env.VITE_BACKEND_URL,
     socket: import.meta.env.VITE_SOCKET_URL,
+    domain: import.meta.env.VITE_DOMAIN,
     firebase: {
         apiKey: import.meta.env.VITE_FIREBASE_KEY,
         authDomain: import.meta.env.VITE_FIREBASE_DOMAIN,

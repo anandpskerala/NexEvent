@@ -3,9 +3,11 @@ import { INotificationService } from "../services/interfaces/INotificationServic
 import { HttpResponse } from "../shared/constants/httpResponse";
 import logger from "../shared/utils/logger";
 import { addClient, broadcastInit, removeClient } from "../shared/utils/sseManager";
+import { inject, injectable } from "tsyringe";
 
+@injectable()
 export class NotificationController {
-    constructor(private notificationService: INotificationService) { }
+    constructor(@inject("INotificationService") private _notificationService: INotificationService) { }
 
     public notificationStream = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
@@ -18,17 +20,27 @@ export class NotificationController {
             res.setHeader("Content-Type", "text/event-stream");
             res.setHeader("Cache-Control", "no-cache");
             res.setHeader("Connection", "keep-alive");
-            res.setHeader("Access-Control-Allow-Origin", "*");
-            res.flushHeaders();
+            res.flushHeaders?.();
+
+            const heartbeat = setInterval(() => {
+                res.write(':keep-alive\n\n');
+            }, 30000);
 
             addClient(id, res);
 
-            const unread = await this.notificationService.getUnreads(id);
+            const unread = await this._notificationService.getUnreads(id);
             broadcastInit(id, unread.result);
 
             req.on("close", () => {
                 logger.info(`SSE disconnected for user: ${id}`);
                 removeClient(id);
+                clearInterval(heartbeat);
+            });
+
+            req.on("aborted", () => {
+                logger.info(`Client aborted connection for user: ${id}`);
+                removeClient(id);
+                clearInterval(heartbeat);
             });
 
         } catch (error) {
@@ -40,14 +52,14 @@ export class NotificationController {
 
     public readAllNotifications = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const result = await this.notificationService.markAllAsRead(id);
+        const result = await this._notificationService.markAllAsRead(id);
         res.status(result.status).json({ message: result.message });
     }
 
     public getAllNotifications = async (req: Request, res: Response): Promise<void> => {
         const { id } = req.params;
-        const { page = 1, limit = 10, isRead = true } = req.query;
-        const result = await this.notificationService.getAllNotification(id, Number(page), Number(limit), isRead as boolean);
+        const { page = 1, limit = 10, isRead = 'false' } = req.query;
+        const result = await this._notificationService.getAllNotification(id, Number(page), Number(limit), isRead === 'true');
         res.status(result.status).json({
             message: result.message,
             notifications: result.notifications,

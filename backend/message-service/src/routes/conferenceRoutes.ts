@@ -1,11 +1,10 @@
 import { Router } from "express";
-import { ConferenceService } from "../services/implementation/conferenceService";
 import { ConferenceController } from "../controllers/conferenceController";
+import { container } from "../containers";
 
 const router = Router();
 
-const service = new ConferenceService();
-const controller = new ConferenceController(service);
+const controller = container.resolve(ConferenceController);
 
 router.post("/token", controller.getToken);
 

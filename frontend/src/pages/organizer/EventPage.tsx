@@ -5,11 +5,11 @@ import { OrganizerSideBar } from '../../components/partials/OrganizerSidebar';
 import { AdminNavbar } from '../../components/partials/AdminNavbar';
 import { Calendar, PlusCircle, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
 import { EventFormSkeleton } from '../../components/skeletons/EventsFormSkeleton';
 import Pagination from '../../components/partials/Pagination';
 import type { AllEventData } from '../../interfaces/entities/FormState';
 import { OrganizerEventCard } from '../../components/cards/OrganizerEventCards';
+import { getEventList } from '../../services/eventService';
 
 
 const EmptyState = () => (
@@ -52,15 +52,12 @@ const EventPage = () => {
     const fetchRequest = useCallback(async () => {
         setLoading(true);
         try {
-            const res = await axiosInstance.get(`/event/events?search=${debouncedSearch}&page=${page}&userId=${user?.id}&limit=10`);
-            if (res.data) {
-                setEvents(res.data.events);
-                setPage(Number(res.data.page));
-                setPages(Number(res.data.pages));
+            const res = await getEventList(debouncedSearch, page, user?.id as string, 10, true);
+            if (res) {
+                setEvents(res.events);
+                setPage(Number(res.page));
+                setPages(Number(res.pages));
             }
-            console.log(res);
-        } catch (error) {
-            console.error(error);
         } finally {
             setLoading(false);
         }
@@ -71,7 +68,7 @@ const EventPage = () => {
     }, [fetchRequest, page, debouncedSearch]);
 
     return (
-        <div className="flex h-screen bg-gray-50">
+        <div className="flex h-screen bg-gray-100">
             <OrganizerSideBar sidebarCollapsed={sidebarCollapsed} section='events' />
             <div className="flex-1 overflow-auto">
                 <div className="p-6">

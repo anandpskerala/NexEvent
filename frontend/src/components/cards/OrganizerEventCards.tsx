@@ -1,32 +1,22 @@
 import { MapPin } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import type { EventCardProps } from "../../interfaces/props/formProps";
-import { AxiosError } from "axios";
-import { toast } from "sonner";
+import type { OrgEventCardProps } from "../../interfaces/props/formProps";
+import { cancelEventService } from "../../services/eventService";
+import { getCategoryDetails } from "../../services/categoryService";
 
 
 const capitalize = (str: string) => {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
+export const OrganizerEventCard: React.FC<OrgEventCardProps> = ({ event }) => {
     const [category, setCategory] = useState<{ name: string }>();
     const imageUrl = event.image || "https://via.placeholder.com/400x200.png?text=Event+Banner";
     const navigate =  useNavigate();
 
     const cancelEvent = async (eventId: string) => {
-        try {
-            const res = await axiosInstance.put(`/event/booking/${eventId}`);
-            if (res.data) {
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            if (error instanceof AxiosError) {
-                toast.error(error.response?.data.message);
-            }
-        }
+        await cancelEventService(eventId);
     }
 
     const manageEvent = (eventId: string) => {
@@ -36,9 +26,9 @@ export const OrganizerEventCard: React.FC<EventCardProps> = ({ event }) => {
     useEffect(() => {
         const fetchRequest = async () => {
             try {
-                const res = await axiosInstance.get(`/admin/category/${event.category}`)
-                if (res.data) {
-                    setCategory(res.data.category)
+                const res = await getCategoryDetails(event.category);
+                if (res) {
+                    setCategory(res.category)
                 }
             } catch (error) {
                 console.error(error)

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-service
+  template:
+    metadata:
+      labels:
+        app: message-service
+    spec:
+      containers:
+        - name: message-service
+          image: anandpskerala/message-service:v1.0.8
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5004
+          envFrom:
+            - secretRef:
+                name: message-env
+          env:
+            - name: KAFKA_BROKER
+              value: kafka.default.svc.cluster.local:9092
+            - name: USER_SERVICE
+              value: http://user-service.default.svc.cluster.local:5001
+            - name: FRONTEND_URL
+              value: https://nexevent.appxstore.shop
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-service
+spec:
+  type: ClusterIP
+  selector:
+    app: message-service
+  ports:
+    - port: 5004
+      targetPort: 5004

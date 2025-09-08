@@ -1,11 +1,14 @@
+import { inject, injectable } from "tsyringe";
 import { INotificationRepository } from "../../repositories/interfaces/INotificationRepository";
 import { HttpResponse } from "../../shared/constants/httpResponse";
 import { StatusCode } from "../../shared/constants/statusCode";
 import { UnreadPaginationType, UnreadReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
+import { INotificationService } from "../interfaces/INotificationService";
 
-export class NotificationService {
-    constructor(private repo: INotificationRepository) {}
+@injectable()
+export class NotificationService implements INotificationService {
+    constructor(@inject("INotificationRepository") private _repo: INotificationRepository) {}
 
     public async getUnreads(userId: string): Promise<UnreadReturnType> {
         try {
@@ -16,7 +19,7 @@ export class NotificationService {
                 }
             }
 
-            const unreads = await this.repo.getUnreadByUser(userId);
+            const unreads = await this._repo.getUnreadByUser(userId);
             return {
                 message: HttpResponse.MESSAGES_FETCHED,
                 status: StatusCode.OK,
@@ -33,7 +36,7 @@ export class NotificationService {
 
     public async markAllAsRead(userId: string): Promise<UnreadReturnType> {
         try {
-            await this.repo.markAsRead(userId);
+            await this._repo.markAsRead(userId);
             return {
                 message: HttpResponse.ALL_READ,
                 status: StatusCode.OK
@@ -50,7 +53,7 @@ export class NotificationService {
     public async getAllNotification(userId: string, page: number, limit: number, isRead: boolean = true): Promise<UnreadPaginationType> {
         try {
             const offset = (page - 1) * limit;
-            const result = await this.repo.getAllNotification(userId, offset, limit, isRead)
+            const result = await this._repo.getAllNotification(userId, offset, limit, isRead);
             return {
                 message: HttpResponse.NOTIFICATION_FETCHED,
                 status: StatusCode.OK,

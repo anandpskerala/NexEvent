@@ -4,8 +4,7 @@ import { IForgotRequest } from "../shared/types/IForgotRequest";
 
 const schema = new Schema<IForgotRequest>({
     userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
         required: true,
         unique: true
     },
@@ -22,14 +21,6 @@ const schema = new Schema<IForgotRequest>({
     }
 }, { timestamps: true });
 
-schema.set('toJSON', {
-    virtuals: true,
-    versionKey: false,
-    transform: (_, ret) => {
-        ret.id = ret._id;
-        delete ret._id;
-    }
-});
 
 const forgotModel = mongoose.model<IForgotRequest>("ForgotRequest", schema);
 

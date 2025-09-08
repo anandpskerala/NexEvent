@@ -1,16 +1,13 @@
 import { Router } from "express";
 import { protectedRoute } from "../middlewares/protectedRoutes";
 import { CategoryController } from "../controllers/categoryController";
-import { CategoryRepository } from "../repositories/implementation/CategoryRepository";
-import { CategoryService } from "../services/implementation/categoryService";
 import { validate } from "../middlewares/validate";
 import { createCategory } from "../shared/validators/categorySchema";
+import { container } from "../containers";
 
 const router = Router();
 
-const categoryRepo = new CategoryRepository();
-const categoryService = new CategoryService(categoryRepo);
-const categoryController = new CategoryController(categoryService);
+const categoryController = container.resolve(CategoryController);
 
 router.post("/", protectedRoute, validate(createCategory), categoryController.createCategory);
 router.get("/", categoryController.getCategories);
