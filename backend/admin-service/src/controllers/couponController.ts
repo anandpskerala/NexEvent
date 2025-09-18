@@ -22,8 +22,8 @@ export class CouponController {
     }
 
     public getCoupon = async (req: Request, res: Response): Promise<void> => {
-        const id = req.params.id;
-        const result = await this._couponService.getCouponInfo(id);
+        const couponId = req.params.id;
+        const result = await this._couponService.getCouponInfo(couponId);
         res.status(result.status).json({ message: result.message, coupon: result.coupon });
     }
 
@@ -41,9 +41,9 @@ export class CouponController {
 
 
     public updateCoupon = async (req: Request, res: Response): Promise<void> => {
-        const id = req.params.id;
+        const couponId = req.params.id;
         const { couponCode, couponName, description, discount, startDate, endDate, minAmount, maxAmount, status } = req.body;
-        const result = await this._couponService.updateCoupon(id ,{
+        const result = await this._couponService.updateCoupon(couponId ,{
             couponCode,
             couponName,
             description,
@@ -58,8 +58,8 @@ export class CouponController {
     }
 
     public deleteCoupon = async (req: Request, res: Response): Promise<void> => {
-        const id = req.params.id;
-        const result = await this._couponService.deleteCoupon(id);
+        const couponId = req.params.id;
+        const result = await this._couponService.deleteCoupon(couponId);
         res.status(result.status).json({ message: result.message });
     }
 }
