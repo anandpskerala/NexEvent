@@ -1,7 +1,6 @@
 import { StatusCode } from "../../shared/constants/statusCode";
 import { IRequest } from "../../shared/types/IRequest";
 import { UserReturnType, RequestPaginationType, RequestReturnType } from "../../shared/types/ReturnType";
-import logger from "../../shared/utils/logger";
 import { IUserRepository } from "../../repositories/interfaces/IUserRepository";
 import { IRequestRepository } from "../../repositories/interfaces/IRequestRepository";
 import { IRequestService } from "../interfaces/IRequestService";
@@ -20,7 +19,6 @@ export class RequestService implements IRequestService {
     ) {}
 
     public async createRequest(data: Partial<IRequest>): Promise<RequestReturnType> {
-        try {
             if (!data.userId) {
                 return {
                     status: StatusCode.BAD_REQUEST,
@@ -48,18 +46,10 @@ export class RequestService implements IRequestService {
                 status: StatusCode.CREATED,
                 message: HttpResponse.REQUEST_SENT
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
-        }
     }
 
 
     public async getRequest(userId: string): Promise<RequestReturnType> {
-        try {
             if (!userId || userId.trim() === "") {
                 return {
                     status: StatusCode.BAD_REQUEST,
@@ -73,17 +63,10 @@ export class RequestService implements IRequestService {
                 message: HttpResponse.REQUEST_FETCHED,
                 request: request ? toRequestDTO(request) : undefined
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
-        }
+
     }
 
     public async deleteRequest(reqId: string): Promise<RequestReturnType> {
-        try {
             if (!reqId || reqId.trim() === "") {
                 return {
                     message: HttpResponse.REQUEST_ID_INVALID,
@@ -108,17 +91,11 @@ export class RequestService implements IRequestService {
                 message: HttpResponse.REAPPLY,
                 status: StatusCode.OK
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
-        }
+
     }
 
     public async getAllRequests(page: number, limit: number): Promise<RequestPaginationType> {
-        try {
+
             const skip = (page - 1) * limit;
             const total = await this._requestRepo.countDocs();
             const requests = await this._requestRepo.getRequests(skip, limit);
@@ -130,17 +107,10 @@ export class RequestService implements IRequestService {
                 page,
                 pages: Math.ceil(total / limit),
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
-        }
+
     }
 
     public async updateRequest(userId: string, action: string, rejectionReason?: string): Promise<UserReturnType> {
-        try {
             if (!userId || userId.trim() === "" || !action || action.trim() === "") {
                 return {
                     message: HttpResponse.MISSING_FIELDS,
@@ -167,12 +137,5 @@ export class RequestService implements IRequestService {
                 status: StatusCode.OK,
                 user: user? toUserDTO(user): undefined
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
-        }
     }
 }

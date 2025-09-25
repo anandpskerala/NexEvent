@@ -20,4 +20,5 @@ export const config = {
     jwt: {
         accessToken: process.env.ACCESS_TOKEN_SECRET || ""
     },
+    internalToken: process.env.INTERNAL_TOKEN || ""
 }

@@ -21,4 +21,5 @@ export const config = {
         secret: process.env.CLOUD_SECRET,
         preset: process.env.CLOUD_PRESET,
     },
+    internalToken: process.env.INTERNAL_TOKEN || ""
 }

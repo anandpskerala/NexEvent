@@ -97,6 +97,7 @@ export const getEventList = async (
     userId: string = "", 
     limit: number = 10,
     isOrganizer: boolean = false,
+    getExpired: boolean = false,
     category: string = "",
     eventType: string = "",
     eventStatus: string = "",
@@ -105,7 +106,7 @@ export const getEventList = async (
     sortBy: string = "createdAt"
 ) => {
     try {
-        const res = await axiosInstance.get(`/event/all?search=${search}&page=${page}&userId=${userId}&limit=${limit}&category=${category}&eventType=${eventType}&eventStatus=${eventStatus}&startDate=${startDate}&endDate=${endDate}&sortBy=${sortBy}&isOrganizer=${isOrganizer}`);
+        const res = await axiosInstance.get(`/event/all?search=${search}&getExpired=${getExpired}&page=${page}&userId=${userId}&limit=${limit}&category=${category}&eventType=${eventType}&eventStatus=${eventStatus}&startDate=${startDate}&endDate=${endDate}&sortBy=${sortBy}&isOrganizer=${isOrganizer}`);
         return res.data;
     } catch (error) {
         console.error(error);

@@ -22,4 +22,5 @@ export const config = {
         stripeSecret: process.env.STRIPE_SECRET_KEY
     },
     maxTicketLimit: 10,
+    internalToken: process.env.INTERNAL_TOKEN || ""
 };

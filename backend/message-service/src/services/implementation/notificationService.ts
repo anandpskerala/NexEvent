@@ -5,6 +5,7 @@ import { StatusCode } from "../../shared/constants/statusCode";
 import { UnreadPaginationType, UnreadReturnType } from "../../shared/types/ReturnType";
 import logger from "../../shared/utils/logger";
 import { INotificationService } from "../interfaces/INotificationService";
+import { toNotificationDTO } from "../../shared/dtos/NotificationDTO";
 
 @injectable()
 export class NotificationService implements INotificationService {
@@ -23,7 +24,7 @@ export class NotificationService implements INotificationService {
             return {
                 message: HttpResponse.MESSAGES_FETCHED,
                 status: StatusCode.OK,
-                result: unreads
+                result: unreads.map(item => toNotificationDTO(item))
             }
         } catch (error) {
             logger.error(error);
@@ -57,7 +58,7 @@ export class NotificationService implements INotificationService {
             return {
                 message: HttpResponse.NOTIFICATION_FETCHED,
                 status: StatusCode.OK,
-                notifications: result.notifications,
+                notifications: result.notifications.map(item => toNotificationDTO(item)),
                 total: result.total,
                 page: page,
                 pages: Math.ceil(result.total / limit)

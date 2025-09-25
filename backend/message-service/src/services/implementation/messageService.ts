@@ -13,6 +13,8 @@ import { HttpResponse } from "../../shared/constants/httpResponse";
 import { IMessageService } from "../interfaces/IMessageService";
 import { inject, injectable } from "tsyringe";
 import { IKafkaProducer } from "../../kafka/producer/IKafkaProducer";
+import { toMessageDTO } from "../../shared/dtos/MessageDTO";
+import { toUserDto } from "../../shared/dtos/UserResponseDTO";
 
 
 @injectable()
@@ -40,7 +42,7 @@ export class MessageService implements IMessageService {
             return {
                 message: HttpResponse.MESSAGE_SENT,
                 status: StatusCode.CREATED,
-                chat: message
+                chat: toMessageDTO(message)
             }
         } catch (error) {
             logger.error(error);
@@ -97,7 +99,7 @@ export class MessageService implements IMessageService {
 
                     const lastMessage = await this._repo.getLastMessage(userId, user.id as string);
                     return {
-                        ...user,
+                        ...toUserDto(user),
                         unreadCount: parseInt(count || "0", 10),
                         lastMessage: lastMessage?.content || null,
                         lastMessageAt: lastMessage?.createdAt || null
@@ -125,7 +127,7 @@ export class MessageService implements IMessageService {
             return {
                 message: HttpResponse.MESSAGES_FETCHED,
                 status: StatusCode.OK,
-                messages: messages.messages,
+                messages: messages.messages.map(item => toMessageDTO(item)),
                 total: messages.total
             }
         } catch (error) {

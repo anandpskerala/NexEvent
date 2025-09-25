@@ -6,6 +6,8 @@ export interface IReport {
     status?: ReportActions;
     description: string;
     evidence?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface AllIReports {

@@ -38,8 +38,8 @@ export class EventController {
 
     public getEvent = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
-        const { id } = req.params;
-        const result = await this._eventService.getEvent(id, userId);
+        const eventId = req.params.id;
+        const result = await this._eventService.getEvent(eventId, userId);
         res.status(result.status).json({message: result.message, event: result.event});
     }
 
@@ -75,8 +75,8 @@ export class EventController {
 
     public getEvents = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
-        const { search = "", page = 1, limit = 10} = req.query;
-        const result = await this._eventService.getEvents(userId as string, search as string, page as number, limit as number);
+        const { search = "", page = 1, limit = 10, getExpired = "false" } = req.query;
+        const result = await this._eventService.getEvents(userId as string, search as string, page as number, limit as number, getExpired === "true" ? true: false);
         res.status(result.status).json({
             message: result.message,
             total: result.total,
@@ -87,10 +87,10 @@ export class EventController {
     }
 
     public editEvent = async (req: Request, res: Response): Promise<void> => {
-        const id = req.params.id;
+        const eventId = req.params.id;
         const { title, description, eventType, category, image, tags, location, eventFormat, startDate, endDate, startTime, endTime } = req.body;
         const event:IEvent = {
-            id,
+            id: eventId,
             title,
             description,
             eventFormat,
@@ -110,16 +110,16 @@ export class EventController {
     }
 
     public editTicket = async (req: Request, res: Response): Promise<void> => {
-        const id = req.params.id;
+        const eventId = req.params.id;
         const { currency, entryType, showQuantity, refunds, tickets } = req.body;
-        const result = await this._eventService.createTicket(id, currency, entryType, showQuantity, refunds, tickets, true);
+        const result = await this._eventService.createTicket(eventId, currency, entryType, showQuantity, refunds, tickets, true);
         res.status(result.status).json({message: result.message});
     }
 
     public checkSaved = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
+        const eventId = req.params.id;
         const userId = req.headers['x-user-id'];
-        const result = await this._eventService.isSavedEvent(userId as string, id);
+        const result = await this._eventService.isSavedEvent(userId as string, eventId);
         res.status(result.status).json({message: result.message, saved: result.saved});
     }
 
@@ -131,9 +131,9 @@ export class EventController {
     }
 
     public removeSaved = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
+        const eventId = req.params.id;
         const userId = req.headers['x-user-id'] as string;
-        const result = await this._eventService.removeSavedEvent(id, userId);
+        const result = await this._eventService.removeSavedEvent(eventId, userId);
         res.status(result.status).json({message: result.message, saved: result.saved});
     }
 

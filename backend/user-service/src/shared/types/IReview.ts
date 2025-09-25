@@ -1,12 +1,14 @@
-import { Types } from "mongoose";
+import { UserDTO } from "../dtos/userDTO";
 
 export interface IReview {
     id?: string;
-    userId: Types.ObjectId;
+    userId: string;
+    user?: UserDTO;
     eventId: string;
     rating: number;
     title: string;
     message: string;
+    createdAt?: string;
 }
 
 export interface AllReviews {

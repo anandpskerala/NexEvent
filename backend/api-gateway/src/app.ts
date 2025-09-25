@@ -6,38 +6,36 @@ import compression from "compression";
 import rateLimit from 'express-rate-limit';
 import { AuthMiddleware } from "./middlewares/authMiddleware";
 import { config } from "./config";
-import { UserProxy } from "./middlewares/proxies/userProxy";
-import { AdminProxy } from "./middlewares/proxies/adminProxy";
-import { MessageProxy } from "./middlewares/proxies/messageProxy";
-import { EventProxy } from "./middlewares/proxies/eventProxy";
 import logger from "./shared/utils/logger";
 import { errorHandler } from "./middlewares/errorHandler";
 import { requestLogger } from "./middlewares/requestLogger";
-import { BookingProxy } from "./middlewares/proxies/bookingProxy";
+import { IServiceResolver } from "./resolvers/interfaces/IServiceResolver";
 
 
 export class App {
-    public app: Application;
+    public _app: Application;
 
-    constructor() {
-        this.app = express();
+    constructor(
+        private _service: IServiceResolver
+    ) {
+        this._app = express();
         this.setupMiddleware();
         this.setupProxy();
     }
 
     private setupMiddleware() {
-        this.app.use(helmet());
-        this.app.use(compression());
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(cookieParser());
-        this.app.use(cors({
+        this._app.use(helmet());
+        this._app.use(compression());
+        this._app.use(express.json());
+        this._app.use(express.urlencoded({ extended: true }));
+        this._app.use(cookieParser());
+        this._app.use(cors({
             origin: config.app.frontend,
             credentials: true,
             methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
             allowedHeaders: ["Content-Type", "Authorization"],
         }));
-        this.app.use(requestLogger);
+        this._app.use(requestLogger);
 
         const limiter = rateLimit({
             windowMs: 15 * 60 * 1000,
@@ -54,22 +52,22 @@ export class App {
             }
         });
 
-        this.app.use(limiter);
+        this._app.use(limiter);
         const authMiddleware = new AuthMiddleware();
-        this.app.use(authMiddleware.authenticate);
-        this.app.use(errorHandler);
+        this._app.use(authMiddleware.authenticate);
+        this._app.use(errorHandler);
     }
 
     private setupProxy() {
-        this.app.use('/api/user', UserProxy.setupProxy());
-        this.app.use('/api/admin', AdminProxy.setupProxy());
-        this.app.use('/api/event', EventProxy.setupProxy());
-        this.app.use('/api/messages', MessageProxy.setupProxy());
-        this.app.use('/api/bookings', BookingProxy.setupProxy());
+        this._app.use('/api/user', this._service.resolve("user"));
+        this._app.use('/api/admin', this._service.resolve("admin"));
+        this._app.use('/api/event', this._service.resolve("event"));
+        this._app.use('/api/messages', this._service.resolve("messages"));
+        this._app.use('/api/bookings', this._service.resolve("bookings"));
     }
 
     public listen(port: number) {
-        this.app.listen(port, () => {
+        this._app.listen(port, () => {
             logger.info(`API gateway running on port ${port}`);
         })
     }

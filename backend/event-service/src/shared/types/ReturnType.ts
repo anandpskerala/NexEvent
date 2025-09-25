@@ -1,6 +1,6 @@
 import { StatusCode } from "../constants/statusCode";
-import { IEvent } from "./IEvent";
-import { ISavedEvents } from "./ISavedEvents";
+import { EventDTO } from "../dtos/EventDTOS";
+import { SavedEventDTO } from "../dtos/SavedEventDTO";
 import { RevenueAnalyticsGraphPoint, TopSelling } from "./RevenueAnalytics";
 
 export interface EventReturnType {
@@ -12,13 +12,13 @@ export interface EventReturnType {
 export interface RawReturnType {
     message: string;
     status: StatusCode;
-    event?: IEvent;
+    event?: EventDTO;
 }
 
 export interface EventsReturnType {
     message: string;
     status: StatusCode;
-    events?: IEvent[];
+    events?: EventDTO[];
 }
 
 export interface StockReturnType {
@@ -30,7 +30,7 @@ export interface StockReturnType {
 export interface EventPaginationType {
     message: string;
     status: StatusCode;
-    events?: IEvent[];
+    events?: EventDTO[];
     total?: number;
     page?: number;
     pages?: number;
@@ -57,7 +57,7 @@ export interface BookingVerifyType {
 export interface SavedEventPaginationType {
     message: string;
     status: StatusCode;
-    events?: ISavedEvents[];
+    events?: SavedEventDTO[];
     total?: number;
     page?: number;
     pages?: number;

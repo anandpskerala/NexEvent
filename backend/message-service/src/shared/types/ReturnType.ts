@@ -1,37 +1,37 @@
 import { StatusCode } from "../constants/statusCode";
-import { INotification } from "./INotfication";
-import { IUser } from "./IUser";
-import { Message } from "./Message";
+import { MessageDTO } from "../dtos/MessageDTO";
+import { NotificationDTO } from "../dtos/NotificationDTO";
+import { UserResponseDTO } from "../dtos/UserResponseDTO";
 
 export interface MessageReturnType {
     message: string;
     status: StatusCode;
-    chat?: Message;
+    chat?: MessageDTO;
 }
 
 export interface UserReturnType {
     message: string;
     status: StatusCode;
-    users?: IUser[];
+    users?: UserResponseDTO[];
 }
 
 export interface MessagePaginationType {
     message: string;
     status: StatusCode;
-    messages?: Message[];
+    messages?: MessageDTO[];
     total?: number;
 }
 
 export interface UnreadReturnType {
     message: string;
     status: StatusCode;
-    result?: INotification[];
+    result?: NotificationDTO[];
 }
 
 export interface UnreadPaginationType {
     message: string;
     status: StatusCode;
-    notifications?: INotification[];
+    notifications?: NotificationDTO[];
     total?: number;
     page?: number;
     pages?: number;

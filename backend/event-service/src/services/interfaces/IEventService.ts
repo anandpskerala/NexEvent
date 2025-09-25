@@ -8,7 +8,7 @@ export interface IEventService {
     getEvent(id: string, userId: string): Promise<RawReturnType>;
     getAllEvents(userId: string, search: string, page: number, limit: number, category?: string, eventStatus?: string, eventType?: string, sortBy?: string, isOrganizer?: boolean): Promise<EventPaginationType>;
     getNearbyEvents(userId: string, latitude: number, longitude: number): Promise<EventsReturnType>;
-    getEvents(userId: string, search: string, page: number, limit: number): Promise<EventPaginationType>;
+    getEvents(userId: string, search: string, page: number, limit: number, getExpired?: boolean): Promise<EventPaginationType>;
     updateEvent(event: IEvent): Promise<EventReturnType>;
     saveEvent(userId: string, eventId: string): Promise<SavedEventReturnType>;
     isSavedEvent(userId: string, eventId: string): Promise<SavedEventReturnType>;

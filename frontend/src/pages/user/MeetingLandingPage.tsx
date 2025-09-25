@@ -11,17 +11,20 @@ import { toast } from 'sonner';
 import { AxiosError } from 'axios';
 import { getEventDetails } from '../../services/eventService';
 import { postReview } from '../../services/reviewService';
+import type { User } from '../../interfaces/entities/User';
 
+type ReviewInput = Omit<Review, 'id' | 'userId' | 'createdAt'>;
 
 const MeetingLandingPage: React.FC = () => {
     const { id } = useParams();
     const { user } = useSelector((state: RootState) => state.auth);
     const [step, setStep] = useState<'review' | 'submitted'>('review');
-    const [review, setReview] = useState<Omit<Review, 'id' | 'userId' | 'createdAt'>>({
+    const [review, setReview] = useState<ReviewInput>({
         rating: 0,
         title: '',
         eventId: id as string,
-        message: ''
+        message: '',
+        user: user as User
     });
     const [event, setEvent] = useState<AllEventData>();
     const [hoveredStar, setHoveredStar] = useState(0);

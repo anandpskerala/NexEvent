@@ -1,8 +1,7 @@
 import { StatusCode } from "../constants/statusCode";
 import { RequestDTO } from "../dtos/requestDTO";
+import { ReviewDTO } from "../dtos/reviewDTO";
 import { UserDTO } from "../dtos/userDTO";
-import { IReview } from "./IReview";
-import { IUser } from "./IUser";
 
 export interface UserReturnType {
     message: string;
@@ -13,7 +12,7 @@ export interface UserReturnType {
 export interface UsersReturnType {
     message: string;
     status: StatusCode;
-    users?: IUser[];
+    users?: UserDTO[];
 }
 
 export interface OtpReturnType {
@@ -55,7 +54,7 @@ export interface ReviewPaginationType {
     message: string;
     status: StatusCode;
     total?: number;
-    reviews?: IReview[];
+    reviews?: ReviewDTO[];
     avgRating?: number;
     page?: number; 
     pages?: number;

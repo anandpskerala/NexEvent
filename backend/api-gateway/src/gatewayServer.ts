@@ -5,30 +5,33 @@ import { config } from "./config";
 import { Consumer } from "./kafka/consumer";
 import { ConsumerHandler } from "./kafka/consumer/handlers/consumerHandler";
 import logger from "./shared/utils/logger";
+import { IServiceResolver } from "./resolvers/interfaces/IServiceResolver";
 
 export class GatewayServer {
-    private readonly httpServer: HTTPServer;
-    private readonly io: SocketIOServer;
-    private readonly consumer: Consumer;
+    private readonly _httpServer: HTTPServer;
+    private readonly _io: SocketIOServer;
+    private readonly _consumer: Consumer;
 
-    constructor() {
-        const appInstance = new App();
-        const app = appInstance.app;
+    constructor(
+        private _services: IServiceResolver
+    ) {
+        const appInstance = new App(this._services);
+        const app = appInstance._app;
 
-        this.httpServer = createServer(app);
-        this.io = new SocketIOServer(this.httpServer, {
+        this._httpServer = createServer(app);
+        this._io = new SocketIOServer(this._httpServer, {
             cors: {
                 origin: config.app.frontend,
                 credentials: true,
             },
         })
 
-        const handler = new ConsumerHandler(this.io);
-        this.consumer = new Consumer(handler);
+        const handler = new ConsumerHandler(this._io);
+        this._consumer = new Consumer(handler);
     }
 
     private setupSocketHandlers(): void {
-        this.io.on("connection", (socket) => {
+        this._io.on("connection", (socket) => {
             logger.info("Socket.IO: Client connected", socket.id);
 
             socket.on("join", (userId: string) => {
@@ -44,17 +47,17 @@ export class GatewayServer {
     }
 
     private async setupKafkaConsumers(): Promise<void> {
-        await this.consumer.connect();
-        await this.consumer.listen().catch(console.error);
+        await this._consumer.connect();
+        await this._consumer.listen().catch(console.error);
         process.on("SIGINT", async () => {
             logger.info("SIGINT received, disconnecting producer...");
-            await this.consumer.disconnect();
+            await this._consumer.disconnect();
             process.exit(0);
         });
 
         process.on("SIGTERM", async () => {
             logger.info("SIGTERM received, disconnecting producer...");
-            await this.consumer.disconnect();
+            await this._consumer.disconnect();
             process.exit(0);
         });
     }
@@ -63,7 +66,7 @@ export class GatewayServer {
         this.setupSocketHandlers();
         await this.setupKafkaConsumers();
 
-        this.httpServer.listen(port, () => {
+        this._httpServer.listen(port, () => {
             logger.info(`API Gateway service running on port ${port}`);
         });
     }

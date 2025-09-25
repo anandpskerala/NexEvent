@@ -25,5 +25,6 @@ export const config = {
     liveKit: {
         apiKey: process.env.LIVEKIT_API_KEY,
         apiSecret: process.env.LIVEKIT_API_SECRET
-    }
+    },
+    internalToken: process.env.INTERNAL_TOKEN || ""
 }

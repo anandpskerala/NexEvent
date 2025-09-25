@@ -24,15 +24,15 @@ export class BookingController {
     }
 
     public getBooking = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
-        const result = await this._bookingService.getBooking(id);
+        const bookingId = req.params.id;
+        const result = await this._bookingService.getBooking(bookingId);
         res.status(result.status).json({ message: result.message, booking: result.booking });
     }
 
     public getBookings = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
+        const bookingId = req.params.id;
         const { page, limit } = req.query;
-        const result = await this._bookingService.getBookings(id as string, Number(page), Number(limit));
+        const result = await this._bookingService.getBookings(bookingId as string, Number(page), Number(limit));
         res.status(result.status).json(
             {
                 message: result.message,
@@ -45,14 +45,14 @@ export class BookingController {
     }
 
     public cancelBooking = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
-        const result = await this._bookingService.cancelBooking(id);
+        const bookingId = req.params.id;
+        const result = await this._bookingService.cancelBooking(bookingId);
         res.status(result.status).json({ message: result.message });
     }
 
     public cancelAllBookings = async(req: Request, res: Response): Promise<void> => {
-        const {id} = req.params;
-        const result = await this._bookingService.cancelAllBookings(id);
+        const bookingId = req.params.id;
+        const result = await this._bookingService.cancelAllBookings(bookingId);
         res.status(result.status).json({message: result.message});
     }
 

@@ -33,6 +33,7 @@ const SavedEvents = lazy(() => import("../pages/profile/SavedEvents"));
 const UserMessages = lazy(() => import("../pages/profile/UserMessages"));
 const OrganizerProfile = lazy(() => import("../pages/organizer/OrganizerProfile"));
 const OrganizerBooking = lazy(() => import("../pages/organizer/Bookings"));
+const OrganizerBookingDetails = lazy(() => import("../pages/organizer/BookingDetails"));
 
 const EventPage = lazy(() => import("../pages/organizer/EventPage"));
 const CreateEvent = lazy(() => import("../pages/organizer/CreateEvent"));
@@ -99,6 +100,7 @@ const AppRoutes = () => {
                         <Route path="/organizer/edit-event/:id" element={<EditEvent />} />
                         <Route path="/organizer/create-ticket/:id" element={<CreateTicket />} />
                         <Route path="/organizer/edit-ticket/:id" element={<EditTicket />} />
+                        <Route path="/organizer/bookings/details" element={<OrganizerBookingDetails />} />
                         <Route path="/organizer/bookings" element={<OrganizerBooking />} />
                         <Route path="/organizer/request-a-feature" element={<FeatureRequestPage />} />
                         <Route path="/organizer/dashboard" element={<OrganizerDashboard />} />

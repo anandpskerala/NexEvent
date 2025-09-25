@@ -1,13 +1,13 @@
 import { Orders } from "razorpay/dist/types/orders";
 import { StatusCode } from "../constants/statusCode";
-import { IBooking } from "./IBooking";
-import { IPayment } from "./IPayment";
-import { IWallet } from "./IWallet";
+import { BookingDTO } from "../dtos/BookingDTO";
+import { PaymentDTO } from "../dtos/PaymentDTO";
+import { WalletDTO } from "../dtos/WalletDTO";
 
 export interface BookingReturnType {
     message: string;
     status: StatusCode;
-    booking?: IBooking;
+    booking?: BookingDTO;
 }
 
 export interface BookingVerifyType {
@@ -19,7 +19,7 @@ export interface BookingVerifyType {
 export interface BookingPaginationType {
     message: string;
     status: StatusCode;
-    bookings?: IBooking[];
+    bookings?: BookingDTO[];
     total?: number;
     page?: number;
     pages?: number;
@@ -41,12 +41,12 @@ export interface RPayReturnType {
 export interface PaymentReturnType {
     message: string;
     status: StatusCode;
-    payment?: IPayment;
+    payment?: PaymentDTO;
     orderId?: string;
 }
 
 export interface WalletReturnType {
     message: string;
     status: StatusCode;
-    wallet?: IWallet
+    wallet?: WalletDTO
 }

@@ -41,8 +41,8 @@ export class PaymentController {
     }
 
     public walletDetails = async (req: Request, res: Response): Promise<void> => {
-        const { id } = req.params;
-        const result = await this._paymentService.getWalletDetails(id);
+        const walletId = req.params.id;
+        const result = await this._paymentService.getWalletDetails(walletId);
         res.status(result.status).json({message: result.message, wallet: result.wallet});
     }
 }
