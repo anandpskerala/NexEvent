@@ -19,7 +19,8 @@ export const ReviewCard = ({ id, user }: { id: string, user: User }) => {
         title: "",
         message: "",
         eventId: id,
-        userId: user,
+        userId: user.id,
+        user,
         createdAt: new Date().toISOString()
     });
     const [hoverRating, setHoverRating] = useState(0);
@@ -73,7 +74,7 @@ export const ReviewCard = ({ id, user }: { id: string, user: User }) => {
             if (res.data) {
                 setReviews([...reviews, newReview])
 
-                setNewReview({ id: nanoid(), rating: 0, title: "", message: "", eventId: id, userId: user, createdAt: new Date().toISOString() });
+                setNewReview({ id: nanoid(), rating: 0, title: "", message: "", eventId: id, userId: user.id, user, createdAt: new Date().toISOString() });
                 setIsModalOpen(false);
                 toast.success(res.data.message);
             }
@@ -93,7 +94,7 @@ export const ReviewCard = ({ id, user }: { id: string, user: User }) => {
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        setNewReview({ id: nanoid(), rating: 0, title: "", message: "", eventId: id, userId: user, createdAt: new Date().toISOString() });
+        setNewReview({ id: nanoid(), rating: 0, title: "", message: "", eventId: id, userId: user.id, user, createdAt: new Date().toISOString() });
         setHoverRating(0);
     };
 
@@ -142,14 +143,14 @@ export const ReviewCard = ({ id, user }: { id: string, user: User }) => {
                         <div className="flex w-full text-center items-center justify-center">No reviews</div>
                     ) :
                         (reviews.map((review) => (
-                            <div key={review.id} className="flex gap-4">
+                            <div key={review.userId} className="flex gap-4">
                                 <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                     {
-                                        review.userId.image ? (
-                                            <img className="w-full h-full rounded-full" src={`${review.userId.image}`} />
+                                        review.user.image ? (
+                                            <img className="w-full h-full rounded-full" src={`${review.user.image}`} />
                                         ) : (
                                             <span className="text-sm font-medium text-blue-600">
-                                                {review.userId.firstName.slice(0, 1).toUpperCase()}
+                                                {review.user.firstName.slice(0, 1).toUpperCase()}
                                             </span>
                                         )
                                     }
@@ -158,7 +159,7 @@ export const ReviewCard = ({ id, user }: { id: string, user: User }) => {
                                 <div className="flex-1">
                                     <div className="flex items-center justify-between mb-2">
                                         <div>
-                                            <h4 className="font-medium text-gray-900">{review.userId.firstName} {review.userId.lastName}</h4>
+                                            <h4 className="font-medium text-gray-900">{review.user.firstName} {review.user.lastName}</h4>
                                             <p className="text-xs text-gray-500 font-medium tracking-wide">
                                                 {formatTimeAgo(review.createdAt)}
                                             </p>

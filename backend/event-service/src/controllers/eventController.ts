@@ -75,8 +75,8 @@ export class EventController {
 
     public getEvents = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'];
-        const { search = "", page = 1, limit = 10} = req.query;
-        const result = await this._eventService.getEvents(userId as string, search as string, page as number, limit as number);
+        const { search = "", page = 1, limit = 10, getExpired = "false" } = req.query;
+        const result = await this._eventService.getEvents(userId as string, search as string, page as number, limit as number, getExpired === "true" ? true: false);
         res.status(result.status).json({
             message: result.message,
             total: result.total,

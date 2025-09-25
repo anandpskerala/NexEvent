@@ -2,6 +2,7 @@ import { Document } from "mongoose";
 import { PaymentMethod, PaymentStatus } from "./Payments";
 
 export interface IPayment extends Document {
+  id?: string;
   userId: string;
   eventId: string;
   bookingId: string;

@@ -16,6 +16,8 @@ import { inject, injectable } from "tsyringe";
 import { INotification } from "../../shared/types/INotification";
 import { TOPICS } from "../../kafka/topics";
 import { IKafkaProducer } from "../../kafka/producer/IKafkaProducer";
+import { toPaymentDTO } from "../../shared/dtos/PaymentDTO";
+import { toWalletDTO } from "../../shared/dtos/WalletDTO";
 
 
 @injectable()
@@ -166,7 +168,7 @@ export class PaymentService implements IPaymentService {
             return {
                 message: HttpResponse.PAYMENT_SUCCESS,
                 status: StatusCode.CREATED,
-                payment: booked,
+                payment: booked ? toPaymentDTO(booked): booked,
                 orderId: session.metadata?.orderId
             }
         } catch (error) {
@@ -273,7 +275,7 @@ export class PaymentService implements IPaymentService {
                 return {
                     message: HttpResponse.PAYMENT_SUCCESS,
                     status: StatusCode.OK,
-                    payment: booked,
+                    payment: booked ? toPaymentDTO(booked): booked,
                     orderId: razorpay_order_id
                 };
             } else {
@@ -365,7 +367,7 @@ export class PaymentService implements IPaymentService {
             return {
                 message: HttpResponse.PAYMENT_SUCCESS,
                 status: StatusCode.OK,
-                payment: booked,
+                payment: booked ? toPaymentDTO(booked): booked,
                 orderId: booked?.id
             };
         } catch (error) {
@@ -391,10 +393,10 @@ export class PaymentService implements IPaymentService {
             return {
                 message: HttpResponse.WALLER_FETCHED,
                 status: StatusCode.OK,
-                wallet: {
+                wallet: toWalletDTO({
                     ...wallet,
                     transactions
-                }
+                })
             };
         } catch (error) {
             logger.error(error);

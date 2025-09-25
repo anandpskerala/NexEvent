@@ -28,5 +28,6 @@ export const config = {
     },
     service: {
         kafka: process.env.KAFKA_BROKER || 'host.docker.internal:9092'
-    }
+    },
+    internalToken: process.env.INTERNAL_TOKEN || ""
 }

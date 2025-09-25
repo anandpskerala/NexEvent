@@ -50,3 +50,16 @@ export interface ITicket {
     startDate: Date;
     endDate: Date;
 }
+
+export interface EventSummary {
+    eventId: string;
+    eventTitle: string;
+    eventDate: string;
+    eventLocation: string;
+    totalRevenue: number;
+    totalBookings: number;
+    paidBookings: number;
+    pendingBookings: number;
+    cancelledBookings: number;
+    currency: string;
+}

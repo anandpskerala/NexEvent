@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { Types } from "mongoose";
 import { IReviewService } from "../services/interfaces/IReviewService";
 import { inject, injectable } from "tsyringe";
 
@@ -11,7 +10,7 @@ export class ReviewController {
     public addReview = async (req: Request, res: Response): Promise<void> => {
         const userId = req.headers['x-user-id'] as string;
         const { eventId , rating, title, message} = req.body;
-        const result = await this._reviewService.createReview({userId: new Types.ObjectId(userId), eventId, rating, title, message});
+        const result = await this._reviewService.createReview({userId, eventId, rating, title, message});
         res.status(result.status).json({message: result.message});
     }
 

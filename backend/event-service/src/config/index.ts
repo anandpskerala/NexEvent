@@ -22,4 +22,5 @@ export const config = {
         user: process.env.USER_SERVICE || ""
     },
     maxTicketLimit: 3,
+    internalToken: process.env.INTERNAL_TOKEN || ""
 }

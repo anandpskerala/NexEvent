@@ -9,4 +9,6 @@ export interface ICoupon {
     status?: string;
     minAmount: number;
     maxAmount: number;
+    createdAt?: string;
+    updatedAt?: string;
 }

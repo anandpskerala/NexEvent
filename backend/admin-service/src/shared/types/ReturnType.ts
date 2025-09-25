@@ -1,19 +1,19 @@
 import { StatusCode } from "../constants/statusCode";
-import { ICategory } from "./ICategory";
-import { ICoupon } from "./ICoupon";
-import { IReport } from "./IReport";
-import { IRequests } from "./IRequests";
+import { CategoryDTO } from "../dtos/CategoryDTO";
+import { CouponDTO } from "../dtos/CouponDTO";
+import { ReportDTO } from "../dtos/ReportDTO";
+import { RequestDTO } from "../dtos/RequestDTO";
 
 export interface CategoryReturnType {
     message: string;
     status: StatusCode;
-    category?: ICategory
+    category?: CategoryDTO
 }
 
 export interface CategoryPaginationType {
     message: string;
     status: StatusCode;
-    categories?: ICategory[];
+    categories?: CategoryDTO[];
     total?: number;
     page?: number;
     pages?: number; 
@@ -22,13 +22,13 @@ export interface CategoryPaginationType {
 export interface CouponReturnType {
     message: string;
     status: StatusCode;
-    coupon?: ICoupon
+    coupon?: CouponDTO
 }
 
 export interface CouponPaginationType {
     message: string;
     status: StatusCode;
-    coupons?: ICoupon[];
+    coupons?: CouponDTO[];
     total?: number;
     page?: number;
     pages?: number; 
@@ -37,13 +37,13 @@ export interface CouponPaginationType {
 export interface ReportReturnType {
     message: string;
     status: StatusCode;
-    data?: IReport;
+    data?: ReportDTO;
 }
 
 export interface ReportPaginationType {
     message: string;
     status: StatusCode;
-    reports?: IReport[];
+    reports?: ReportDTO[];
     total?: number;
     page?: number;
     pages?: number; 
@@ -52,13 +52,13 @@ export interface ReportPaginationType {
 export interface RequestReturnType {
     message: string;
     status: StatusCode;
-    request?: IRequests;
+    request?: RequestDTO;
 }
 
 export interface RequestPaginationType {
     message: string;
     status: StatusCode;
-    requests?: IRequests[];
+    requests?: RequestDTO[];
     total?: number;
     page?: number;
     pages?: number; 

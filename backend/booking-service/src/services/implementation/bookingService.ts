@@ -19,6 +19,7 @@ import { INotification } from '../../shared/types/INotification';
 import { TOPICS } from '../../kafka/topics';
 import { TransactionType } from '../../shared/types/IWallet';
 import { IKafkaProducer } from '../../kafka/producer/IKafkaProducer';
+import { toBookingDTO } from '../../shared/dtos/BookingDTO';
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -76,7 +77,7 @@ export class BookingService implements IBookingService {
             return {
                 message: HttpResponse.BOOKING_INITIATED,
                 status: StatusCode.CREATED,
-                booking
+                booking: toBookingDTO(booking)
             };
 
         } catch (error) {
@@ -92,39 +93,23 @@ export class BookingService implements IBookingService {
     }
 
     public async getBooking(id: string): Promise<BookingReturnType> {
-        try {
-            const booking = await this._repo.findBooking(id);
-            return {
-                message: HttpResponse.BOOKING_FETCHED,
-                status: StatusCode.OK,
-                booking
-            }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+        const booking = await this._repo.findBooking(id);
+        return {
+            message: HttpResponse.BOOKING_FETCHED,
+            status: StatusCode.OK,
+            booking: booking ? toBookingDTO(booking) : booking
         }
     }
 
     public async getBookings(userId: string, page: number, limit: number): Promise<BookingPaginationType> {
-        try {
-            const skip = (page - 1) * limit;
-            const res = await this._repo.findByUserID(userId, skip, limit);
-            return {
-                message: HttpResponse.BOOKING_FETCHED,
-                status: StatusCode.OK,
-                bookings: res.items,
-                total: res.total,
-                pages: Math.ceil(res.total / limit)
-            }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+        const skip = (page - 1) * limit;
+        const res = await this._repo.findByUserID(userId, skip, limit);
+        return {
+            message: HttpResponse.BOOKING_FETCHED,
+            status: StatusCode.OK,
+            bookings: res.items.map(item => toBookingDTO(item)),
+            total: res.total,
+            pages: Math.ceil(res.total / limit)
         }
     }
 
@@ -224,165 +209,126 @@ export class BookingService implements IBookingService {
     }
 
     public async failedBooking(bookingId: string, eventId: string, amount: number, currency: string, userId: string): Promise<BookingReturnType> {
-        try {
-            const booked = await this._paymentRepo.upsert(bookingId, {
-                userId,
-                eventId,
-                bookingId,
-                method: PaymentMethod.RAZORPAY,
-                amount: amount / 100,
-                currency,
+        const booked = await this._paymentRepo.upsert(bookingId, {
+            userId,
+            eventId,
+            bookingId,
+            method: PaymentMethod.RAZORPAY,
+            amount: amount / 100,
+            currency,
+            status: PaymentStatus.FAILED
+        });
+
+        if (booked) {
+            await this._repo.update(booked.bookingId, {
+                paymentId: booked.id,
+                paymentMethod: booked.method,
                 status: PaymentStatus.FAILED
-            });
+            })
+        }
 
-            if (booked) {
-                await this._repo.update(booked.bookingId, {
-                    paymentId: booked.id,
-                    paymentMethod: booked.method,
-                    status: PaymentStatus.FAILED
-                })
-            }
-
-            return {
-                message: HttpResponse.PAYMENT_FAILED,
-                status: StatusCode.OK
-            }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+        return {
+            message: HttpResponse.PAYMENT_FAILED,
+            status: StatusCode.OK
         }
     }
 
 
     public async downloadTicket(bookingId: string, res: Response): Promise<void> {
-        try {
-            const booking = await this._repo.findBooking(bookingId);
-            if (!booking) {
-                res.status(StatusCode.NOT_FOUND).json({
-                    message: HttpResponse.BOOKING_NOT_FOUND
-                });
-                return;
-            }
-
-            res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', `attachment; filename=ticket-${bookingId}.pdf`);
-
-            const doc = new PDFDocument();
-            doc.pipe(res);
-
-            doc.fontSize(24).text('Event Ticket', { align: 'center' });
-            doc.moveDown();
-            doc.fontSize(16).text(`Event: ${booking.eventId.title}`);
-            doc.text(`Date: ${new Date(booking.eventId.startDate as string).toDateString()}`);
-            doc.text(`Location: ${booking.eventId?.location?.place || "Virtual"}`);
-            doc.text(`Total Amount: ₹${booking.totalAmount}`);
-            doc.text(`Order ID: ${booking.orderId}`);
-            doc.moveDown().text(`Thank you for your booking!`);
-
-            const qrData = `OrderID:${booking.orderId},Event:${booking.eventId.title}`;
-            const qrImage = await QRCode.toDataURL(qrData);
-            doc.image(qrImage, { fit: [100, 100], align: 'center' });
-
-            doc.end();
-        } catch (error) {
-            logger.error(error);
-            res.status(StatusCode.INTERNAL_SERVER_ERROR).json({
-                message: HttpResponse.INTERNAL_SERVER_ERROR
+        const booking = await this._repo.findBooking(bookingId);
+        if (!booking) {
+            res.status(StatusCode.NOT_FOUND).json({
+                message: HttpResponse.BOOKING_NOT_FOUND
             });
+            return;
         }
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=ticket-${bookingId}.pdf`);
+
+        const doc = new PDFDocument();
+        doc.pipe(res);
+
+        doc.fontSize(24).text('Event Ticket', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(16).text(`Event: ${booking.eventId.title}`);
+        doc.text(`Date: ${new Date(booking.eventId.startDate as string).toDateString()}`);
+        doc.text(`Location: ${booking.eventId?.location?.place || "Virtual"}`);
+        doc.text(`Total Amount: ₹${booking.totalAmount}`);
+        doc.text(`Order ID: ${booking.orderId}`);
+        doc.moveDown().text(`Thank you for your booking!`);
+
+        const qrData = `OrderID:${booking.orderId},Event:${booking.eventId.title}`;
+        const qrImage = await QRCode.toDataURL(qrData);
+        doc.image(qrImage, { fit: [100, 100], align: 'center' });
+
+        doc.end();
     }
 
     public async getOrganizerBookings(userId: string, search: string, page: number, limit: number): Promise<BookingPaginationType> {
-        try {
-            const skip = (page - 1) * limit;
-            const events = await this._repo.getAllEvents({ userId: String(userId) }, skip, 0);
-            const eventIds = events.map(event => event.id);
+        const skip = (page - 1) * limit;
+        const events = await this._repo.getAllEvents({ userId: String(userId) }, skip, 0);
+        const eventIds = events.map(event => event.id);
 
-            if (eventIds.length === 0) {
-                return {
-                    message: HttpResponse.NO_BOOKINGS,
-                    status: StatusCode.OK,
-                    bookings: []
-                }
-            }
-
-            const bookings = await this._repo.getBookingWithQuery({
-                $or: [
-                    { orderId: { $regex: search, $options: "i" } }
-                ], eventId: { $in: eventIds }
-            }, skip, limit);
-            const userIds = [...new Set(bookings.items.map(b => b.userId))];
-
-            const userMap = await fetchUsers(userIds);
-            const enrichedBookings = bookings.items.map(booking => ({
-                ...booking,
-                user: userMap[booking.userId] || null
-            }));
-
+        if (eventIds.length === 0) {
             return {
-                message: HttpResponse.BOOKINGS_FOUND,
+                message: HttpResponse.NO_BOOKINGS,
                 status: StatusCode.OK,
-                bookings: enrichedBookings,
-                total: bookings.total,
-                page,
-                pages: Math.ceil(bookings.total / limit)
+                bookings: []
             }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+        }
+
+        const bookings = await this._repo.getBookingWithQuery({
+            $or: [
+                { orderId: { $regex: search, $options: "i" } }
+            ], eventId: { $in: eventIds }
+        }, skip, limit);
+        const userIds = [...new Set(bookings.items.map(b => b.userId))];
+
+        const userMap = await fetchUsers(userIds);
+        const enrichedBookings = bookings.items.map(booking => ({
+            ...toBookingDTO(booking),
+            user: userMap[booking.userId] || null
+        }));
+
+        return {
+            message: HttpResponse.BOOKINGS_FOUND,
+            status: StatusCode.OK,
+            bookings: enrichedBookings,
+            total: eventIds.length,
+            page,
+            pages: Math.ceil(eventIds.length / limit),
         }
     }
 
     public async verifyBooking(userId: string, eventId: string): Promise<BookingVerifyType> {
-        try {
-            const result = await this._repo.findWithUserIdAndEventId(userId, eventId);
-            if (!result) {
-                return {
-                    message: HttpResponse.NOT_PURCHASED,
-                    status: StatusCode.NOT_FOUND
-                }
-            }
+        const result = await this._repo.findWithUserIdAndEventId(userId, eventId);
+        if (!result) {
             return {
-                message: HttpResponse.BOOKING_FETCHED,
-                status: StatusCode.OK,
-                verified: true
-            };
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
+                message: HttpResponse.NOT_PURCHASED,
+                status: StatusCode.NOT_FOUND
             }
         }
+        return {
+            message: HttpResponse.BOOKING_FETCHED,
+            status: StatusCode.OK,
+            verified: true
+        };
     }
 
 
     public async checkCouponApplied(promoCode: string, userId: string): Promise<BookingReturnType> {
-        try {
-            const applied = await this._repo.checkForPromoCode(promoCode, userId);
-            if (!applied) {
-                return {
-                    message: HttpResponse.COUPON_ELIGIBLE,
-                    status: StatusCode.OK
-                }
+        const applied = await this._repo.checkForPromoCode(promoCode, userId);
+        if (!applied) {
+            return {
+                message: HttpResponse.COUPON_ELIGIBLE,
+                status: StatusCode.OK
             }
+        }
 
-            return {
-                message: HttpResponse.ALREADY_APPLIED,
-                status: StatusCode.BAD_REQUEST
-            }
-        } catch (error) {
-            logger.error(error);
-            return {
-                message: HttpResponse.INTERNAL_SERVER_ERROR,
-                status: StatusCode.INTERNAL_SERVER_ERROR
-            }
+        return {
+            message: HttpResponse.ALREADY_APPLIED,
+            status: StatusCode.BAD_REQUEST
         }
     }
 }

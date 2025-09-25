@@ -4,4 +4,6 @@ export interface ICategory {
     description: string;
     image: string;
     isBlocked?: boolean;
+    createdAt?: string;
+    updatedAt?: string; 
 }

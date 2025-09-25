@@ -3,8 +3,7 @@ import { IReview } from "../shared/types/IReview";
 
 const schema = new Schema<IReview>({
     userId: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
+        type: String,
         required: true
     },
     eventId: {

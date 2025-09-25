@@ -22,6 +22,7 @@ export interface IEvent {
     endDate?: string;
     startTime?: string;
     endTime?: string;
+    availableTickets?: number;
 }
 
 export interface ILocation {
